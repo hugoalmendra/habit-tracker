@@ -58,7 +58,7 @@ export default function PublicProfile() {
         return
       }
 
-      setProfile(profileData)
+      setProfile(profileData as Profile)
 
       // Load habits
       const { data: habitsData, error: habitsError } = await supabase
@@ -68,7 +68,7 @@ export default function PublicProfile() {
         .order('created_at', { ascending: true })
 
       if (habitsError) throw habitsError
-      setHabits(habitsData || [])
+      setHabits((habitsData || []) as Habit[])
 
       // Load this month's completions
       const monthStart = startOfMonth(currentDate)

@@ -88,7 +88,7 @@ export default function HabitCard({ habit, completed, index }: HabitCardProps) {
         >
         <div
           className="absolute left-0 top-0 h-full w-1 rounded-l-2xl"
-          style={{ backgroundColor: categoryColor }}
+          style={{ backgroundColor: categoryColor || undefined }}
         />
         <CardContent className="p-6 pl-7">
           <div className="flex items-start justify-between gap-4 mb-5">
@@ -107,8 +107,8 @@ export default function HabitCard({ habit, completed, index }: HabitCardProps) {
                 <span
                   className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0"
                   style={{
-                    backgroundColor: `${categoryColor}20`,
-                    color: categoryColor
+                    backgroundColor: `${categoryColor || '#3b82f6'}20`,
+                    color: categoryColor || undefined
                   }}
                 >
                   {habit.category}

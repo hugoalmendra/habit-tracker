@@ -277,7 +277,7 @@ export default function Progress() {
                       <div key={habit.id} className="flex items-center gap-4">
                         <div
                           className="h-4 w-4 rounded-full shrink-0"
-                          style={{ backgroundColor: habit.color }}
+                          style={{ backgroundColor: habit.color || undefined }}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="mb-1.5 flex items-center justify-between gap-4">
@@ -292,7 +292,7 @@ export default function Progress() {
                               animate={{ width: `${habitRate}%` }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                               className="h-full"
-                              style={{ backgroundColor: habit.color }}
+                              style={{ backgroundColor: habit.color || undefined }}
                             />
                           </div>
                         </div>
