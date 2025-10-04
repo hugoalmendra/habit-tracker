@@ -50,7 +50,11 @@ export default function PublicProfile() {
         .eq('id', userId)
         .single()
 
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error('Profile error:', profileError)
+        setLoading(false)
+        return
+      }
 
       if (!profileData?.is_public) {
         setProfile(null)
