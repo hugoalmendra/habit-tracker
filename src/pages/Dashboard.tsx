@@ -29,7 +29,7 @@ import {
 } from '@dnd-kit/sortable'
 
 export default function Dashboard() {
-  const { signOut, user } = useAuth()
+  const { signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)

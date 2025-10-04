@@ -1,20 +1,9 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
 export default function Hero() {
-  const [email, setEmail] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle email submission (waitlist)
-    console.log('Email submitted:', email)
-    alert('Thanks for your interest! We\'ll be in touch soon.')
-    setEmail('')
-  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-kaizen-bg via-white to-kaizen-bg dark:from-black dark:via-kaizen-dark-gray dark:to-black pt-20">
