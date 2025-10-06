@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Brain, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const features = [
   {
@@ -9,6 +10,7 @@ const features = [
     description:
       'Your goals are unique. Your path should be too. Our AI sensei analyzes your aspirations and crafts a personalized habit strategy, guiding you with the wisdom of thousands of successful transformations.',
     visual: '🧠',
+    hasImage: true,
   },
   {
     icon: TrendingUp,
@@ -16,6 +18,7 @@ const features = [
     description:
       'Every samurai tracked their training. Every master measured their growth. Visualize your journey with elegant heatmaps, streak tracking, and insights that reveal the power of consistency. Watch small actions compound into extraordinary results.',
     visual: '📈',
+    hasImage: false,
   },
   {
     icon: Users,
@@ -23,10 +26,12 @@ const features = [
     description:
       'Transparency breeds accountability. Honor demands integrity. Share your journey publicly and join a community of practitioners committed to continuous improvement. Your progress inspires others; their presence keeps you honest.',
     visual: '👥',
+    hasImage: false,
   },
 ]
 
 export default function Features() {
+  const { theme } = useTheme()
   return (
     <section id="features" className="py-24 bg-white dark:bg-black relative">
       {/* Subtle grid pattern for dark mode */}
@@ -83,10 +88,20 @@ export default function Features() {
                   </p>
 
                   {/* Visual Placeholder */}
-                  <div className="rounded-xl bg-gradient-to-br from-kaizen-crimson/5 to-kaizen-crimson-light/5 dark:from-kaizen-crimson/10 dark:to-kaizen-crimson-light/10 p-6 text-center">
-                    <div className="text-5xl mb-2">{feature.visual}</div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Feature Preview</p>
-                  </div>
+                  {feature.hasImage ? (
+                    <div className="rounded-xl overflow-hidden border border-border/40">
+                      <img
+                        src={theme === 'dark' ? `/feature${index + 1}-dark.jpg` : `/feature${index + 1}-light.jpg`}
+                        alt={`${feature.title} preview`}
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-xl bg-gradient-to-br from-kaizen-crimson/5 to-kaizen-crimson-light/5 dark:from-kaizen-crimson/10 dark:to-kaizen-crimson-light/10 p-6 text-center">
+                      <div className="text-5xl mb-2">{feature.visual}</div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Feature Preview</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
