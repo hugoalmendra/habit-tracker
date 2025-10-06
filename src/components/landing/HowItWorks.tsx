@@ -75,7 +75,7 @@ export default function HowItWorks() {
               <div className="flex items-start gap-6 mb-12">
                 {/* Icon Circle */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-kaizen-crimson to-kaizen-gold p-[2px]">
+                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-kaizen-crimson to-kaizen-crimson-light p-[2px]">
                     <div className="w-full h-full rounded-full bg-kaizen-bg dark:bg-kaizen-dark-gray flex items-center justify-center">
                       <step.icon className="h-12 w-12 text-kaizen-crimson" />
                     </div>

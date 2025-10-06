@@ -53,6 +53,7 @@ export default {
         ring: 'hsl(var(--ring))',
         kaizen: {
           crimson: '#DC2626',
+          'crimson-light': '#F87171',
           charcoal: '#18181B',
           gold: '#F59E0B',
           bg: '#FAFAF9',

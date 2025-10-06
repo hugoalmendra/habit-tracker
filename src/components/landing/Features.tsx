@@ -83,7 +83,7 @@ export default function Features() {
                   </p>
 
                   {/* Visual Placeholder */}
-                  <div className="rounded-xl bg-gradient-to-br from-kaizen-crimson/5 to-kaizen-gold/5 dark:from-kaizen-crimson/10 dark:to-kaizen-gold/10 p-6 text-center">
+                  <div className="rounded-xl bg-gradient-to-br from-kaizen-crimson/5 to-kaizen-crimson-light/5 dark:from-kaizen-crimson/10 dark:to-kaizen-crimson-light/10 p-6 text-center">
                     <div className="text-5xl mb-2">{feature.visual}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Feature Preview</p>
                   </div>

@@ -23,7 +23,7 @@ export default function FinalCTA() {
             className="text-4xl md:text-6xl font-bold text-kaizen-slate dark:text-white mb-6"
           >
             Your Journey to Mastery{' '}
-            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-gold bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent">
               Begins Today
             </span>
           </motion.h2>

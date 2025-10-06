@@ -77,7 +77,7 @@ export default function Testimonials() {
               transition={{ duration: 0.4, delay: index * 0.1 }}
               className="text-center"
             >
-              <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-kaizen-crimson to-kaizen-gold bg-clip-text text-transparent mb-2">
+              <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent mb-2">
                 {stat.number}
               </div>
               <div className="text-gray-600 font-medium">{stat.label}</div>

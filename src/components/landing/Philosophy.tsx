@@ -20,7 +20,7 @@ export default function Philosophy() {
             transition={{ duration: 0.8 }}
             className="mb-12"
           >
-            <div className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-kaizen-crimson via-kaizen-gold to-kaizen-crimson">
+            <div className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-kaizen-crimson via-kaizen-crimson-light to-kaizen-crimson">
               改善
             </div>
             <p className="text-white/80 text-xl mt-4 tracking-widest">KAIZEN</p>
@@ -43,7 +43,7 @@ export default function Philosophy() {
             whileInView={{ opacity: 1, scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="h-px w-32 bg-gradient-to-r from-transparent via-kaizen-gold to-transparent mx-auto mb-8"
+            className="h-px w-32 bg-gradient-to-r from-transparent via-kaizen-crimson-light to-transparent mx-auto mb-8"
           />
 
           {/* Explanation */}

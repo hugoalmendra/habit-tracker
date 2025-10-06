@@ -81,7 +81,7 @@ export default function Hero() {
               Master Your Life,
             </span>
             <br />
-            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-gold bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent">
               One Day at a Time
             </span>
           </motion.h1>
@@ -132,7 +132,7 @@ export default function Hero() {
             className="mt-16 relative"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-kaizen-charcoal">
-              <div className="aspect-video bg-gradient-to-br from-kaizen-crimson/10 via-white to-kaizen-gold/10 dark:from-kaizen-crimson/20 dark:via-kaizen-slate dark:to-kaizen-gold/20 flex items-center justify-center">
+              <div className="aspect-video bg-gradient-to-br from-kaizen-crimson/10 via-white to-kaizen-crimson-light/10 dark:from-kaizen-crimson/20 dark:via-kaizen-slate dark:to-kaizen-crimson-light/20 flex items-center justify-center">
                 <div className="text-center p-8">
                   <div className="text-6xl mb-4">📊</div>
                   <p className="text-kaizen-slate dark:text-white font-medium">Dashboard Preview</p>
