@@ -8,6 +8,14 @@ import { useMonthlyStats } from '@/hooks/useMonthlyStats'
 import { motion } from 'framer-motion'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns'
 
+const CATEGORY_COLORS: Record<string, string> = {
+  Health: '#34C759',
+  Hustle: '#FF9500',
+  Heart: '#FF3B30',
+  Harmony: '#AF52DE',
+  Happiness: '#FFCC00',
+}
+
 export default function Progress() {
   const { theme } = useTheme()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -272,12 +280,13 @@ export default function Progress() {
                       (c) => c.habit_id === habit.id
                     ).length
                     const habitRate = ((habitCompletions / daysInMonthCount) * 100).toFixed(1)
+                    const habitColor = CATEGORY_COLORS[habit.category] || habit.color
 
                     return (
                       <div key={habit.id} className="flex items-center gap-4">
                         <div
                           className="h-4 w-4 rounded-full shrink-0"
-                          style={{ backgroundColor: habit.color || undefined }}
+                          style={{ backgroundColor: habitColor || undefined }}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="mb-1.5 flex items-center justify-between gap-4">
@@ -292,7 +301,7 @@ export default function Progress() {
                               animate={{ width: `${habitRate}%` }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                               className="h-full"
-                              style={{ backgroundColor: habit.color || undefined }}
+                              style={{ backgroundColor: habitColor || undefined }}
                             />
                           </div>
                         </div>

@@ -18,7 +18,7 @@ const features = [
     description:
       'Every samurai tracked their training. Every master measured their growth. Visualize your journey with elegant heatmaps, streak tracking, and insights that reveal the power of consistency. Watch small actions compound into extraordinary results.',
     visual: '📈',
-    hasImage: false,
+    hasImage: true,
   },
   {
     icon: Users,
@@ -26,7 +26,7 @@ const features = [
     description:
       'Transparency breeds accountability. Honor demands integrity. Share your journey publicly and join a community of practitioners committed to continuous improvement. Your progress inspires others; their presence keeps you honest.',
     visual: '👥',
-    hasImage: false,
+    hasImage: true,
   },
 ]
 

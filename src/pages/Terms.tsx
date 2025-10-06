@@ -7,7 +7,7 @@ export default function Terms() {
   const { theme } = useTheme()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-kaizen-slate">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-kaizen-charcoal/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-4">

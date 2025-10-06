@@ -4,23 +4,23 @@ import { Star } from 'lucide-react'
 
 const testimonials = [
   {
-    name: 'Sarah Chen',
+    name: 'Sarah Davis',
     role: 'Product Designer',
-    image: '👩‍💻',
+    image: '/avatar1.jpg',
     quote: 'The AI habit suggestions were spot-on for my goals. I\'ve built a 90-day streak and my productivity has never been better.',
     rating: 5,
   },
   {
     name: 'Marcus Johnson',
-    role: 'Entrepreneur',
-    image: '👨‍💼',
+    role: 'Fitness Instructor',
+    image: '/avatar2.jpg',
     quote: 'Sharing my public profile keeps me accountable. The visual progress tracking is incredibly motivating. This is the habit tracker I\'ve been looking for.',
     rating: 5,
   },
   {
     name: 'Yuki Tanaka',
-    role: 'Fitness Coach',
-    image: '🏋️',
+    role: 'Entrepreneur',
+    image: '/avatar3.jpg',
     quote: 'The philosophy of Kaizen resonates deeply with me. Small daily improvements compound into remarkable results. My clients love it too.',
     rating: 5,
   },
@@ -111,7 +111,11 @@ export default function Testimonials() {
 
                   {/* Author */}
                   <div className="flex items-center gap-4">
-                    <div className="text-4xl">{testimonial.image}</div>
+                    <img
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                     <div>
                       <div className="font-bold text-kaizen-slate dark:text-white">{testimonial.name}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
