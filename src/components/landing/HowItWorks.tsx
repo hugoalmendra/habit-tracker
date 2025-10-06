@@ -76,12 +76,12 @@ export default function HowItWorks() {
                 {/* Icon Circle */}
                 <div className="relative flex-shrink-0">
                   <div className="w-28 h-28 rounded-full bg-gradient-to-br from-kaizen-crimson to-kaizen-gold p-[2px]">
-                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-kaizen-bg dark:bg-kaizen-dark-gray flex items-center justify-center">
                       <step.icon className="h-12 w-12 text-kaizen-crimson" />
                     </div>
                   </div>
                   {/* Step Number */}
-                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-kaizen-charcoal text-white flex items-center justify-center font-bold text-sm">
+                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-kaizen-charcoal dark:bg-white text-white dark:text-kaizen-charcoal flex items-center justify-center font-bold text-sm">
                     {step.number}
                   </div>
                 </div>
