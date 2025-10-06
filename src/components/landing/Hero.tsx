@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Hero() {
+  const { theme } = useTheme()
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-kaizen-bg via-white to-kaizen-bg dark:from-black dark:via-kaizen-dark-gray dark:to-black pt-20">
@@ -133,7 +135,7 @@ export default function Hero() {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-kaizen-charcoal">
               <img
-                src="/hero.jpg"
+                src={theme === 'dark' ? '/dark-hero.jpg' : '/light-hero.jpg'}
                 alt="The Way of Kaizen Dashboard"
                 className="w-full h-auto"
               />
