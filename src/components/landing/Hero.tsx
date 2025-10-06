@@ -124,7 +124,7 @@ export default function Hero() {
             Free to start. No credit card required.
           </motion.p>
 
-          {/* Demo Image Placeholder */}
+          {/* Hero Image */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -132,13 +132,11 @@ export default function Hero() {
             className="mt-16 relative"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-kaizen-charcoal">
-              <div className="aspect-video bg-gradient-to-br from-kaizen-crimson/10 via-white to-kaizen-crimson-light/10 dark:from-kaizen-crimson/20 dark:via-kaizen-slate dark:to-kaizen-crimson-light/20 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="text-6xl mb-4">📊</div>
-                  <p className="text-kaizen-slate dark:text-white font-medium">Dashboard Preview</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Track your daily progress with elegant visualizations</p>
-                </div>
-              </div>
+              <img
+                src="/hero.jpg"
+                alt="The Way of Kaizen Dashboard"
+                className="w-full h-auto"
+              />
             </div>
             {/* Shadow effect */}
             <div className="absolute inset-0 -z-10 bg-gradient-to-b from-kaizen-crimson/20 to-transparent blur-3xl transform translate-y-8" />
