@@ -105,26 +105,12 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hidden sm:flex"
-              asChild
-            >
-              <Link to="/progress">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Progress
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               asChild
             >
-              <Link to="/progress" className="sm:hidden">
-                <TrendingUp className="h-4 w-4" />
-              </Link>
-              <Link to="/progress" className="hidden sm:flex items-center">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Progress
+              <Link to="/progress" className="flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Progress</span>
               </Link>
             </Button>
             <Button
