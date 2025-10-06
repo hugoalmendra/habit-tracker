@@ -90,22 +90,22 @@ export default function HabitCard({ habit, completed, index }: HabitCardProps) {
           className="absolute left-0 top-0 h-full w-1 rounded-l-2xl"
           style={{ backgroundColor: categoryColor || undefined }}
         />
-        <CardContent className="p-6 pl-7">
-          <div className="flex items-start justify-between gap-4 mb-5">
+        <CardContent className="p-4 sm:p-6 pl-5 sm:pl-7">
+          <div className="flex items-start justify-between gap-2 sm:gap-4 mb-4 sm:mb-5">
             <div
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+              className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shrink-0 touch-none"
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <h3 className="text-lg font-semibold tracking-tight text-foreground truncate">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5">
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground line-clamp-1">
                   {habit.name}
                 </h3>
                 <span
-                  className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0"
+                  className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 w-fit"
                   style={{
                     backgroundColor: `${categoryColor || '#3b82f6'}20`,
                     color: categoryColor || undefined
@@ -115,7 +115,7 @@ export default function HabitCard({ habit, completed, index }: HabitCardProps) {
                 </span>
               </div>
               {habit.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                   {habit.description}
                 </p>
               )}

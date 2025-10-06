@@ -81,15 +81,15 @@ export default function Dashboard() {
     <div className="min-h-screen bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
+        <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
           <div className="flex items-center gap-4">
             <img
               src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
               alt="The Way of Kaizen"
-              className="h-8 w-auto"
+              className="h-7 sm:h-8 w-auto"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <Button
               variant="ghost"
               size="sm"
@@ -105,7 +105,7 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all hidden sm:flex"
               asChild
             >
               <Link to="/progress">
@@ -116,57 +116,72 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              asChild
+            >
+              <Link to="/progress" className="sm:hidden">
+                <TrendingUp className="h-4 w-4" />
+              </Link>
+              <Link to="/progress" className="hidden sm:flex items-center">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Progress
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               asChild
             >
               <Link to="/settings">
-                <User className="mr-2 h-4 w-4" />
-                Profile
+                <User className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Profile</span>
               </Link>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sign out</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10 flex items-center justify-between"
+          className="mb-8 sm:mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div>
-            <h2 className="text-4xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
               Today
             </h2>
-            <p className="mt-2 text-base text-muted-foreground">
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {format(new Date(), 'EEEE, MMMM d, yyyy')}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setIsAIModalOpen(true)}
               variant="outline"
-              className="h-11 rounded-xl border-border/60 px-5 text-base font-medium hover:bg-secondary transition-all"
+              className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl border-border/60 px-4 sm:px-5 text-sm sm:text-base font-medium hover:bg-secondary transition-all"
             >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Generate with AI
+              <Sparkles className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+              <span className="hidden sm:inline">Generate with AI</span>
+              <span className="sm:hidden">AI</span>
             </Button>
             <Button
               onClick={() => setIsAddModalOpen(true)}
-              className="h-11 rounded-xl bg-primary px-6 text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
+              className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl bg-primary px-4 sm:px-6 text-sm sm:text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
             >
-              <Plus className="mr-2 h-5 w-5" />
+              <Plus className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
               Add Habit
             </Button>
           </div>
@@ -209,7 +224,7 @@ export default function Dashboard() {
               items={habits?.map((h) => h.id) || []}
               strategy={verticalListSortingStrategy}
             >
-              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {habits?.map((habit, index) => (
                   <HabitCard
                     key={habit.id}
