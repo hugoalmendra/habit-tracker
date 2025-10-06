@@ -6,12 +6,16 @@ import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, LogOut, TrendingUp, Moon, Sun, Sparkles, User } from 'lucide-react'
+import { Plus, LogOut, TrendingUp, Moon, Sun, Sparkles, User, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import HabitCard from '@/components/habits/HabitCard'
 import AddHabitModal from '@/components/habits/AddHabitModal'
 import AIGenerateModal from '@/components/habits/AIGenerateModal'
-import { format } from 'date-fns'
+import KaizenQuote from '@/components/dashboard/KaizenQuote'
+import XPBar from '@/components/dashboard/XPBar'
+import AchievementPopup from '@/components/celebrations/AchievementPopup'
+import { useAchievements } from '@/hooks/useAchievements'
+import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
 import {
   DndContext,
   closestCenter,
@@ -34,17 +38,34 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isAIModalOpen, setIsAIModalOpen] = useState(false)
-  const today = format(new Date(), 'yyyy-MM-dd')
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
 
   const { habits, isLoading, updateHabitOrder } = useHabits()
-  const { completions: todayCompletions } = useCompletions({
-    startDate: today,
-    endDate: today,
+  const { completions: dateCompletions } = useCompletions({
+    startDate: selectedDateStr,
+    endDate: selectedDateStr,
   })
 
   const completedHabitIds = new Set(
-    todayCompletions?.map((c) => c.habit_id) || []
+    dateCompletions?.map((c) => c.habit_id) || []
   )
+
+  const { achievement, clearAchievement } = useAchievements()
+
+  const goToPreviousDay = () => {
+    setSelectedDate(subDays(selectedDate, 1))
+  }
+
+  const goToNextDay = () => {
+    if (!isFuture(addDays(selectedDate, 1))) {
+      setSelectedDate(addDays(selectedDate, 1))
+    }
+  }
+
+  const goToToday = () => {
+    setSelectedDate(new Date())
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -139,37 +160,89 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* XP Bar and Quote - Side by Side at the Top */}
+        {isToday(selectedDate) && (
+          <div className="mb-6 sm:mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <XPBar />
+            <KaizenQuote />
+          </div>
+        )}
+
+        {/* Only XP Bar for past dates */}
+        {!isToday(selectedDate) && (
+          <div className="mb-6 sm:mb-8">
+            <XPBar />
+          </div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-8 sm:mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          className="mb-8 sm:mb-10 flex flex-col gap-4"
         >
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
-              Today
-            </h2>
-            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              {format(new Date(), 'EEEE, MMMM d, yyyy')}
-            </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+                  {isToday(selectedDate) ? 'Today' : format(selectedDate, 'MMMM d, yyyy')}
+                </h2>
+                <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+                  {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button
+                onClick={() => setIsAIModalOpen(true)}
+                variant="outline"
+                className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl border-border/60 px-4 sm:px-5 text-sm sm:text-base font-medium hover:bg-secondary transition-all"
+              >
+                <Sparkles className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+                <span className="hidden sm:inline">Generate with AI</span>
+                <span className="sm:hidden">AI</span>
+              </Button>
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl bg-primary px-4 sm:px-6 text-sm sm:text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
+              >
+                <Plus className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+                Add Habit
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <Button
-              onClick={() => setIsAIModalOpen(true)}
-              variant="outline"
-              className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl border-border/60 px-4 sm:px-5 text-sm sm:text-base font-medium hover:bg-secondary transition-all"
-            >
-              <Sparkles className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-              <span className="hidden sm:inline">Generate with AI</span>
-              <span className="sm:hidden">AI</span>
-            </Button>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="h-10 sm:h-11 flex-1 sm:flex-none rounded-xl bg-primary px-4 sm:px-6 text-sm sm:text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
-            >
-              <Plus className="mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-              Add Habit
-            </Button>
+
+          {/* Date Navigation */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={goToPreviousDay}
+                variant="outline"
+                size="sm"
+                className="h-9 w-9 rounded-lg border-border/60 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={goToNextDay}
+                variant="outline"
+                size="sm"
+                disabled={isFuture(addDays(selectedDate, 1))}
+                className="h-9 w-9 rounded-lg border-border/60 p-0 disabled:opacity-50"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            {!isToday(selectedDate) && (
+              <Button
+                onClick={goToToday}
+                variant="outline"
+                size="sm"
+                className="h-9 rounded-lg border-border/60 px-4 text-sm font-medium"
+              >
+                Back to Today
+              </Button>
+            )}
           </div>
         </motion.div>
 
@@ -216,6 +289,7 @@ export default function Dashboard() {
                     key={habit.id}
                     habit={habit}
                     completed={completedHabitIds.has(habit.id)}
+                    selectedDate={selectedDateStr}
                     index={index}
                   />
                 ))}
@@ -232,6 +306,10 @@ export default function Dashboard() {
       <AIGenerateModal
         open={isAIModalOpen}
         onOpenChange={setIsAIModalOpen}
+      />
+      <AchievementPopup
+        achievement={achievement}
+        onClose={clearAchievement}
       />
     </div>
   )

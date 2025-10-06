@@ -13,6 +13,7 @@ import { CSS } from '@dnd-kit/utilities'
 interface HabitCardProps {
   habit: Habit
   completed: boolean
+  selectedDate: string
   index: number
 }
 
@@ -24,11 +25,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   Happiness: '#FFCC00',
 }
 
-export default function HabitCard({ habit, completed, index }: HabitCardProps) {
+export default function HabitCard({ habit, completed, selectedDate, index }: HabitCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const { deleteHabit } = useHabits()
   const { toggleCompletion, isToggling } = useCompletions()
-  const today = format(new Date(), 'yyyy-MM-dd')
 
   const categoryColor = CATEGORY_COLORS[habit.category] || habit.color
 
@@ -49,7 +49,7 @@ export default function HabitCard({ habit, completed, index }: HabitCardProps) {
   const handleToggle = async () => {
     await toggleCompletion({
       habitId: habit.id,
-      date: today,
+      date: selectedDate,
     })
   }
 
