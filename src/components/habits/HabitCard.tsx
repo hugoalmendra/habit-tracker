@@ -6,7 +6,6 @@ import { Trash2, Check, GripVertical } from 'lucide-react'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import type { Habit } from '@/lib/types'
-import { format } from 'date-fns'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 

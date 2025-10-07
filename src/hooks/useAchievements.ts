@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useCompletions } from './useCompletions'
-import { calculateXP, getRankFromXP, RANKS } from '@/lib/xpSystem'
+import { calculateXP, getRankFromXP } from '@/lib/xpSystem'
 import { Achievement } from '@/components/celebrations/AchievementPopup'
-import { format, subDays, isSameDay } from 'date-fns'
+import { format, subDays } from 'date-fns'
 
 const STORAGE_KEY = 'kaizen_last_level'
 const STREAK_STORAGE_KEY = 'kaizen_celebrated_streaks'

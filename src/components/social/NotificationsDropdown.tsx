@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useNotifications } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Bell, Check, X, User as UserIcon } from 'lucide-react'
+import { Bell, X, User as UserIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 

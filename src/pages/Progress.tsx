@@ -331,7 +331,7 @@ export default function Progress() {
                                   transition-all hover:scale-110
                                 `}
                                 style={{
-                                  backgroundColor: isCompleted ? habitColor : undefined
+                                  backgroundColor: isCompleted ? (habitColor || undefined) : undefined
                                 }}
                               >
                                 {/* Tooltip with day number */}

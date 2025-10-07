@@ -118,6 +118,66 @@ export type Database = {
         }
         Relationships: []
       }
+      followers: {
+        Row: {
+          id: string
+          follower_id: string
+          following_id: string
+          status: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          following_id: string
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          following_id?: string
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          from_user_id: string | null
+          content: string
+          metadata: Json | null
+          read: boolean
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          from_user_id?: string | null
+          content: string
+          metadata?: Json | null
+          read?: boolean
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          from_user_id?: string | null
+          content?: string
+          metadata?: Json | null
+          read?: boolean
+          created_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
