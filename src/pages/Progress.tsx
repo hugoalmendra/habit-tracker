@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMonthlyStats } from '@/hooks/useMonthlyStats'
 import { motion } from 'framer-motion'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns'
+import XPBar from '@/components/dashboard/XPBar'
 
 const CATEGORY_COLORS: Record<string, string> = {
   Health: '#34C759',
@@ -101,6 +102,11 @@ export default function Progress() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
+        {/* XP Progress Bar */}
+        <div className="mb-8">
+          <XPBar />
+        </div>
+
         {/* Stats Cards */}
         <div className="mb-10 grid gap-5 md:grid-cols-4">
           <motion.div
@@ -274,36 +280,67 @@ export default function Progress() {
                 <CardTitle className="text-foreground">Habits Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {monthlyData.habits.map((habit) => {
-                    const habitCompletions = monthlyData.completions.filter(
-                      (c) => c.habit_id === habit.id
-                    ).length
-                    const habitRate = ((habitCompletions / daysInMonthCount) * 100).toFixed(1)
                     const habitColor = CATEGORY_COLORS[habit.category] || habit.color
 
+                    // Get completions for this habit by date
+                    const habitCompletionDates = new Set(
+                      monthlyData.completions
+                        .filter((c) => c.habit_id === habit.id)
+                        .map((c) => c.completed_date)
+                    )
+
+                    const totalCompletions = habitCompletionDates.size
+                    const habitRate = ((totalCompletions / daysInMonthCount) * 100).toFixed(1)
+
                     return (
-                      <div key={habit.id} className="flex items-center gap-4">
-                        <div
-                          className="h-4 w-4 rounded-full shrink-0"
-                          style={{ backgroundColor: habitColor || undefined }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="mb-1.5 flex items-center justify-between gap-4">
-                            <span className="font-medium text-foreground truncate">{habit.name}</span>
-                            <span className="text-sm text-muted-foreground shrink-0">
-                              {habitCompletions}/{daysInMonthCount} ({habitRate}%)
-                            </span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${habitRate}%` }}
-                              transition={{ duration: 0.5, delay: 0.2 }}
-                              className="h-full"
-                              style={{ backgroundColor: habitColor || undefined }}
-                            />
-                          </div>
+                      <div key={habit.id}>
+                        {/* Habit Header */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div
+                            className="h-3 w-3 rounded-full shrink-0"
+                            style={{ backgroundColor: habitColor || undefined }}
+                          />
+                          <span className="font-medium text-foreground">{habit.name}</span>
+                          <span className="text-sm text-muted-foreground ml-auto">
+                            {totalCompletions}/{daysInMonthCount} ({habitRate}%)
+                          </span>
+                        </div>
+
+                        {/* Calendar Blocks */}
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                          {daysInMonth.map((day, index) => {
+                            const dayStr = format(day, 'yyyy-MM-dd')
+                            const isCompleted = habitCompletionDates.has(dayStr)
+                            const isToday = isSameDay(day, new Date())
+
+                            return (
+                              <motion.div
+                                key={dayStr}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: index * 0.01 }}
+                                className={`
+                                  flex-1 min-w-[20px] max-w-[40px] aspect-square rounded-md relative group
+                                  ${isCompleted
+                                    ? 'opacity-100'
+                                    : 'bg-secondary opacity-40'
+                                  }
+                                  ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                                  transition-all hover:scale-110
+                                `}
+                                style={{
+                                  backgroundColor: isCompleted ? habitColor : undefined
+                                }}
+                              >
+                                {/* Tooltip with day number */}
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                  {format(day, 'MMM d')}
+                                </div>
+                              </motion.div>
+                            )
+                          })}
                         </div>
                       </div>
                     )

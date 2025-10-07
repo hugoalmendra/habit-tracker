@@ -13,6 +13,7 @@ import Onboarding from '@/pages/Onboarding'
 import Dashboard from '@/pages/Dashboard'
 import Progress from '@/pages/Progress'
 import Settings from '@/pages/Settings'
+import Social from '@/pages/Social'
 import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
@@ -54,6 +55,10 @@ function AppRoutes() {
       <Route
         path="/settings"
         element={user ? <Settings /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/social"
+        element={user ? <Social /> : <Navigate to="/login" replace />}
       />
       <Route path="/profile/:userId" element={<PublicProfile />} />
       <Route path="/privacy" element={<Privacy />} />

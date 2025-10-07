@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { useFollowers } from '@/hooks/useFollowers'
 import { Card, CardContent } from '@/components/ui/card'
-import { motion } from 'framer-motion'
-import { User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, Users as UsersIcon, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 
@@ -26,14 +30,31 @@ interface Completion {
   habit_id: string
 }
 
+interface FollowerProfile {
+  id: string
+  display_name: string | null
+  photo_url: string | null
+}
+
 export default function PublicProfile() {
   const { userId } = useParams()
   const { theme } = useTheme()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const { followUser, unfollowUser, checkIsFollowing } = useFollowers()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [habits, setHabits] = useState<Habit[]>([])
   const [completions, setCompletions] = useState<Completion[]>([])
+  const [followersCount, setFollowersCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [currentDate] = useState(new Date())
+  const [showFollowersModal, setShowFollowersModal] = useState(false)
+  const [showFollowingModal, setShowFollowingModal] = useState(false)
+  const [followersList, setFollowersList] = useState<FollowerProfile[]>([])
+  const [followingList, setFollowingList] = useState<FollowerProfile[]>([])
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
     loadPublicProfile()
@@ -87,11 +108,110 @@ export default function PublicProfile() {
 
       if (completionsError) throw completionsError
       setCompletions(completionsData || [])
+
+      // Load followers count
+      const { count: followersCount, error: followersCountError } = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', userId)
+        .eq('status', 'accepted')
+
+      if (!followersCountError) {
+        setFollowersCount(followersCount || 0)
+      }
+
+      // Load following count
+      const { count: followingCount, error: followingCountError } = await supabase
+        .from('followers')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', userId)
+        .eq('status', 'accepted')
+
+      if (!followingCountError) {
+        setFollowingCount(followingCount || 0)
+      }
+
+      // Check if current user is following this profile
+      if (user && userId !== user.id) {
+        const following = await checkIsFollowing(userId)
+        setIsFollowing(following)
+      }
     } catch (error) {
       console.error('Error loading public profile:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleFollowToggle = async () => {
+    if (!userId || !user) return
+
+    setFollowLoading(true)
+    try {
+      if (isFollowing) {
+        await unfollowUser(userId)
+        setIsFollowing(false)
+        setFollowersCount(prev => prev - 1)
+      } else {
+        await followUser(userId)
+        setIsFollowing(true)
+        setFollowersCount(prev => prev + 1)
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error)
+    } finally {
+      setFollowLoading(false)
+    }
+  }
+
+  const loadFollowersList = async () => {
+    if (!userId) return
+
+    const { data: followersData } = await supabase
+      .from('followers')
+      .select('follower_id')
+      .eq('following_id', userId)
+      .eq('status', 'accepted')
+
+    if (followersData) {
+      const profiles = await Promise.all(
+        followersData.map(async (f) => {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, display_name, photo_url')
+            .eq('id', f.follower_id)
+            .single()
+          return data
+        })
+      )
+      setFollowersList(profiles.filter((p) => p !== null) as FollowerProfile[])
+    }
+    setShowFollowersModal(true)
+  }
+
+  const loadFollowingList = async () => {
+    if (!userId) return
+
+    const { data: followingData } = await supabase
+      .from('followers')
+      .select('following_id')
+      .eq('follower_id', userId)
+      .eq('status', 'accepted')
+
+    if (followingData) {
+      const profiles = await Promise.all(
+        followingData.map(async (f) => {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, display_name, photo_url')
+            .eq('id', f.following_id)
+            .single()
+          return data
+        })
+      )
+      setFollowingList(profiles.filter((p) => p !== null) as FollowerProfile[])
+    }
+    setShowFollowingModal(true)
   }
 
   if (loading) {
@@ -156,7 +276,7 @@ export default function PublicProfile() {
           {/* Profile Header */}
           <Card className="border-border/40 shadow-apple-lg rounded-2xl">
             <CardContent className="p-8">
-              <div className="flex items-start gap-6">
+              <div className="flex items-center justify-start gap-8">
                 {/* Profile Photo with Fallback */}
                 <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-border shrink-0 bg-secondary/50 flex items-center justify-center">
                   {profile.photo_url ? (
@@ -173,6 +293,7 @@ export default function PublicProfile() {
                     <User className="h-10 w-10 text-muted-foreground" />
                   )}
                 </div>
+
                 <div className="flex-1">
                   <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-2">
                     {profile.display_name || 'Anonymous'}
@@ -181,6 +302,36 @@ export default function PublicProfile() {
                     <p className="text-base text-muted-foreground">{profile.bio}</p>
                   )}
                 </div>
+
+                {/* Followers/Following with better spacing */}
+                <div className="flex items-center gap-10 text-sm shrink-0">
+                  <button
+                    onClick={loadFollowersList}
+                    className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span className="font-bold text-2xl text-foreground">{followersCount}</span>
+                    <span>followers</span>
+                  </button>
+                  <button
+                    onClick={loadFollowingList}
+                    className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span className="font-bold text-2xl text-foreground">{followingCount}</span>
+                    <span>following</span>
+                  </button>
+                </div>
+
+                {/* Follow/Unfollow Button */}
+                {user && userId !== user.id && (
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                    variant={isFollowing ? 'outline' : 'default'}
+                    className="shrink-0"
+                  >
+                    {followLoading ? 'Loading...' : isFollowing ? 'Unfollow' : 'Follow'}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -293,6 +444,94 @@ export default function PublicProfile() {
           </Card>
         </motion.div>
       </main>
+
+      {/* Followers Modal */}
+      <Dialog open={showFollowersModal} onOpenChange={setShowFollowersModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Followers ({followersList.length})</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {followersList.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No followers yet
+              </div>
+            ) : (
+              followersList.map((follower) => (
+                <div
+                  key={follower.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary cursor-pointer transition-all"
+                  onClick={() => {
+                    setShowFollowersModal(false)
+                    navigate(`/profile/${follower.id}`)
+                  }}
+                >
+                  <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-border bg-secondary/50 flex items-center justify-center flex-shrink-0">
+                    {follower.photo_url ? (
+                      <img
+                        src={follower.photo_url}
+                        alt={follower.display_name || 'User'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">
+                      {follower.display_name || 'Anonymous User'}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Following Modal */}
+      <Dialog open={showFollowingModal} onOpenChange={setShowFollowingModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Following ({followingList.length})</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {followingList.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Not following anyone
+              </div>
+            ) : (
+              followingList.map((following) => (
+                <div
+                  key={following.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary cursor-pointer transition-all"
+                  onClick={() => {
+                    setShowFollowingModal(false)
+                    navigate(`/profile/${following.id}`)
+                  }}
+                >
+                  <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-border bg-secondary/50 flex items-center justify-center flex-shrink-0">
+                    {following.photo_url ? (
+                      <img
+                        src={following.photo_url}
+                        alt={following.display_name || 'User'}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">
+                      {following.display_name || 'Anonymous User'}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -6,14 +6,14 @@ import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, LogOut, TrendingUp, Moon, Sun, Sparkles, User, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, LogOut, TrendingUp, Moon, Sun, Sparkles, User, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import HabitCard from '@/components/habits/HabitCard'
 import AddHabitModal from '@/components/habits/AddHabitModal'
 import AIGenerateModal from '@/components/habits/AIGenerateModal'
 import KaizenQuote from '@/components/dashboard/KaizenQuote'
-import XPBar from '@/components/dashboard/XPBar'
 import AchievementPopup from '@/components/celebrations/AchievementPopup'
+import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import { useAchievements } from '@/hooks/useAchievements'
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
 import {
@@ -104,13 +104,16 @@ export default function Dashboard() {
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
           <div className="flex items-center gap-4">
-            <img
-              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
-              alt="The Way of Kaizen"
-              className="h-7 sm:h-8 w-auto"
-            />
+            <Link to="/dashboard">
+              <img
+                src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
+                alt="The Way of Kaizen"
+                className="h-7 sm:h-8 w-auto cursor-pointer"
+              />
+            </Link>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3">
+            <NotificationsDropdown />
             <Button
               variant="ghost"
               size="sm"
@@ -140,6 +143,17 @@ export default function Dashboard() {
               className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               asChild
             >
+              <Link to="/social" className="flex items-center justify-center">
+                <Users className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Social</span>
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              asChild
+            >
               <Link to="/settings">
                 <User className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Profile</span>
@@ -160,20 +174,6 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* XP Bar and Quote - Side by Side at the Top */}
-        {isToday(selectedDate) && (
-          <div className="mb-6 sm:mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <XPBar />
-            <KaizenQuote />
-          </div>
-        )}
-
-        {/* Only XP Bar for past dates */}
-        {!isToday(selectedDate) && (
-          <div className="mb-6 sm:mb-8">
-            <XPBar />
-          </div>
-        )}
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -296,6 +296,18 @@ export default function Dashboard() {
               </div>
             </SortableContext>
           </DndContext>
+        )}
+
+        {/* Daily Quote at Bottom */}
+        {habits && habits.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-10"
+          >
+            <KaizenQuote />
+          </motion.div>
         )}
       </main>
 
