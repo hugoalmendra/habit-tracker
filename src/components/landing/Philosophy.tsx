@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 
 export default function Philosophy() {
   return (
-    <section id="philosophy" className="py-24 bg-gradient-to-br from-kaizen-charcoal via-kaizen-slate to-kaizen-charcoal relative overflow-hidden">
+    <section id="philosophy" className="py-24 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-1/4 left-1/4 text-[20rem] font-bold text-white">
@@ -55,7 +55,7 @@ export default function Philosophy() {
             className="text-white/70 text-lg max-w-3xl mx-auto space-y-6"
           >
             <p>
-              <span className="text-kaizen-gold font-semibold">Kaizen (改善)</span> is the ancient Japanese philosophy of continuous improvement through small, incremental changes.
+              <span className="text-kaizen-crimson font-semibold">Kaizen (改善)</span> is the ancient Japanese philosophy of continuous improvement through small, incremental changes.
             </p>
             <p>
               Rooted in the samurai tradition of daily discipline and deliberate practice, Kaizen teaches that mastery comes not from dramatic transformations, but from the compound effect of 1% improvements every day.
@@ -63,19 +63,6 @@ export default function Philosophy() {
             <p>
               The Way of Kaizen embodies this timeless wisdom, guiding you to build lasting habits that transform your life, one day at a time.
             </p>
-          </motion.div>
-
-          {/* Decorative Element */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="mt-12 flex justify-center gap-4"
-          >
-            <div className="w-16 h-16 rounded-full border-2 border-kaizen-crimson/30" />
-            <div className="w-16 h-16 rounded-full border-2 border-kaizen-gold/30" />
-            <div className="w-16 h-16 rounded-full border-2 border-white/30" />
           </motion.div>
         </div>
       </div>
