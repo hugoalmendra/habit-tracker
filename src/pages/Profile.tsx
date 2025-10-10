@@ -218,6 +218,12 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     if (!user) return
 
+    // Validate first and last name are not empty
+    if (!editFirstName.trim() || !editLastName.trim()) {
+      alert('First Name and Last Name are required')
+      return
+    }
+
     // Combine first and last name
     const displayName = `${editFirstName.trim()} ${editLastName.trim()}`.trim()
 
@@ -541,24 +547,26 @@ export default function Profile() {
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                              First Name
+                              First Name <span className="text-destructive">*</span>
                             </label>
                             <Input
                               value={editFirstName}
                               onChange={(e) => setEditFirstName(e.target.value)}
                               placeholder="First Name"
                               className="h-10"
+                              required
                             />
                           </div>
                           <div>
                             <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                              Last Name
+                              Last Name <span className="text-destructive">*</span>
                             </label>
                             <Input
                               value={editLastName}
                               onChange={(e) => setEditLastName(e.target.value)}
                               placeholder="Last Name"
                               className="h-10"
+                              required
                             />
                           </div>
                         </div>
