@@ -12,7 +12,8 @@ export default function Signup() {
   const { theme } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signUp } = useAuth()
@@ -24,6 +25,7 @@ export default function Signup() {
     setLoading(true)
 
     try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
       await signUp(email, password, fullName)
       navigate('/dashboard')
     } catch (err) {
@@ -70,18 +72,35 @@ export default function Signup() {
                   {error}
                 </motion.div>
               )}
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="text-sm font-medium">
-                  Full Name
-                </Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="h-12 rounded-xl border-border/50 bg-secondary/50 px-4 text-base placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-1 focus:ring-primary/20 transition-all"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor="firstName" className="text-sm font-medium">
+                    First Name
+                  </Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    className="h-12 rounded-xl border-border/50 bg-secondary/50 px-4 text-base placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-1 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor="lastName" className="text-sm font-medium">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                    className="h-12 rounded-xl border-border/50 bg-secondary/50 px-4 text-base placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-1 focus:ring-primary/20 transition-all"
+                  />
+                </div>
               </div>
               <div className="space-y-3">
                 <Label htmlFor="email" className="text-sm font-medium">
