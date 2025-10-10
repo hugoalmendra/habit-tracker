@@ -503,9 +503,9 @@ export default function Profile() {
           {/* Profile Header */}
           <Card className="border-border/40 shadow-apple-lg rounded-2xl">
             <CardContent className="p-8">
-              <div className="flex items-start justify-between gap-8">
+              <div className="flex flex-col md:flex-row items-start md:justify-between gap-6 md:gap-8">
                 {/* Profile Photo */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 w-full md:w-auto">
                   <div className="relative">
                     <div className="h-24 w-24 rounded-full overflow-hidden border-2 border-border shrink-0 bg-secondary/50 flex items-center justify-center">
                       {profile.photo_url ? (
@@ -623,8 +623,8 @@ export default function Profile() {
                 </div>
 
                 {/* Stats and Actions */}
-                <div className="flex flex-col items-end gap-4">
-                  <div className="flex items-center gap-8 text-sm">
+                <div className="flex flex-col items-start md:items-end gap-4 w-full md:w-auto">
+                  <div className="flex items-center gap-8 text-sm w-full md:w-auto justify-start md:justify-end">
                     <button
                       onClick={loadFollowersList}
                       className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
