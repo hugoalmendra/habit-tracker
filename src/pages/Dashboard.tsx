@@ -122,7 +122,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
+      <header className="sticky top-0 z-50 border-b border-white/20 dark:border-white/10 bg-background/50 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
           <Link to="/dashboard">
             <img

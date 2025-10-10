@@ -209,7 +209,7 @@ export default function Onboarding() {
                   <Button
                     onClick={handleCreateHabits}
                     disabled={selectedHabits.size === 0 || isCreating}
-                    className="w-full h-14 rounded-xl bg-primary text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
+                    className="w-full h-14 rounded-xl text-base font-medium active:scale-[0.98] transition-all shadow-apple-sm"
                   >
                     {isCreating ? (
                       <>

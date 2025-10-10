@@ -95,7 +95,7 @@ export default function Testimonials() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card className="h-full border-2 border-gray-200/50 dark:border-gray-800/50 hover:border-kaizen-crimson/30 dark:hover:border-kaizen-crimson/50 hover:shadow-xl dark:hover:shadow-kaizen-crimson/10 transition-all duration-300 dark:bg-kaizen-dark-gray">
+              <Card className="h-full border-2 border-white/20 dark:border-white/10 hover:border-kaizen-crimson/30 dark:hover:border-kaizen-crimson/50 hover:shadow-xl dark:hover:shadow-kaizen-crimson/10 transition-all duration-300">
                 <CardContent className="p-8">
                   {/* Rating */}
                   <div className="flex gap-1 mb-4">

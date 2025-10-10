@@ -10,7 +10,7 @@ export default function Navigation() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/50 dark:bg-black/60 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-800/30">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -63,7 +63,7 @@ export default function Navigation() {
             </Button>
             <Button
               asChild
-              className="bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90 shadow-lg"
+              className="bg-kaizen-crimson/50 backdrop-blur-md text-kaizen-crimson border border-kaizen-crimson/30 hover:bg-kaizen-crimson/60 shadow-lg"
             >
               <Link to="/signup">Get Started</Link>
             </Button>
@@ -127,7 +127,7 @@ export default function Navigation() {
                   </Button>
                   <Button
                     asChild
-                    className="w-full bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90"
+                    className="w-full bg-kaizen-crimson/50 backdrop-blur-md text-kaizen-crimson border border-kaizen-crimson/30 hover:bg-kaizen-crimson/60"
                   >
                     <Link to="/signup">Get Started</Link>
                   </Button>
