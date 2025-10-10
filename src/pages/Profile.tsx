@@ -132,6 +132,7 @@ export default function Profile() {
           return {
             ...post,
             created_at: post.created_at || new Date().toISOString(),
+            image_url: post.image_url || undefined,
             reactions_count: reactionsData.count || 0,
             comments_count: commentsData.count || 0
           }

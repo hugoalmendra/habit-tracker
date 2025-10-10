@@ -38,8 +38,6 @@ export default function AvatarDropdown() {
       setProfile(data)
     } catch (error) {
       console.error('Error loading profile:', error)
-    } finally {
-      setLoading(false)
     }
   }
 

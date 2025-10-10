@@ -97,7 +97,6 @@ export default function Settings() {
       if (error) throw error
 
       alert('Password updated successfully!')
-      setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (error) {
