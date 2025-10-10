@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
+import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, Moon, Sun, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -43,16 +45,33 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState<typeof CATEGORIES[number]>('All')
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
 
+  const { user } = useAuth()
   const { habits, isLoading, updateHabitOrder } = useHabits()
+  const { acceptedSharedHabits } = useSharedHabits()
   const { completions: dateCompletions } = useCompletions({
     startDate: selectedDateStr,
     endDate: selectedDateStr,
   })
 
+  // Combine user's own habits with accepted shared habits (only where user is invited)
+  const ownHabitIds = new Set((habits || []).map(h => h.id))
+  const sharedHabitsForDisplay = (acceptedSharedHabits || [])
+    .filter(sh => sh.habit && sh.invited_user_id === user?.id && !ownHabitIds.has(sh.habit.id))
+    .map(sh => ({
+      ...sh.habit!,
+      isShared: true,
+      sharedHabitId: sh.id,
+    }))
+
+  const allHabits = [
+    ...(habits || []),
+    ...sharedHabitsForDisplay
+  ]
+
   // Filter by category
   const filteredHabits = selectedCategory === 'All'
-    ? (habits || [])
-    : (habits || []).filter(h => h.category === selectedCategory)
+    ? allHabits
+    : allHabits.filter(h => h.category === selectedCategory)
 
   const completedHabitIds = new Set(
     dateCompletions?.map((c) => c.habit_id) || []
@@ -103,7 +122,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/20 dark:border-white/10 bg-background/50 backdrop-blur-xl shadow-apple-sm">
+      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
           <Link to="/dashboard">
             <img
@@ -228,7 +247,7 @@ export default function Dashboard() {
           </div>
 
           {/* Category Filter */}
-          {(habits || []).length > 0 && (
+          {allHabits.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {CATEGORIES.map((cat) => (
                 <Button
@@ -249,7 +268,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-center py-20">
             <div className="text-lg font-medium text-muted-foreground">Loading habits...</div>
           </div>
-        ) : (habits || []).length === 0 ? (
+        ) : allHabits.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -298,7 +317,7 @@ export default function Dashboard() {
         )}
 
         {/* Daily Quote at Bottom */}
-        {(habits || []).length > 0 && (
+        {allHabits.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

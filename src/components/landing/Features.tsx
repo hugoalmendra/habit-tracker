@@ -70,10 +70,10 @@ export default function Features() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card className="h-full border-2 border-white/20 dark:border-white/10 hover:border-kaizen-crimson/30 dark:hover:border-kaizen-crimson/50 hover:shadow-xl dark:hover:shadow-kaizen-crimson/10 transition-all duration-300 group">
+              <Card className="h-full border-2 border-gray-200/50 dark:border-gray-800/50 hover:border-kaizen-crimson/30 dark:hover:border-kaizen-crimson/50 hover:shadow-xl dark:hover:shadow-kaizen-crimson/10 transition-all duration-300 group dark:bg-kaizen-dark-gray">
                 <CardContent className="p-8">
                   {/* Icon */}
-                  <div className="mb-6 inline-flex p-4 rounded-2xl bg-kaizen-crimson/50 dark:bg-kaizen-crimson/50 backdrop-blur-md border border-kaizen-crimson/30 text-kaizen-crimson group-hover:scale-110 transition-transform">
+                  <div className="mb-6 inline-flex p-4 rounded-2xl bg-kaizen-crimson/10 dark:bg-kaizen-crimson/20 text-kaizen-crimson group-hover:scale-110 transition-transform">
                     <feature.icon className="h-8 w-8" />
                   </div>
 

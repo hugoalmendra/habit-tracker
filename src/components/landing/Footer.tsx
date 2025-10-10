@@ -23,7 +23,7 @@ export default function Footer() {
                 href="https://www.instagram.com/the.way.of.kaizen/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-kaizen-crimson/50 hover:border-kaizen-crimson/30 flex items-center justify-center transition-all duration-300"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-kaizen-crimson flex items-center justify-center transition-colors"
                 aria-label="Follow us on Instagram"
               >
                 <Instagram className="h-5 w-5" />

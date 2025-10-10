@@ -66,7 +66,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kaizen-crimson/50 dark:bg-kaizen-crimson/50 backdrop-blur-md border border-kaizen-crimson/30 text-kaizen-crimson dark:text-kaizen-crimson text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kaizen-crimson/10 dark:bg-kaizen-crimson/20 text-kaizen-crimson dark:text-kaizen-crimson text-sm font-medium mb-8"
           >
             <Sparkles className="h-4 w-4" />
             Join 10,000+ practitioners on their journey
@@ -108,7 +108,7 @@ export default function Hero() {
             <Button
               asChild
               size="lg"
-              className="w-full sm:w-auto bg-kaizen-crimson/50 backdrop-blur-md text-kaizen-crimson border border-kaizen-crimson/30 hover:bg-kaizen-crimson/60 h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all"
+              className="w-full sm:w-auto bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90 h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all"
             >
               <Link to="/signup">
                 Begin Your Journey

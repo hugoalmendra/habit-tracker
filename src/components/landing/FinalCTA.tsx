@@ -50,7 +50,7 @@ export default function FinalCTA() {
             <Button
               asChild
               size="lg"
-              className="w-full sm:w-auto bg-kaizen-crimson/50 backdrop-blur-md text-kaizen-crimson border border-kaizen-crimson/30 hover:bg-kaizen-crimson/60 h-14 px-10 text-lg shadow-xl hover:shadow-2xl transition-all group"
+              className="w-full sm:w-auto bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90 h-14 px-10 text-lg shadow-xl hover:shadow-2xl transition-all group"
             >
               <Link to="/signup">
                 Start Your Journey
@@ -62,7 +62,7 @@ export default function FinalCTA() {
               asChild
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto border-2 border-white/30 dark:border-white/30 bg-white/40 dark:bg-black/40 backdrop-blur-md text-kaizen-charcoal dark:text-white hover:bg-white/50 dark:hover:bg-black/50 h-14 px-10 text-lg transition-all"
+              className="w-full sm:w-auto border-2 border-kaizen-charcoal dark:border-white text-kaizen-charcoal dark:text-white hover:bg-kaizen-charcoal hover:text-white dark:hover:bg-white dark:hover:text-kaizen-charcoal h-14 px-10 text-lg transition-all"
             >
               <Link to="/login">Sign In</Link>
             </Button>

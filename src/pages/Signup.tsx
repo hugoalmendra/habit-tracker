@@ -116,7 +116,7 @@ export default function Signup() {
             <CardFooter className="flex flex-col space-y-4 pt-2">
               <Button
                 type="submit"
-                className="h-12 w-full rounded-xl text-base font-medium active:scale-[0.98] transition-all shadow-apple-sm"
+                className="h-12 w-full rounded-xl bg-primary text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
                 disabled={loading}
               >
                 {loading ? 'Creating account...' : 'Create account'}
