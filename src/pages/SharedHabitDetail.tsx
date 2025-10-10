@@ -67,6 +67,7 @@ export default function SharedHabitDetail() {
         .maybeSingle()
 
       if (error) throw error
+      if (!data) throw new Error('Shared habit not found')
 
       const [habitData, ownerData, invitedUserData] = await Promise.all([
         supabase
