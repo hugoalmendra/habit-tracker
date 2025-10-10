@@ -228,7 +228,7 @@ export default function Dashboard() {
           </div>
 
           {/* Category Filter */}
-          {allHabits.length > 0 && (
+          {(habits || []).length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {CATEGORIES.map((cat) => (
                 <Button
@@ -249,7 +249,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-center py-20">
             <div className="text-lg font-medium text-muted-foreground">Loading habits...</div>
           </div>
-        ) : allHabits.length === 0 ? (
+        ) : (habits || []).length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -298,7 +298,7 @@ export default function Dashboard() {
         )}
 
         {/* Daily Quote at Bottom */}
-        {allHabits.length > 0 && (
+        {(habits || []).length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
