@@ -92,7 +92,7 @@ export default function GlobalSearch() {
               .from('profiles')
               .select('display_name')
               .eq('id', challenge.creator_id)
-              .single()
+              .maybeSingle()
 
             return {
               ...challenge,

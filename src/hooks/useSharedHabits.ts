@@ -53,12 +53,12 @@ export function useSharedHabits() {
               .from('habits')
               .select('id, name, color, category')
               .eq('id', share.habit_id)
-              .single(),
+              .maybeSingle(),
             supabase
               .from('profiles')
               .select('id, display_name, photo_url')
               .eq('id', share.invited_user_id)
-              .single()
+              .maybeSingle()
           ])
 
           return {
@@ -94,12 +94,12 @@ export function useSharedHabits() {
               .from('habits')
               .select('id, name, color, category')
               .eq('id', share.habit_id)
-              .single(),
+              .maybeSingle(),
             supabase
               .from('profiles')
               .select('id, display_name, photo_url')
               .eq('id', share.owner_id)
-              .single()
+              .maybeSingle()
           ])
 
           return {
@@ -204,12 +204,12 @@ export function useSharedHabits() {
               .from('habits')
               .select('id, name, color, category')
               .eq('id', share.habit_id)
-              .single(),
+              .maybeSingle(),
             supabase
               .from('profiles')
               .select('id, display_name, photo_url')
               .eq('id', share.owner_id)
-              .single()
+              .maybeSingle()
           ])
 
           // Get all users sharing this habit

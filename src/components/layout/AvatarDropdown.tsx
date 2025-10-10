@@ -32,9 +32,12 @@ export default function AvatarDropdown() {
         .from('profiles')
         .select('display_name, photo_url')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error loading profile:', error)
+        return
+      }
       setProfile(data)
     } catch (error) {
       console.error('Error loading profile:', error)

@@ -55,7 +55,7 @@ export const completionsRouter = router({
         .select('id')
         .eq('habit_id', input.habitId)
         .eq('completed_date', input.date)
-        .single()
+        .maybeSingle()
 
       if (existing) {
         // Delete if exists

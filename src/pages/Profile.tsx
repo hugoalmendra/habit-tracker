@@ -156,7 +156,7 @@ export default function Profile() {
         .from('profiles')
         .select('display_name, photo_url, bio, is_public')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (profileError) throw profileError
       setProfile(profileData as Profile)

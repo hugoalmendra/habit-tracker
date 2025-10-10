@@ -37,7 +37,7 @@ export function useHabits() {
           color: input.color || '#3b82f6',
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data as Habit
@@ -55,7 +55,7 @@ export function useHabits() {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data as Habit

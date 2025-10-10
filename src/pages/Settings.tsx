@@ -31,7 +31,7 @@ export default function Settings() {
         .from('profiles')
         .select('is_public')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
 

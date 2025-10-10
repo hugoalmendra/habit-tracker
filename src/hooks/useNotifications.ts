@@ -56,7 +56,7 @@ export function useNotifications() {
               .from('profiles')
               .select('id, display_name, photo_url')
               .eq('id', notification.from_user_id)
-              .single()
+              .maybeSingle()
 
             return {
               ...notification,

@@ -79,7 +79,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
                 .from('profiles')
                 .select('id, display_name, photo_url')
                 .eq('id', post.user_id)
-                .single(),
+                .maybeSingle(),
               supabase
                 .from('post_comments')
                 .select('id', { count: 'exact', head: true })
@@ -127,7 +127,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
               .from('profiles')
               .select('id, display_name, photo_url')
               .eq('id', post.user_id)
-              .single(),
+              .maybeSingle(),
             supabase
               .from('post_comments')
               .select('id', { count: 'exact', head: true })
@@ -170,7 +170,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           image_url: input.image_url,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -240,7 +240,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           content,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -282,7 +282,7 @@ export function useComments(postId: string) {
             .from('profiles')
             .select('display_name, photo_url')
             .eq('id', comment.user_id)
-            .single()
+            .maybeSingle()
 
           return {
             ...comment,

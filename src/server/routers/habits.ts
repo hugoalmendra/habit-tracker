@@ -41,7 +41,7 @@ export const habitsRouter = router({
           color: input.color,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
         throw new TRPCError({
@@ -71,7 +71,7 @@ export const habitsRouter = router({
         .eq('id', id)
         .eq('user_id', ctx.userId)
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
         throw new TRPCError({

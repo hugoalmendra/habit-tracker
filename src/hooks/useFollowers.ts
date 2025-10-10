@@ -45,7 +45,7 @@ export function useFollowers() {
             .from('profiles')
             .select('id, display_name, photo_url')
             .eq('id', followerRow.follower_id)
-            .single()
+            .maybeSingle()
 
           return {
             ...followerRow,
@@ -79,7 +79,7 @@ export function useFollowers() {
             .from('profiles')
             .select('id, display_name, photo_url')
             .eq('id', followingRow.following_id)
-            .single()
+            .maybeSingle()
 
           return {
             ...followingRow,
@@ -123,7 +123,7 @@ export function useFollowers() {
           status: 'accepted',
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data

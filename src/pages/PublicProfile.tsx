@@ -72,7 +72,7 @@ export default function PublicProfile() {
         .from('profiles')
         .select('display_name, photo_url, bio, is_public')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
       if (profileError) {
         console.error('Profile error:', profileError)

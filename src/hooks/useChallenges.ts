@@ -79,7 +79,7 @@ export function useChallenges() {
               .from('profiles')
               .select('display_name, photo_url')
               .eq('id', challenge.creator_id)
-              .single(),
+              .maybeSingle(),
             supabase
               .from('challenge_participants')
               .select('id', { count: 'exact', head: true })
@@ -130,7 +130,7 @@ export function useChallenges() {
           ...input,
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error('Challenge creation error:', error)
@@ -338,7 +338,7 @@ export function useChallengeParticipants(challengeId: string) {
             .from('profiles')
             .select('display_name, photo_url')
             .eq('id', participant.user_id)
-            .single()
+            .maybeSingle()
 
           return {
             ...participant,

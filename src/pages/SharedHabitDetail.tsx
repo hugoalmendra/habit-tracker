@@ -64,7 +64,7 @@ export default function SharedHabitDetail() {
         .from('shared_habits')
         .select('*')
         .eq('id', id!)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
 
@@ -73,17 +73,17 @@ export default function SharedHabitDetail() {
           .from('habits')
           .select('id, name, color, category, description')
           .eq('id', data.habit_id)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('profiles')
           .select('id, display_name, photo_url')
           .eq('id', data.owner_id)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('profiles')
           .select('id, display_name, photo_url')
           .eq('id', data.invited_user_id)
-          .single()
+          .maybeSingle()
       ])
 
       return {

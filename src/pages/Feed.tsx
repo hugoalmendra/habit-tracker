@@ -107,7 +107,7 @@ export default function Feed() {
         .from('profiles')
         .select('photo_url, display_name')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
         .then(({ data }) => setProfile(data))
     }
   }, [user])
