@@ -321,35 +321,45 @@ export default function PublicProfile() {
           {/* Profile Header */}
           <Card className="border-border/40 shadow-apple-lg rounded-2xl">
             <CardContent className="p-8">
-              <div className="flex items-center justify-start gap-8">
-                {/* Profile Photo with Fallback */}
-                <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-border shrink-0 bg-secondary/50 flex items-center justify-center">
-                  {profile.photo_url ? (
-                    <img
-                      src={profile.photo_url}
-                      alt={profile.display_name || 'User'}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                        e.currentTarget.parentElement?.classList.add('show-fallback')
-                      }}
-                    />
-                  ) : (
-                    <User className="h-10 w-10 text-muted-foreground" />
-                  )}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-start gap-6">
+                {/* Top section: Avatar and Name (always together) */}
+                <div className="flex items-center gap-6 md:gap-8">
+                  {/* Profile Photo with Fallback */}
+                  <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-border shrink-0 bg-secondary/50 flex items-center justify-center">
+                    {profile.photo_url ? (
+                      <img
+                        src={profile.photo_url}
+                        alt={profile.display_name || 'User'}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                          e.currentTarget.parentElement?.classList.add('show-fallback')
+                        }}
+                      />
+                    ) : (
+                      <User className="h-10 w-10 text-muted-foreground" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 md:flex-initial">
+                    <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground mb-2">
+                      {profile.display_name || 'Anonymous'}
+                    </h1>
+                    {profile.bio && (
+                      <p className="text-base text-muted-foreground hidden md:block">{profile.bio}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex-1">
-                  <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-2">
-                    {profile.display_name || 'Anonymous'}
-                  </h1>
-                  {profile.bio && (
-                    <p className="text-base text-muted-foreground">{profile.bio}</p>
-                  )}
-                </div>
+                {/* Bio on mobile (below avatar and name) */}
+                {profile.bio && (
+                  <p className="text-base text-muted-foreground md:hidden -mt-3">
+                    {profile.bio}
+                  </p>
+                )}
 
-                {/* Followers/Following with better spacing */}
-                <div className="flex items-center gap-10 text-sm shrink-0">
+                {/* Followers/Following section - stacks below on mobile */}
+                <div className="flex items-center gap-8 md:gap-10 text-sm md:ml-auto">
                   <button
                     onClick={loadFollowersList}
                     className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
@@ -366,13 +376,13 @@ export default function PublicProfile() {
                   </button>
                 </div>
 
-                {/* Follow/Unfollow Button */}
+                {/* Follow/Unfollow Button - full width on mobile */}
                 {user && userId !== user.id && (
                   <Button
                     onClick={handleFollowToggle}
                     disabled={followLoading}
                     variant={isFollowing ? 'outline' : 'default'}
-                    className="shrink-0"
+                    className="w-full md:w-auto md:shrink-0"
                   >
                     {followLoading ? 'Loading...' : isFollowing ? 'Unfollow' : 'Follow'}
                   </Button>
