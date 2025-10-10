@@ -159,6 +159,8 @@ export default function Profile() {
         .maybeSingle()
 
       if (profileError) throw profileError
+      if (!profileData) throw new Error('Profile not found')
+
       setProfile(profileData as Profile)
 
       // Split display_name into first and last name

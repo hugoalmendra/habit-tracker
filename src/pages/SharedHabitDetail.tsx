@@ -86,6 +86,10 @@ export default function SharedHabitDetail() {
           .maybeSingle()
       ])
 
+      if (habitData.error) throw habitData.error
+      if (ownerData.error) throw ownerData.error
+      if (invitedUserData.error) throw invitedUserData.error
+
       return {
         ...data,
         habit: habitData.data,

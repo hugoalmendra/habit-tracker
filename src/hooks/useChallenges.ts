@@ -141,6 +141,8 @@ export function useChallenges() {
       console.log('Challenge created successfully:', data)
 
       // Automatically add creator as a participant
+      if (!data) throw new Error('Failed to create challenge')
+
       const { error: participantError } = await supabase
         .from('challenge_participants')
         .insert({
