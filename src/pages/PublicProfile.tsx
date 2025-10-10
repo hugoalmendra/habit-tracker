@@ -179,11 +179,12 @@ export default function PublicProfile() {
     if (followersData) {
       const profiles = await Promise.all(
         followersData.map(async (f) => {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('profiles')
             .select('id, display_name, photo_url')
             .eq('id', f.follower_id)
-            .single()
+            .maybeSingle()
+          if (error) console.error('Error loading profile:', error)
           return data
         })
       )
@@ -204,11 +205,12 @@ export default function PublicProfile() {
     if (followingData) {
       const profiles = await Promise.all(
         followingData.map(async (f) => {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('profiles')
             .select('id, display_name, photo_url')
             .eq('id', f.following_id)
-            .single()
+            .maybeSingle()
+          if (error) console.error('Error loading profile:', error)
           return data
         })
       )
