@@ -11,7 +11,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
-import GlobalSearch from '@/components/layout/GlobalSearch'
 import { format, startOfWeek, addDays, isSameDay, endOfWeek } from 'date-fns'
 
 export default function SharedHabits() {

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Edit2, X, Check, Upload, Search, UserPlus, UserMinus, Settings as SettingsIcon, Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react'
+import { User, Edit2, X, Check, Upload, Search, UserPlus, UserMinus, Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, formatDistanceToNow } from 'date-fns'
 import BadgesDisplay from '@/components/challenges/BadgesDisplay'
@@ -63,7 +63,7 @@ export default function Profile() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { followers, following, followUser, unfollowUser, checkIsFollowing } = useFollowers()
+  const { followUser, unfollowUser, checkIsFollowing } = useFollowers()
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [habits, setHabits] = useState<Habit[]>([])
@@ -108,7 +108,7 @@ export default function Profile() {
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select('id, content, created_at, image_url')
+        .select('id, user_id, content, created_at, image_url, privacy')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10)
@@ -131,6 +131,7 @@ export default function Profile() {
 
           return {
             ...post,
+            created_at: post.created_at || new Date().toISOString(),
             reactions_count: reactionsData.count || 0,
             comments_count: commentsData.count || 0
           }

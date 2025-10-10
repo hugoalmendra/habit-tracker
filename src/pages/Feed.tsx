@@ -7,7 +7,7 @@ import { usePosts, useComments } from '@/hooks/usePosts'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Plus, Moon, Sun, Heart, ThumbsUp, Flame, MessageCircle, Trash2, Send } from 'lucide-react'
+import { Moon, Sun, Heart, ThumbsUp, Flame, MessageCircle, Trash2, Send } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
@@ -16,15 +16,7 @@ import CreatePostModal from '@/components/feed/CreatePostModal'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 
-const REACTION_ICONS = {
-  like: ThumbsUp,
-  love: Heart,
-  fire: Flame,
-  celebrate: '🎉',
-  support: '💪',
-}
-
-type FeedFilter = 'all' | 'friends' | 'following'
+type FeedFilter = 'for_you' | 'following'
 
 interface CommentsSectionProps {
   postId: string
@@ -35,6 +27,7 @@ interface CommentsSectionProps {
 }
 
 function CommentsSection({ postId, commentInput, onCommentInputChange, onAddComment, onKeyDown }: CommentsSectionProps) {
+  const { user } = useAuth()
   const { comments, isLoading } = useComments(postId)
 
   return (

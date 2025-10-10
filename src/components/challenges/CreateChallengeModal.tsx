@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trophy, Calendar } from 'lucide-react'
+import { X, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { format, addDays } from 'date-fns'

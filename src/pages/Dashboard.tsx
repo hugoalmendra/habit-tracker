@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
-import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, Moon, Sun, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -47,31 +46,15 @@ export default function Dashboard() {
 
   const { user } = useAuth()
   const { habits, isLoading, updateHabitOrder } = useHabits()
-  const { acceptedSharedHabits } = useSharedHabits()
   const { completions: dateCompletions } = useCompletions({
     startDate: selectedDateStr,
     endDate: selectedDateStr,
   })
 
-  // Combine user's own habits with accepted shared habits (only where user is invited)
-  const ownHabitIds = new Set((habits || []).map(h => h.id))
-  const sharedHabitsForDisplay = (acceptedSharedHabits || [])
-    .filter(sh => sh.habit && sh.invited_user_id === user?.id && !ownHabitIds.has(sh.habit.id))
-    .map(sh => ({
-      ...sh.habit!,
-      isShared: true,
-      sharedHabitId: sh.id,
-    }))
-
-  const allHabits = [
-    ...(habits || []),
-    ...sharedHabitsForDisplay
-  ]
-
   // Filter by category
   const filteredHabits = selectedCategory === 'All'
-    ? allHabits
-    : allHabits.filter(h => h.category === selectedCategory)
+    ? (habits || [])
+    : (habits || []).filter(h => h.category === selectedCategory)
 
   const completedHabitIds = new Set(
     dateCompletions?.map((c) => c.habit_id) || []

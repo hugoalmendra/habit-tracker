@@ -16,7 +16,6 @@ export default function AvatarDropdown() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
 
   // Load profile on mount
   useEffect(() => {

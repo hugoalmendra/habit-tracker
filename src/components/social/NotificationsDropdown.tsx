@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
@@ -166,7 +165,7 @@ export default function NotificationsDropdown() {
                                     handleAcceptInvite(
                                       e,
                                       notification.id,
-                                      notification.metadata.shared_habit_id as string
+                                      (notification.metadata as { shared_habit_id: string }).shared_habit_id
                                     )
                                   }
                                   disabled={processingInvite === notification.id}
@@ -182,7 +181,7 @@ export default function NotificationsDropdown() {
                                     handleDeclineInvite(
                                       e,
                                       notification.id,
-                                      notification.metadata.shared_habit_id as string
+                                      (notification.metadata as { shared_habit_id: string }).shared_habit_id
                                     )
                                   }
                                   disabled={processingInvite === notification.id}

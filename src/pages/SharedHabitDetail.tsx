@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Send, Calendar, CheckCircle2, Circle, LogOut, UserMinus } from 'lucide-react'
+import { ArrowLeft, Send, Calendar, CheckCircle2, Circle, UserMinus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -107,53 +107,15 @@ export default function SharedHabitDetail() {
     endDate: format(weekEnd, 'yyyy-MM-dd'),
   })
 
-  // Fetch messages
-  const { data: messages = [] } = useQuery({
-    queryKey: ['shared-habit-messages', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_habit_messages')
-        .select('*')
-        .eq('shared_habit_id', id!)
-        .order('created_at', { ascending: true })
+  // Fetch messages (stubbed - shared habits functionality removed)
+  const messages: Message[] = []
 
-      if (error) throw error
-
-      const messagesWithUsers = await Promise.all(
-        (data || []).map(async (msg) => {
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('display_name, photo_url')
-            .eq('id', msg.user_id)
-            .single()
-
-          return {
-            ...msg,
-            user: userData
-          }
-        })
-      )
-
-      return messagesWithUsers as Message[]
-    },
-    enabled: !!id,
-  })
-
-  // Send message mutation
+  // Send message mutation (stubbed - shared habits functionality removed)
   const sendMessageMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const { error } = await supabase
-        .from('shared_habit_messages')
-        .insert({
-          shared_habit_id: id!,
-          user_id: user!.id,
-          message
-        })
-
-      if (error) throw error
+    mutationFn: async (_message: string) => {
+      // Stubbed - functionality removed
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shared-habit-messages', id] })
       setMessageText('')
     },
   })

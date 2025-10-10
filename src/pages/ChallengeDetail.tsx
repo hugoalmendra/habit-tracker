@@ -84,7 +84,6 @@ export default function ChallengeDetail() {
   const today = new Date()
   const isActive = today >= startDate && today <= endDate
   const isUpcoming = today < startDate
-  const isCompleted = today > endDate
 
   const progressPercentage = Math.min(
     ((userParticipation?.current_progress || 0) / challenge.target_value) * 100,

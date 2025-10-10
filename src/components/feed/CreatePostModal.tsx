@@ -64,7 +64,7 @@ export default function CreatePostModal({ open, onOpenChange }: CreatePostModalP
         const fileExt = selectedImage.name.split('.').pop()
         const fileName = `${user.id}/${Date.now()}.${fileExt}`
 
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('post-images')
           .upload(fileName, selectedImage)
 

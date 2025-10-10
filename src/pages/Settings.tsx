@@ -12,7 +12,6 @@ import Header from '@/components/layout/Header'
 export default function Settings() {
   const { user } = useAuth()
   const [isPublic, setIsPublic] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(true)
