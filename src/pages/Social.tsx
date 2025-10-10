@@ -6,9 +6,11 @@ import { useFollowers } from '@/hooks/useFollowers'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, Search, Users, UserPlus, UserMinus, User as UserIcon } from 'lucide-react'
+import { Search, Users, UserPlus, UserMinus, User as UserIcon, Moon, Sun } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import NotificationsDropdown from '@/components/social/NotificationsDropdown'
+import AvatarDropdown from '@/components/layout/AvatarDropdown'
 
 interface UserProfile {
   id: string
@@ -18,7 +20,7 @@ interface UserProfile {
 }
 
 export default function Social() {
-  const { theme } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
   const navigate = useNavigate()
   const { followers, following, followUser, unfollowUser, checkIsFollowing } = useFollowers()
@@ -89,25 +91,51 @@ export default function Social() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
-          <div className="flex items-center gap-4">
+          <Link to="/dashboard">
+            <img
+              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
+              alt="The Way of Kaizen"
+              className="h-7 sm:h-8 w-auto cursor-pointer"
+            />
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav className="hidden md:flex items-center gap-1">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link to="/progress">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Progress
+                </Button>
+              </Link>
+              <Link to="/shared-habits">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Shared Habits
+                </Button>
+              </Link>
+              <Link to="/challenges">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Challenges
+                </Button>
+              </Link>
+              <Link to="/feed">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Feed
+                </Button>
+              </Link>
+            </nav>
+            <NotificationsDropdown />
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              asChild
+              onClick={toggleTheme}
+              className="h-9 w-9 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
             >
-              <Link to="/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Link to="/dashboard">
-              <img
-                src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
-                alt="The Way of Kaizen"
-                className="h-7 sm:h-8 w-auto cursor-pointer"
-              />
-            </Link>
+            <AvatarDropdown />
           </div>
         </div>
       </header>

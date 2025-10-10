@@ -2,15 +2,16 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Check, GripVertical } from 'lucide-react'
+import { Trash2, Check, GripVertical, Pencil } from 'lucide-react'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import type { Habit } from '@/lib/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import EditHabitModal from './EditHabitModal'
 
 interface HabitCardProps {
-  habit: Habit
+  habit: Habit & { isShared?: boolean; sharedHabitId?: string }
   completed: boolean
   selectedDate: string
   index: number
@@ -26,6 +27,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function HabitCard({ habit, completed, selectedDate, index }: HabitCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const { deleteHabit } = useHabits()
   const { toggleCompletion, isToggling } = useCompletions()
 
@@ -58,6 +60,7 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
       await deleteHabit(habit.id)
     }
   }
+
 
   return (
     <div
@@ -99,12 +102,12 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5">
-                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground line-clamp-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground flex items-center gap-2">
                   {habit.name}
                 </h3>
                 <span
-                  className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 w-fit"
+                  className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0"
                   style={{
                     backgroundColor: `${categoryColor || '#3b82f6'}20`,
                     color: categoryColor || undefined
@@ -119,15 +122,25 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                 </p>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive rounded-lg shrink-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowEditModal(true)}
+                className="h-8 w-8 hover:bg-primary/10 hover:text-primary rounded-lg"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-lg"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <motion.button
@@ -157,6 +170,12 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
         </CardContent>
       </Card>
       </motion.div>
+
+      <EditHabitModal
+        habit={habit}
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+      />
     </div>
   )
 }

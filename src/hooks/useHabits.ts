@@ -48,7 +48,7 @@ export function useHabits() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: async (input: { id: string; name?: string; description?: string; color?: string }) => {
+    mutationFn: async (input: { id: string; name?: string; description?: string | null; category?: string; color?: string }) => {
       const { id, ...updates } = input
       const { data, error } = await supabase
         .from('habits')

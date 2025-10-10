@@ -178,6 +178,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_habits: {
+        Row: {
+          id: string
+          habit_id: string
+          owner_id: string
+          invited_user_id: string
+          status: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          habit_id: string
+          owner_id: string
+          invited_user_id: string
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          habit_id?: string
+          owner_id?: string
+          invited_user_id?: string
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useTheme } from '@/contexts/ThemeContext'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Header from '@/components/layout/Header'
 import { useMonthlyStats } from '@/hooks/useMonthlyStats'
 import { motion } from 'framer-motion'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns'
@@ -18,7 +17,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function Progress() {
-  const { theme } = useTheme()
   const [currentDate, setCurrentDate] = useState(new Date())
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth() + 1
@@ -76,29 +74,7 @@ export default function Progress() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              asChild
-            >
-              <Link to="/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-            <img
-              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
-              alt="The Way of Kaizen"
-              className="h-8 w-auto"
-            />
-          </div>
-        </div>
-      </header>
+      <Header showNotifications />
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">

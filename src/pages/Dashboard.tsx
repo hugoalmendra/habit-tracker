@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
+import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, LogOut, TrendingUp, Moon, Sun, Sparkles, User, ChevronLeft, ChevronRight, Users } from 'lucide-react'
+import { Plus, Moon, Sun, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import HabitCard from '@/components/habits/HabitCard'
 import AddHabitModal from '@/components/habits/AddHabitModal'
@@ -14,6 +15,8 @@ import AIGenerateModal from '@/components/habits/AIGenerateModal'
 import KaizenQuote from '@/components/dashboard/KaizenQuote'
 import AchievementPopup from '@/components/celebrations/AchievementPopup'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
+import AvatarDropdown from '@/components/layout/AvatarDropdown'
+import GlobalSearch from '@/components/layout/GlobalSearch'
 import { useAchievements } from '@/hooks/useAchievements'
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
 import {
@@ -32,20 +35,43 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 
+const CATEGORIES = ['All', 'Health', 'Hustle', 'Heart', 'Harmony', 'Happiness'] as const
+
 export default function Dashboard() {
-  const { signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
-  const navigate = useNavigate()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isAIModalOpen, setIsAIModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedCategory, setSelectedCategory] = useState<typeof CATEGORIES[number]>('All')
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
 
+  const { user } = useAuth()
   const { habits, isLoading, updateHabitOrder } = useHabits()
+  const { acceptedSharedHabits } = useSharedHabits()
   const { completions: dateCompletions } = useCompletions({
     startDate: selectedDateStr,
     endDate: selectedDateStr,
   })
+
+  // Combine user's own habits with accepted shared habits (only where user is invited)
+  const ownHabitIds = new Set((habits || []).map(h => h.id))
+  const sharedHabitsForDisplay = (acceptedSharedHabits || [])
+    .filter(sh => sh.habit && sh.invited_user_id === user?.id && !ownHabitIds.has(sh.habit.id))
+    .map(sh => ({
+      ...sh.habit!,
+      isShared: true,
+      sharedHabitId: sh.id,
+    }))
+
+  const allHabits = [
+    ...(habits || []),
+    ...sharedHabitsForDisplay
+  ]
+
+  // Filter by category
+  const filteredHabits = selectedCategory === 'All'
+    ? allHabits
+    : allHabits.filter(h => h.category === selectedCategory)
 
   const completedHabitIds = new Set(
     dateCompletions?.map((c) => c.habit_id) || []
@@ -93,26 +119,42 @@ export default function Dashboard() {
     }
   }
 
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
-
   return (
     <div className="min-h-screen bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <img
-                src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
-                alt="The Way of Kaizen"
-                className="h-7 sm:h-8 w-auto cursor-pointer"
-              />
-            </Link>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <Link to="/dashboard">
+            <img
+              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
+              alt="The Way of Kaizen"
+              className="h-7 sm:h-8 w-auto cursor-pointer"
+            />
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav className="hidden md:flex items-center gap-1">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link to="/progress">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Progress
+                </Button>
+              </Link>
+              <Link to="/challenges">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Challenges
+                </Button>
+              </Link>
+              <Link to="/feed">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Feed
+                </Button>
+              </Link>
+            </nav>
+            <GlobalSearch />
             <NotificationsDropdown />
             <Button
               variant="ghost"
@@ -126,48 +168,7 @@ export default function Dashboard() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              asChild
-            >
-              <Link to="/progress" className="flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Progress</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              asChild
-            >
-              <Link to="/social" className="flex items-center justify-center">
-                <Users className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Social</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-              asChild
-            >
-              <Link to="/settings">
-                <User className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Profile</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="h-9 w-9 sm:w-auto p-0 sm:px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-            >
-              <LogOut className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Sign out</span>
-            </Button>
+            <AvatarDropdown />
           </div>
         </div>
       </header>
@@ -244,13 +245,30 @@ export default function Dashboard() {
               </Button>
             )}
           </div>
+
+          {/* Category Filter */}
+          {allHabits.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {CATEGORIES.map((cat) => (
+                <Button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  variant={selectedCategory === cat ? 'default' : 'outline'}
+                  size="sm"
+                  className="rounded-lg shrink-0"
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-lg font-medium text-muted-foreground">Loading habits...</div>
           </div>
-        ) : habits?.length === 0 ? (
+        ) : allHabits.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -284,7 +302,7 @@ export default function Dashboard() {
               strategy={verticalListSortingStrategy}
             >
               <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {habits?.map((habit, index) => (
+                {filteredHabits.map((habit, index) => (
                   <HabitCard
                     key={habit.id}
                     habit={habit}
@@ -299,7 +317,7 @@ export default function Dashboard() {
         )}
 
         {/* Daily Quote at Bottom */}
-        {habits && habits.length > 0 && (
+        {allHabits.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Bell, X, User as UserIcon } from 'lucide-react'
+import { Bell, X, User as UserIcon, Check, XCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
+  const [processingInvite, setProcessingInvite] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, hasMore, loadMore, isLoading } = useNotifications()
+  const { acceptInvite, declineInvite } = useSharedHabits()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -37,6 +40,32 @@ export default function NotificationsDropdown() {
   const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
     e.stopPropagation()
     await deleteNotification(notificationId)
+  }
+
+  const handleAcceptInvite = async (e: React.MouseEvent, notificationId: string, sharedHabitId: string) => {
+    e.stopPropagation()
+    setProcessingInvite(notificationId)
+    try {
+      await acceptInvite(sharedHabitId)
+      await deleteNotification(notificationId)
+    } catch (error) {
+      console.error('Error accepting invite:', error)
+    } finally {
+      setProcessingInvite(null)
+    }
+  }
+
+  const handleDeclineInvite = async (e: React.MouseEvent, notificationId: string, sharedHabitId: string) => {
+    e.stopPropagation()
+    setProcessingInvite(notificationId)
+    try {
+      await declineInvite(sharedHabitId)
+      await deleteNotification(notificationId)
+    } catch (error) {
+      console.error('Error declining invite:', error)
+    } finally {
+      setProcessingInvite(null)
+    }
   }
 
   return (
@@ -79,7 +108,7 @@ export default function NotificationsDropdown() {
                 ) : null}
               </div>
 
-              <div className="max-h-[400px] overflow-y-auto">
+              <div className="max-h-[500px] overflow-y-auto">
                 {!notifications || notifications.length === 0 ? (
                   <div className="p-8 text-center">
                     <Bell className="mx-auto h-12 w-12 text-muted-foreground mb-3 opacity-40" />
@@ -127,6 +156,44 @@ export default function NotificationsDropdown() {
                                 <X className="h-3.5 w-3.5" />
                               </button>
                             </div>
+
+                            {/* Action buttons for shared habit invites */}
+                            {notification.type === 'shared_habit_invite' && notification.metadata && (
+                              <div className="mt-3 flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={(e) =>
+                                    handleAcceptInvite(
+                                      e,
+                                      notification.id,
+                                      notification.metadata.shared_habit_id as string
+                                    )
+                                  }
+                                  disabled={processingInvite === notification.id}
+                                  className="flex-1 h-8 text-xs bg-primary hover:bg-primary/90"
+                                >
+                                  <Check className="h-3.5 w-3.5 mr-1" />
+                                  Accept
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) =>
+                                    handleDeclineInvite(
+                                      e,
+                                      notification.id,
+                                      notification.metadata.shared_habit_id as string
+                                    )
+                                  }
+                                  disabled={processingInvite === notification.id}
+                                  className="flex-1 h-8 text-xs hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                  <XCircle className="h-3.5 w-3.5 mr-1" />
+                                  Decline
+                                </Button>
+                              </div>
+                            )}
+
                             {!notification.read && (
                               <div className="mt-2">
                                 <span className="inline-block h-2 w-2 rounded-full bg-primary" />
@@ -140,18 +207,22 @@ export default function NotificationsDropdown() {
                 )}
               </div>
 
-              {notifications && notifications.length > 0 && (
+              {notifications && notifications.length > 0 && hasMore && (
                 <div className="p-3 border-t border-border/40">
-                  <Link to="/social">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsOpen(false)}
-                      className="w-full h-9 rounded-lg text-sm text-primary hover:text-primary/80 hover:bg-primary/10"
-                    >
-                      View all notifications
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={loadMore}
+                    disabled={isLoading}
+                    className="w-full h-9 rounded-lg text-sm text-primary hover:text-primary/80 hover:bg-primary/10 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Loading...' : 'View past notifications'}
+                  </Button>
+                </div>
+              )}
+              {notifications && notifications.length > 0 && !hasMore && (
+                <div className="p-3 border-t border-border/40 text-center">
+                  <p className="text-xs text-muted-foreground">No more notifications</p>
                 </div>
               )}
             </Card>

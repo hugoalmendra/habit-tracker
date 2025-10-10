@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -18,22 +19,34 @@ export interface Notification {
   }
 }
 
+const NOTIFICATIONS_PER_PAGE = 15
+
 export function useNotifications() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const [page, setPage] = useState(0)
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([])
+  const [hasMore, setHasMore] = useState(true)
 
-  // Get all notifications
+  // Get notifications with pagination
   const { data: notifications, isLoading } = useQuery({
-    queryKey: ['notifications', user?.id],
+    queryKey: ['notifications', user?.id, page],
     queryFn: async () => {
+      const offset = page * NOTIFICATIONS_PER_PAGE
+
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .range(offset, offset + NOTIFICATIONS_PER_PAGE - 1)
 
       if (error) throw error
+
+      // Check if we have more notifications
+      if (data.length < NOTIFICATIONS_PER_PAGE) {
+        setHasMore(false)
+      }
 
       // Fetch profile data for each notification that has a from_user_id
       const notificationsWithProfiles = await Promise.all(
@@ -58,6 +71,17 @@ export function useNotifications() {
     },
     enabled: !!user,
   })
+
+  // Update allNotifications when new data comes in
+  useEffect(() => {
+    if (notifications) {
+      if (page === 0) {
+        setAllNotifications(notifications)
+      } else {
+        setAllNotifications(prev => [...prev, ...notifications])
+      }
+    }
+  }, [notifications, page])
 
   // Get unread count
   const { data: unreadCount } = useQuery({
@@ -124,10 +148,48 @@ export function useNotifications() {
     },
   })
 
+  // Real-time subscription for new notifications
+  useEffect(() => {
+    if (!user) return
+
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Reset to first page and invalidate queries when notifications change
+          setPage(0)
+          setHasMore(true)
+          queryClient.invalidateQueries({ queryKey: ['notifications'] })
+          queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user, queryClient])
+
+  // Load more function
+  const loadMore = () => {
+    if (!isLoading && hasMore) {
+      setPage(prev => prev + 1)
+    }
+  }
+
   return {
-    notifications,
+    notifications: allNotifications,
     unreadCount,
     isLoading,
+    hasMore,
+    loadMore,
     markAsRead: markAsReadMutation.mutateAsync,
     markAllAsRead: markAllAsReadMutation.mutateAsync,
     deleteNotification: deleteNotificationMutation.mutateAsync,

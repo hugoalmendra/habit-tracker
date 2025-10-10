@@ -9,20 +9,22 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-kaizen-charcoal/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" size="sm" className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all" asChild>
               <Link to="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Home
               </Link>
             </Button>
-            <img
-              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
-              alt="The Way of Kaizen"
-              className="h-8 w-auto"
-            />
+            <Link to="/dashboard">
+              <img
+                src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
+                alt="The Way of Kaizen"
+                className="h-8 w-auto cursor-pointer"
+              />
+            </Link>
           </div>
         </div>
       </header>

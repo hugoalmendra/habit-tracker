@@ -13,7 +13,10 @@ import Onboarding from '@/pages/Onboarding'
 import Dashboard from '@/pages/Dashboard'
 import Progress from '@/pages/Progress'
 import Settings from '@/pages/Settings'
-import Social from '@/pages/Social'
+import Profile from '@/pages/Profile'
+import Feed from '@/pages/Feed'
+import Challenges from '@/pages/Challenges'
+import ChallengeDetail from '@/pages/ChallengeDetail'
 import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
@@ -57,8 +60,20 @@ function AppRoutes() {
         element={user ? <Settings /> : <Navigate to="/login" replace />}
       />
       <Route
-        path="/social"
-        element={user ? <Social /> : <Navigate to="/login" replace />}
+        path="/profile"
+        element={user ? <Profile /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/feed"
+        element={user ? <Feed /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/challenges"
+        element={user ? <Challenges /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/challenge/:id"
+        element={user ? <ChallengeDetail /> : <Navigate to="/login" replace />}
       />
       <Route path="/profile/:userId" element={<PublicProfile />} />
       <Route path="/privacy" element={<Privacy />} />
