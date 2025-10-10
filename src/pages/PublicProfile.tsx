@@ -258,7 +258,7 @@ export default function PublicProfile() {
   const totalCompletions = completions.length
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-secondary pb-20 md:pb-0">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
         <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">

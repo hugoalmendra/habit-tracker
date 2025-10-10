@@ -73,7 +73,7 @@ export default function Progress() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-secondary pb-20 md:pb-0">
       <Header showNotifications />
 
       {/* Main Content */}

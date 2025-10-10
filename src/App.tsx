@@ -4,6 +4,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import MobileBottomNav from '@/components/layout/MobileBottomNav'
 
 // Pages
 import Landing from '@/pages/Landing'
@@ -33,52 +34,55 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-      />
-      <Route
-        path="/signup"
-        element={user ? <Navigate to="/onboarding" replace /> : <Signup />}
-      />
-      <Route
-        path="/onboarding"
-        element={user ? <Onboarding /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/dashboard"
-        element={user ? <Dashboard /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/progress"
-        element={user ? <Progress /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/settings"
-        element={user ? <Settings /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/profile"
-        element={user ? <Profile /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/feed"
-        element={user ? <Feed /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/challenges"
-        element={user ? <Challenges /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/challenge/:id"
-        element={user ? <ChallengeDetail /> : <Navigate to="/login" replace />}
-      />
-      <Route path="/profile/:userId" element={<PublicProfile />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+        />
+        <Route
+          path="/signup"
+          element={user ? <Navigate to="/onboarding" replace /> : <Signup />}
+        />
+        <Route
+          path="/onboarding"
+          element={user ? <Onboarding /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/dashboard"
+          element={user ? <Dashboard /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/progress"
+          element={user ? <Progress /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/settings"
+          element={user ? <Settings /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/profile"
+          element={user ? <Profile /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/feed"
+          element={user ? <Feed /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/challenges"
+          element={user ? <Challenges /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/challenge/:id"
+          element={user ? <ChallengeDetail /> : <Navigate to="/login" replace />}
+        />
+        <Route path="/profile/:userId" element={<PublicProfile />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+      </Routes>
+      {user && <MobileBottomNav />}
+    </>
   )
 }
 
