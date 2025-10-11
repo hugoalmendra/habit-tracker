@@ -270,39 +270,64 @@ export default function PublicProfile() {
             />
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
-            <nav className="hidden md:flex items-center gap-1">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Dashboard
+            {user ? (
+              <>
+                <nav className="hidden md:flex items-center gap-1">
+                  <Link to="/dashboard">
+                    <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link to="/progress">
+                    <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                      Progress
+                    </Button>
+                  </Link>
+                  <Link to="/challenges">
+                    <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                      Challenges
+                    </Button>
+                  </Link>
+                  <Link to="/feed">
+                    <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                      Feed
+                    </Button>
+                  </Link>
+                </nav>
+                <GlobalSearch />
+                <NotificationsDropdown />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="h-9 w-9 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
-              </Link>
-              <Link to="/progress">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Progress
+                <AvatarDropdown />
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="h-9 w-9 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
-              </Link>
-              <Link to="/challenges">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Challenges
-                </Button>
-              </Link>
-              <Link to="/feed">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Feed
-                </Button>
-              </Link>
-            </nav>
-            <GlobalSearch />
-            <NotificationsDropdown />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className="h-9 w-9 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            <AvatarDropdown />
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm font-medium">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button size="sm" className="h-9 px-4 text-sm font-medium rounded-xl">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
