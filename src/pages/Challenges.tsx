@@ -150,8 +150,9 @@ export default function Challenges() {
               onClick={() => setIsCreateChallengeOpen(true)}
               className="rounded-xl shadow-apple-sm"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              New Challenge
+              <Plus className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">New Challenge</span>
+              <span className="md:hidden">New</span>
             </Button>
           </div>
 
