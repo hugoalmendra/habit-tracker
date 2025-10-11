@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
-import { usePosts, useComments } from '@/hooks/usePosts'
+import { usePosts, useComments, type FeedItem } from '@/hooks/usePosts'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -13,6 +13,7 @@ import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import CreatePostModal from '@/components/feed/CreatePostModal'
+import ActivityCard from '@/components/feed/ActivityCard'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -278,102 +279,106 @@ export default function Feed() {
             </Button>
           </div>
 
-          {/* Posts */}
+          {/* Posts and Activities */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <p className="text-muted-foreground">Loading posts...</p>
+              <p className="text-muted-foreground">Loading feed...</p>
             </div>
           ) : posts?.length === 0 ? (
             <Card className="p-16 text-center">
-              <p className="text-muted-foreground">No posts yet. Be the first to share!</p>
+              <p className="text-muted-foreground">No activity yet. Be the first to share!</p>
             </Card>
           ) : (
             <div className="space-y-4">
-              {posts?.map((post) => (
+              {posts?.map((item: FeedItem) => (
                 <motion.div
-                  key={post.id}
+                  key={item.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <Card className="p-6">
-                    {/* Post Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <Link to={post.user_id === user?.id ? '/profile' : `/profile/${post.user_id}`} className="shrink-0">
-                          <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                            <AvatarImage src={post.user?.photo_url || undefined} />
-                            <AvatarFallback>
-                              {post.user?.display_name?.[0]?.toUpperCase() || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Link>
-                        <div>
-                          <Link to={post.user_id === user?.id ? '/profile' : `/profile/${post.user_id}`} className="hover:underline">
-                            <p className="font-semibold">{post.user?.display_name}</p>
+                  {item.item_type === 'activity' ? (
+                    <ActivityCard activity={item} />
+                  ) : (
+                    <Card className="p-6">
+                      {/* Post Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="shrink-0">
+                            <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                              <AvatarImage src={item.user?.photo_url || undefined} />
+                              <AvatarFallback>
+                                {item.user?.display_name?.[0]?.toUpperCase() || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
                           </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                          </p>
+                          <div>
+                            <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="hover:underline">
+                              <p className="font-semibold">{item.user?.display_name}</p>
+                            </Link>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                            </p>
+                          </div>
                         </div>
+                        {item.user_id === user?.id && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeletePost(item.id)}
+                            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
-                      {post.user_id === user?.id && (
+
+                      {/* Post Content */}
+                      <p className="mb-4 whitespace-pre-wrap">{item.content}</p>
+
+                      {/* Post Image */}
+                      {item.image_url && (
+                        <div className="mb-4 rounded-xl overflow-hidden border border-border/60">
+                          <img
+                            src={item.image_url}
+                            alt="Post image"
+                            className="w-full h-auto object-contain"
+                          />
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-4 pt-4 border-t border-border">
                         <Button
                           variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeletePost(post.id)}
-                          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                          size="sm"
+                          onClick={() => handleReaction(item.id, 'like')}
+                          className={item.user_reaction === 'like' ? 'text-primary' : ''}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <ThumbsUp className="h-4 w-4 mr-1" />
+                          {item.reactions_count || 0}
                         </Button>
-                      )}
-                    </div>
-
-                    {/* Post Content */}
-                    <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
-
-                    {/* Post Image */}
-                    {post.image_url && (
-                      <div className="mb-4 rounded-xl overflow-hidden border border-border/60">
-                        <img
-                          src={post.image_url}
-                          alt="Post image"
-                          className="w-full h-auto object-contain"
-                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleComments(item.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          {item.comments_count || 0}
+                        </Button>
                       </div>
-                    )}
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-4 pt-4 border-t border-border">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleReaction(post.id, 'like')}
-                        className={post.user_reaction === 'like' ? 'text-primary' : ''}
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        {post.reactions_count || 0}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleComments(post.id)}
-                      >
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        {post.comments_count || 0}
-                      </Button>
-                    </div>
-
-                    {/* Comments Section */}
-                    {expandedComments.has(post.id) && (
-                      <CommentsSection
-                        postId={post.id}
-                        commentInput={commentInputs[post.id] || ''}
-                        onCommentInputChange={(value) => setCommentInputs(prev => ({ ...prev, [post.id]: value }))}
-                        onAddComment={() => handleAddComment(post.id)}
-                        onKeyDown={(e) => handleCommentKeyDown(e, post.id)}
-                      />
-                    )}
-                  </Card>
+                      {/* Comments Section */}
+                      {expandedComments.has(item.id) && (
+                        <CommentsSection
+                          postId={item.id}
+                          commentInput={commentInputs[item.id] || ''}
+                          onCommentInputChange={(value) => setCommentInputs(prev => ({ ...prev, [item.id]: value }))}
+                          onAddComment={() => handleAddComment(item.id)}
+                          onKeyDown={(e) => handleCommentKeyDown(e, item.id)}
+                        />
+                      )}
+                    </Card>
+                  )}
                 </motion.div>
               ))}
             </div>

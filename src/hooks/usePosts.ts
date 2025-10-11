@@ -20,6 +20,35 @@ export interface Post {
   user_reaction?: string | null
 }
 
+export interface FeedActivity {
+  id: string
+  user_id: string
+  activity_type: 'achievement_unlocked' | 'habit_created' | 'challenge_joined' | 'challenge_completed' | 'streak_milestone'
+  related_id: string | null
+  metadata: {
+    habit_name?: string
+    habit_category?: string
+    habit_emoji?: string
+    challenge_id?: string
+    challenge_name?: string
+    challenge_category?: string
+    badge_icon?: string
+    badge_color?: string
+    streak_count?: number
+    habit_id?: string
+    final_progress?: number
+    final_streak?: number
+  }
+  created_at: string
+  user?: {
+    id: string
+    display_name: string
+    photo_url: string
+  }
+}
+
+export type FeedItem = (Post & { item_type: 'post' }) | (FeedActivity & { item_type: 'activity' })
+
 export interface Comment {
   id: string
   post_id: string
@@ -46,9 +75,11 @@ export function usePosts(filter: FeedFilter = 'for_you') {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: feedItems, isLoading } = useQuery({
     queryKey: ['posts', filter],
     queryFn: async () => {
+      let followingIds: string[] = []
+
       if (filter === 'following') {
         // Get posts only from people I follow
         const { data: following } = await supabase
@@ -57,71 +88,32 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           .eq('follower_id', user!.id)
           .eq('status', 'accepted')
 
-        const followingIds = following?.map(f => f.following_id) || []
+        followingIds = following?.map(f => f.following_id) || []
 
         if (followingIds.length === 0) {
           return []
         }
-
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .in('user_id', followingIds)
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-
-        // Fetch user details, comments count, and reactions for each post
-        const postsWithDetails = await Promise.all(
-          (data || []).map(async (post) => {
-            const [userData, commentsData, reactionsData, userReactionData] = await Promise.all([
-              supabase
-                .from('profiles')
-                .select('id, display_name, photo_url')
-                .eq('id', post.user_id)
-                .maybeSingle(),
-              supabase
-                .from('post_comments')
-                .select('id', { count: 'exact', head: true })
-                .eq('post_id', post.id),
-              supabase
-                .from('post_reactions')
-                .select('id', { count: 'exact', head: true })
-                .eq('post_id', post.id),
-              supabase
-                .from('post_reactions')
-                .select('reaction')
-                .eq('post_id', post.id)
-                .eq('user_id', user!.id)
-                .maybeSingle()
-            ])
-
-            return {
-              ...post,
-              user: userData.data,
-              comments_count: commentsData.count || 0,
-              reactions_count: reactionsData.count || 0,
-              user_reaction: userReactionData.data?.reaction || null
-            }
-          })
-        )
-
-        return postsWithDetails as Post[]
       }
 
-      // For You feed: Show all public posts from all users
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('privacy', 'public')
-        .order('created_at', { ascending: false })
-        .limit(50)
+      // Fetch posts
+      const postsQuery = filter === 'following'
+        ? supabase.from('posts').select('*').in('user_id', followingIds).order('created_at', { ascending: false })
+        : supabase.from('posts').select('*').eq('privacy', 'public').order('created_at', { ascending: false }).limit(50)
 
-      if (error) throw error
+      const { data: postsData, error: postsError } = await postsQuery
+      if (postsError) throw postsError
+
+      // Fetch activities
+      const activitiesQuery = filter === 'following'
+        ? supabase.from('feed_activities').select('*').in('user_id', followingIds).order('created_at', { ascending: false })
+        : supabase.from('feed_activities').select('*').order('created_at', { ascending: false }).limit(50)
+
+      const { data: activitiesData, error: activitiesError } = await activitiesQuery
+      if (activitiesError && activitiesError.code !== 'PGRST116') throw activitiesError
 
       // Fetch user details, comments count, and reactions for each post
       const postsWithDetails = await Promise.all(
-        (data || []).map(async (post) => {
+        (postsData || []).map(async (post) => {
           const [userData, commentsData, reactionsData, userReactionData] = await Promise.all([
             supabase
               .from('profiles')
@@ -146,6 +138,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
 
           return {
             ...post,
+            item_type: 'post' as const,
             user: userData.data,
             comments_count: commentsData.count || 0,
             reactions_count: reactionsData.count || 0,
@@ -154,7 +147,84 @@ export function usePosts(filter: FeedFilter = 'for_you') {
         })
       )
 
-      return postsWithDetails as Post[]
+      // Enrich activities with related data (habit names, challenge names, etc.)
+      const activitiesWithDetails = await Promise.all(
+        (activitiesData || []).map(async (activity) => {
+          const userData = await supabase
+            .from('profiles')
+            .select('id, display_name, photo_url')
+            .eq('id', activity.user_id)
+            .maybeSingle()
+
+          // Fetch habit name if it's a habit-related activity
+          if (activity.activity_type === 'habit_created' && activity.related_id) {
+            const { data: habitData } = await supabase
+              .from('habits')
+              .select('name, category, emoji')
+              .eq('id', activity.related_id)
+              .maybeSingle()
+
+            if (habitData) {
+              activity.metadata = {
+                ...activity.metadata,
+                habit_name: habitData.name,
+                habit_category: habitData.category,
+                habit_emoji: habitData.emoji
+              }
+            }
+          }
+
+          // Fetch challenge name if it's a challenge-related activity
+          if ((activity.activity_type === 'challenge_joined' || activity.activity_type === 'challenge_completed') &&
+              activity.metadata.challenge_id) {
+            const { data: challengeData } = await supabase
+              .from('challenges')
+              .select('name, category, badge_icon, badge_color')
+              .eq('id', activity.metadata.challenge_id)
+              .maybeSingle()
+
+            if (challengeData) {
+              activity.metadata = {
+                ...activity.metadata,
+                challenge_name: challengeData.name,
+                challenge_category: challengeData.category,
+                badge_icon: challengeData.badge_icon,
+                badge_color: challengeData.badge_color
+              }
+            }
+          }
+
+          // Fetch habit name for streak milestones
+          if (activity.activity_type === 'streak_milestone' && activity.metadata.habit_id) {
+            const { data: habitData } = await supabase
+              .from('habits')
+              .select('name, emoji')
+              .eq('id', activity.metadata.habit_id)
+              .maybeSingle()
+
+            if (habitData) {
+              activity.metadata = {
+                ...activity.metadata,
+                habit_name: habitData.name,
+                habit_emoji: habitData.emoji
+              }
+            }
+          }
+
+          return {
+            ...activity,
+            item_type: 'activity' as const,
+            user: userData.data
+          }
+        })
+      )
+
+      // Merge and sort posts and activities by created_at
+      const allItems = [...postsWithDetails, ...activitiesWithDetails].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+
+      return allItems as FeedItem[]
     },
     enabled: !!user,
   })
@@ -252,7 +322,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
   })
 
   return {
-    posts,
+    posts: feedItems,
     isLoading,
     createPost: createPostMutation.mutateAsync,
     deletePost: deletePostMutation.mutateAsync,
