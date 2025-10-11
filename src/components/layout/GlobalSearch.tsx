@@ -308,7 +308,10 @@ export default function GlobalSearch() {
       {/* Mobile Search Modal */}
       <Dialog open={isMobileModalOpen} onOpenChange={setIsMobileModalOpen}>
         <DialogContent className="sm:max-w-md p-0 gap-0 h-[80vh] flex flex-col">
-          <div className="p-4 border-b border-border/40">
+          <DialogHeader className="p-4 pb-3 border-b border-border/40">
+            <DialogTitle>Search</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
