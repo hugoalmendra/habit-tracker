@@ -96,7 +96,13 @@ export default function Dashboard() {
         display_order: index,
       }))
 
-      await updateHabitOrder(habitOrders)
+      try {
+        await updateHabitOrder(habitOrders)
+      } catch (error: any) {
+        console.error('Failed to update habit order:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+        if (error?.message) console.error('Error message:', error.message)
+      }
     }
   }
 
