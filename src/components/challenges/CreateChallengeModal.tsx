@@ -82,7 +82,6 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   }
 
   const canProceedStep1 = name.trim().length > 0
-  const canProceedStep2 = true
 
   return (
     <AnimatePresence>

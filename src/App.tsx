@@ -42,7 +42,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         .eq('id', user.id)
         .maybeSingle()
 
-      setOnboardingCompleted(data?.onboarding_completed ?? false)
+      setOnboardingCompleted((data as any)?.onboarding_completed ?? false)
       setCheckingOnboarding(false)
     }
 
