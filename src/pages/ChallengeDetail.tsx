@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges, useChallengeParticipants } from '@/hooks/useChallenges'
 import { useAuth } from '@/contexts/AuthContext'
@@ -23,7 +23,7 @@ export default function ChallengeDetail() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
 
-  const { challenges, respondToInvite, recordCompletion } = useChallenges()
+  const { challenges, respondToInvite, recordCompletion, leaveChallenge } = useChallenges()
   const { participants } = useChallengeParticipants(id!)
 
   const challenge = challenges?.find(c => c.id === id)
@@ -63,6 +63,21 @@ export default function ChallengeDetail() {
       alert('Failed to record completion. You may have already completed this today.')
     } finally {
       setIsRecording(false)
+    }
+  }
+
+  const handleLeaveChallenge = async () => {
+    if (!id || !isParticipant || isCreator) return
+
+    const confirmed = window.confirm('Are you sure you want to leave this challenge? Your progress will be lost.')
+    if (!confirmed) return
+
+    try {
+      await leaveChallenge(id)
+      navigate('/challenges')
+    } catch (error) {
+      console.error('Error leaving challenge:', error)
+      alert('Failed to leave challenge. Please try again.')
     }
   }
 
@@ -232,6 +247,16 @@ export default function ChallengeDetail() {
               >
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 {isRecording ? 'Recording...' : 'Mark Complete'}
+              </Button>
+            )}
+            {isParticipant && !isCreator && (
+              <Button
+                onClick={handleLeaveChallenge}
+                variant="outline"
+                className="rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Leave
               </Button>
             )}
           </div>

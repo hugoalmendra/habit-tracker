@@ -1,70 +1,112 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Trophy } from 'lucide-react'
-import { useUserBadges } from '@/hooks/useChallenges'
+import { useBadgesByCategory, CATEGORY_LABELS } from '@/hooks/useBadges'
 import { Card } from '@/components/ui/card'
-import { format } from 'date-fns'
+import BadgeCard from '@/components/badges/BadgeCard'
 
 export default function BadgesDisplay() {
-  const { badges, isLoading } = useUserBadges()
+  const categories = useBadgesByCategory()
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Award className="h-5 w-5 text-yellow-500" />
-          <h2 className="text-lg font-semibold">Challenge Badges</h2>
-        </div>
-        <p className="text-muted-foreground text-sm">Loading badges...</p>
-      </Card>
-    )
-  }
+  // Calculate totals
+  const allBadges = Object.values(categories).flat()
+  const earnedBadges = allBadges.filter((b) => b.earned)
+  const totalBadges = allBadges.length
+  const earnedCount = earnedBadges.length
+
+  // Filter badges based on selected category
+  const displayBadges =
+    selectedCategory === 'all'
+      ? allBadges
+      : categories[selectedCategory as keyof typeof categories] || []
+
+  const categoryTabs = [
+    { id: 'all', label: 'All' },
+    { id: 'category_mastery', label: 'Category' },
+    { id: 'quantity', label: 'Quantity' },
+    { id: 'challenge', label: 'Challenges' },
+    { id: 'perfect_streak', label: 'Streaks' },
+    { id: 'social', label: 'Social' },
+    { id: 'time_based', label: 'Time' },
+    { id: 'comeback', label: 'Comeback' },
+    { id: 'special_occasion', label: 'Special' },
+  ]
 
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Award className="h-5 w-5 text-yellow-500" />
-        <h2 className="text-lg font-semibold">Challenge Badges</h2>
-        {badges && badges.length > 0 && (
-          <span className="ml-auto text-sm text-muted-foreground">
-            {badges.length} badge{badges.length !== 1 ? 's' : ''} earned
-          </span>
-        )}
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Award className="h-5 w-5 text-yellow-500" />
+          <h2 className="text-lg font-semibold">Badges</h2>
+          {earnedCount > 0 && (
+            <span className="text-sm text-muted-foreground">
+              {earnedCount}/{totalBadges}
+            </span>
+          )}
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {totalBadges > 0 ? Math.round((earnedCount / totalBadges) * 100) : 0}% Complete
+        </div>
       </div>
 
-      {badges && badges.length > 0 ? (
+      {/* Category Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 hide-scrollbar">
+        {categoryTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setSelectedCategory(tab.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+              selectedCategory === tab.id
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Badges Grid */}
+      {displayBadges.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {badges.map((badge, index) => (
+          {displayBadges.map((badge, index) => (
             <motion.div
               key={badge.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 hover:border-yellow-500/40 transition-all"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03 }}
             >
-              <div
-                className="h-16 w-16 rounded-full flex items-center justify-center text-3xl shadow-lg"
-                style={{ backgroundColor: badge.badge_color }}
-              >
-                {badge.badge_icon}
-              </div>
-              <div className="text-center">
-                <p className="font-semibold text-sm line-clamp-2">{badge.badge_name}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(badge.earned_at), 'MMM d, yyyy')}
-                </p>
-              </div>
+              <BadgeCard
+                name={badge.name}
+                description={badge.description}
+                icon={badge.icon}
+                color={badge.color}
+                earned={badge.earned}
+                earnedAt={badge.earnedAt}
+                progress={badge.progress}
+                requirementValue={badge.requirement_value}
+              />
             </motion.div>
           ))}
         </div>
       ) : (
         <div className="text-center py-12">
           <Trophy className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground text-sm">No badges earned yet</p>
-          <p className="text-muted-foreground text-xs mt-1">
-            Complete challenges to earn badges!
-          </p>
+          <p className="text-muted-foreground text-sm">No badges in this category</p>
         </div>
       )}
+
+      <style>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </Card>
   )
 }

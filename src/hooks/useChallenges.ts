@@ -262,6 +262,22 @@ export function useChallenges() {
     },
   })
 
+  const leaveChallengeMutation = useMutation({
+    mutationFn: async (challengeId: string) => {
+      const { error } = await supabase
+        .from('challenge_participants')
+        .delete()
+        .eq('challenge_id', challengeId)
+        .eq('user_id', user!.id)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
+    },
+  })
+
   // Real-time subscription for challenge updates
   useEffect(() => {
     if (!user) return
@@ -318,6 +334,7 @@ export function useChallenges() {
     respondToInvite: respondToInviteMutation.mutateAsync,
     joinChallenge: joinChallengeMutation.mutateAsync,
     recordCompletion: recordCompletionMutation.mutateAsync,
+    leaveChallenge: leaveChallengeMutation.mutateAsync,
   }
 }
 

@@ -197,11 +197,9 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                               }`}
                             >
                               <div
-                                className="h-8 w-8 rounded-full flex items-center justify-center text-xl"
+                                className="h-8 w-8 rounded-full flex items-center justify-center"
                                 style={{ backgroundColor: cat.color }}
-                              >
-                                {cat.emoji}
-                              </div>
+                              />
                               <span className="text-xs font-medium">{cat.name}</span>
                             </button>
                           ))}
