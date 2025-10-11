@@ -41,6 +41,13 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      // Get habit details to check if it's linked to a challenge
+      const { data: habit } = await supabase
+        .from('habits')
+        .select('challenge_id')
+        .eq('id', input.habitId)
+        .maybeSingle()
+
       // Check if completion exists
       const { data: existing } = await supabase
         .from('habit_completions')
@@ -57,6 +64,17 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
           .eq('id', existing.id)
 
         if (error) throw error
+
+        // If habit is linked to a challenge, also delete challenge completion
+        if (habit?.challenge_id) {
+          await supabase
+            .from('challenge_completions')
+            .delete()
+            .eq('challenge_id', habit.challenge_id)
+            .eq('user_id', user.id)
+            .eq('date', input.date)
+        }
+
         return { completed: false }
       } else {
         // Create if doesn't exist
@@ -69,11 +87,25 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
           })
 
         if (error) throw error
+
+        // If habit is linked to a challenge, also create challenge completion
+        if (habit?.challenge_id) {
+          await supabase
+            .from('challenge_completions')
+            .insert({
+              challenge_id: habit.challenge_id,
+              user_id: user.id,
+              date: input.date,
+            })
+        }
+
         return { completed: true }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['completions'] })
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
     },
   })
 

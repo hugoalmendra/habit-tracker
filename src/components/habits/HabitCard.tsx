@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Check, GripVertical, Pencil } from 'lucide-react'
+import { Trash2, Check, GripVertical, Pencil, Trophy } from 'lucide-react'
 import { useHabits } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import type { Habit } from '@/lib/types'
@@ -11,7 +11,7 @@ import { CSS } from '@dnd-kit/utilities'
 import EditHabitModal from './EditHabitModal'
 
 interface HabitCardProps {
-  habit: Habit & { isShared?: boolean; sharedHabitId?: string }
+  habit: Habit & { isShared?: boolean; sharedHabitId?: string; challenge_id?: string | null }
   completed: boolean
   selectedDate: string
   index: number
@@ -115,6 +115,12 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                 >
                   {habit.category}
                 </span>
+                {habit.challenge_id && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-primary/10 text-primary flex items-center gap-1">
+                    <Trophy className="h-3 w-3" />
+                    Challenge
+                  </span>
+                )}
               </div>
               {habit.description && (
                 <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
@@ -123,23 +129,27 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
               )}
             </div>
             <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowEditModal(true)}
-                className="h-8 w-8 hover:bg-primary/10 hover:text-primary rounded-lg"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-lg"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {!habit.challenge_id && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowEditModal(true)}
+                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary rounded-lg"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 

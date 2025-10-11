@@ -19,11 +19,11 @@ export default function Challenges() {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [isCreateChallengeOpen, setIsCreateChallengeOpen] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'my' | 'joined' | 'past'>('all')
+  const [filter, setFilter] = useState<'all' | 'joined' | 'past'>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [sortFilter, setSortFilter] = useState<'recent' | 'oldest' | 'popular'>('recent')
 
-  const { challenges, isLoading, respondToInvite } = useChallenges()
+  const { challenges, isLoading, respondToInvite, joinChallenge } = useChallenges()
 
   const handleAcceptInvite = async (challengeId: string) => {
     await respondToInvite({ challengeId, status: 'accepted' })
@@ -33,13 +33,22 @@ export default function Challenges() {
     await respondToInvite({ challengeId, status: 'declined' })
   }
 
+  const handleJoinChallenge = async (challengeId: string) => {
+    await joinChallenge(challengeId)
+  }
+
   const filteredChallenges = challenges?.filter(challenge => {
     const endDate = new Date(challenge.end_date)
     const isPast = endDate < new Date()
 
-    // Filter by ownership and time
-    if (filter === 'my' && challenge.creator_id !== user?.id) return false
-    if (filter === 'joined' && !(challenge.user_participation?.status === 'accepted' || challenge.user_participation?.status === 'completed')) return false
+    // Filter by participation status and time
+    if (filter === 'joined') {
+      // Show challenges the user has joined (accepted or completed) or created
+      const isJoined = challenge.user_participation?.status === 'accepted' ||
+                       challenge.user_participation?.status === 'completed' ||
+                       challenge.creator_id === user?.id
+      if (!isJoined) return false
+    }
     if (filter === 'past' && !isPast) return false
     if (filter !== 'past' && isPast) return false
 
@@ -175,18 +184,6 @@ export default function Challenges() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setFilter('my')}
-                className={`rounded-none border-b-2 transition-colors ${
-                  filter === 'my'
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground'
-                }`}
-              >
-                My Challenges
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
                 onClick={() => setFilter('joined')}
                 className={`rounded-none border-b-2 transition-colors ${
                   filter === 'joined'
@@ -292,6 +289,8 @@ export default function Challenges() {
                 const isInvited = challenge.user_participation?.status === 'invited'
                 const isActive = challenge.user_participation?.status === 'accepted'
                 const isCompleted = challenge.user_participation?.status === 'completed'
+                const isCreator = challenge.creator_id === user?.id
+                const hasNotJoined = !challenge.user_participation && !isCreator
 
                 return (
                   <motion.div
@@ -375,7 +374,7 @@ export default function Challenges() {
 
                       {/* Actions */}
                       {isInvited && (
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
                           <Button
                             size="sm"
                             onClick={() => handleAcceptInvite(challenge.id)}
@@ -390,6 +389,18 @@ export default function Challenges() {
                             className="flex-1 rounded-lg"
                           >
                             Decline
+                          </Button>
+                        </div>
+                      )}
+
+                      {hasNotJoined && daysRemaining > 0 && (
+                        <div className="mb-4" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            size="sm"
+                            onClick={() => handleJoinChallenge(challenge.id)}
+                            className="w-full rounded-lg"
+                          >
+                            Join Challenge
                           </Button>
                         </div>
                       )}

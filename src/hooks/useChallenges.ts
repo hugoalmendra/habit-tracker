@@ -208,6 +208,25 @@ export function useChallenges() {
     },
   })
 
+  const joinChallengeMutation = useMutation({
+    mutationFn: async (challengeId: string) => {
+      const { error } = await supabase
+        .from('challenge_participants')
+        .insert({
+          challenge_id: challengeId,
+          user_id: user!.id,
+          status: 'accepted',
+          joined_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
+    },
+  })
+
   const recordCompletionMutation = useMutation({
     mutationFn: async (challengeId: string) => {
       const today = new Date().toISOString().split('T')[0]
@@ -297,6 +316,7 @@ export function useChallenges() {
     createChallenge: createChallengeMutation.mutateAsync,
     inviteParticipants: inviteParticipantsMutation.mutateAsync,
     respondToInvite: respondToInviteMutation.mutateAsync,
+    joinChallenge: joinChallengeMutation.mutateAsync,
     recordCompletion: recordCompletionMutation.mutateAsync,
   }
 }
