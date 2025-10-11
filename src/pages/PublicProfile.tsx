@@ -281,11 +281,6 @@ export default function PublicProfile() {
                   Progress
                 </Button>
               </Link>
-              <Link to="/shared-habits">
-                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
-                  Shared Habits
-                </Button>
-              </Link>
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
