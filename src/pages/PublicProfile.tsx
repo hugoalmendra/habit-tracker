@@ -322,7 +322,7 @@ export default function PublicProfile() {
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button size="sm" className="h-9 px-4 text-sm font-medium rounded-xl">
+                  <Button size="sm" className="h-9 px-4 text-sm font-medium">
                     Get Started
                   </Button>
                 </Link>
