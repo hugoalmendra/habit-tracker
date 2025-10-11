@@ -90,7 +90,7 @@ export default function NotificationsDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 top-12 w-80 sm:w-96 z-50"
+            className="absolute right-0 sm:right-0 left-1/2 sm:left-auto -translate-x-1/2 sm:translate-x-0 top-12 w-[calc(100vw-2rem)] max-w-80 sm:w-96 z-50"
           >
             <Card className="border-border/40 shadow-apple-lg rounded-2xl overflow-hidden">
               <div className="p-4 border-b border-border/40 flex items-center justify-between">
