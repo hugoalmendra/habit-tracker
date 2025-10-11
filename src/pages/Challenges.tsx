@@ -7,12 +7,18 @@ import { useChallenges } from '@/hooks/useChallenges'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, Target } from 'lucide-react'
+import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, Target, ChevronDown } from 'lucide-react'
 import { differenceInDays } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import CreateChallengeModal from '@/components/challenges/CreateChallengeModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function Challenges() {
   const { user } = useAuth()
@@ -208,7 +214,7 @@ export default function Challenges() {
             </div>
 
             {/* Category & Sort Filters */}
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex flex-wrap gap-2 items-center justify-between">
               {/* Category Filter */}
               <div className="flex gap-2 flex-wrap items-center">
                 <span className="text-sm text-muted-foreground">Category:</span>
@@ -238,37 +244,26 @@ export default function Challenges() {
                 ))}
               </div>
 
-              {/* Divider */}
-              <div className="h-6 w-px bg-border hidden sm:block" />
-
-              {/* Sort Filter */}
-              <div className="flex gap-2 flex-wrap items-center">
-                <span className="text-sm text-muted-foreground">Sort:</span>
-                <Button
-                  variant={sortFilter === 'recent' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortFilter('recent')}
-                  className="rounded-lg h-8"
-                >
-                  Most Recent
-                </Button>
-                <Button
-                  variant={sortFilter === 'oldest' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortFilter('oldest')}
-                  className="rounded-lg h-8"
-                >
-                  Oldest
-                </Button>
-                <Button
-                  variant={sortFilter === 'popular' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSortFilter('popular')}
-                  className="rounded-lg h-8"
-                >
-                  Most Popular
-                </Button>
-              </div>
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-lg h-8 gap-2">
+                    Sort: {sortFilter === 'recent' ? 'Most Recent' : sortFilter === 'oldest' ? 'Oldest' : 'Most Popular'}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setSortFilter('recent')}>
+                    Most Recent
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortFilter('oldest')}>
+                    Oldest
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortFilter('popular')}>
+                    Most Popular
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
