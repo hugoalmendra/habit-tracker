@@ -20,6 +20,7 @@ export default function Challenges() {
   const navigate = useNavigate()
   const [isCreateChallengeOpen, setIsCreateChallengeOpen] = useState(false)
   const [filter, setFilter] = useState<'all' | 'my' | 'joined'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
   const { challenges, isLoading, respondToInvite } = useChallenges()
 
@@ -32,20 +33,27 @@ export default function Challenges() {
   }
 
   const filteredChallenges = challenges?.filter(challenge => {
-    if (filter === 'my') return challenge.creator_id === user?.id
-    if (filter === 'joined') return challenge.user_participation?.status === 'accepted' || challenge.user_participation?.status === 'completed'
+    // Filter by ownership
+    if (filter === 'my' && challenge.creator_id !== user?.id) return false
+    if (filter === 'joined' && !(challenge.user_participation?.status === 'accepted' || challenge.user_participation?.status === 'completed')) return false
+
+    // Filter by category
+    if (categoryFilter !== 'all' && challenge.category !== categoryFilter) return false
+
     return true
   })
 
+  const categories = [
+    { name: 'Health', color: '#34C759', emoji: '💪' },
+    { name: 'Hustle', color: '#FF9500', emoji: '🚀' },
+    { name: 'Heart', color: '#FF2D55', emoji: '❤️' },
+    { name: 'Harmony', color: '#5E5CE6', emoji: '🧘' },
+    { name: 'Happiness', color: '#FFD60A', emoji: '😊' },
+  ]
+
   const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Health: '#34C759',
-      Hustle: '#FF9500',
-      Heart: '#FF2D55',
-      Harmony: '#5E5CE6',
-      Happiness: '#FFD60A',
-    }
-    return colors[category] || '#34C759'
+    const cat = categories.find(c => c.name === category)
+    return cat?.color || '#34C759'
   }
 
   const getDaysRemaining = (endDate: string) => {
@@ -129,32 +137,64 @@ export default function Challenges() {
             </Button>
           </div>
 
-          {/* Filter */}
-          <div className="flex gap-2">
-            <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('all')}
-              className="rounded-lg"
-            >
-              All Challenges
-            </Button>
-            <Button
-              variant={filter === 'my' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('my')}
-              className="rounded-lg"
-            >
-              My Challenges
-            </Button>
-            <Button
-              variant={filter === 'joined' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('joined')}
-              className="rounded-lg"
-            >
-              Joined
-            </Button>
+          {/* Filters */}
+          <div className="space-y-3">
+            {/* Ownership Filter */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('all')}
+                className="rounded-lg"
+              >
+                All Challenges
+              </Button>
+              <Button
+                variant={filter === 'my' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('my')}
+                className="rounded-lg"
+              >
+                My Challenges
+              </Button>
+              <Button
+                variant={filter === 'joined' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('joined')}
+                className="rounded-lg"
+              >
+                Joined
+              </Button>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={categoryFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setCategoryFilter('all')}
+                className="rounded-lg"
+              >
+                All Categories
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category.name}
+                  variant={categoryFilter === category.name ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCategoryFilter(category.name)}
+                  className="rounded-lg"
+                  style={
+                    categoryFilter === category.name
+                      ? { backgroundColor: category.color, borderColor: category.color }
+                      : {}
+                  }
+                >
+                  <span className="mr-1">{category.emoji}</span>
+                  {category.name}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Challenges Grid */}
