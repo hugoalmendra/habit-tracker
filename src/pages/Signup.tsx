@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'framer-motion'
+import { Mail } from 'lucide-react'
 
 export default function Signup() {
   const { theme } = useTheme()
@@ -16,6 +17,7 @@ export default function Signup() {
   const [lastName, setLastName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
@@ -27,12 +29,46 @@ export default function Signup() {
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
       await signUp(email, password, fullName)
-      navigate('/dashboard')
+      // Show confirmation message instead of redirecting
+      setShowConfirmation(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign up')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showConfirmation) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md"
+        >
+          <Card className="border-border/40 shadow-apple-lg">
+            <CardContent className="pt-12 pb-8 text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Mail className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-3">Check your email</h2>
+              <p className="text-muted-foreground mb-6">
+                We've sent a confirmation link to <span className="font-medium text-foreground">{email}</span>
+              </p>
+              <p className="text-sm text-muted-foreground mb-8">
+                Click the link in the email to confirm your account and start building better habits.
+              </p>
+              <Link to="/login">
+                <Button className="w-full h-12 rounded-xl">
+                  Back to Sign In
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    )
   }
 
   return (

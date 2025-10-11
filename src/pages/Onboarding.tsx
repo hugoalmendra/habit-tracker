@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Sparkles, Loader2, Check } from 'lucide-react'
 import { useHabits } from '@/hooks/useHabits'
 import { generateHabits } from '@/lib/ai'
+import { supabase } from '@/lib/supabase'
 
 interface SuggestedHabit {
   name: string
@@ -17,6 +19,7 @@ interface SuggestedHabit {
 
 export default function Onboarding() {
   const { theme } = useTheme()
+  const { user } = useAuth()
   const [goal, setGoal] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [suggestedHabits, setSuggestedHabits] = useState<SuggestedHabit[]>([])
@@ -24,6 +27,14 @@ export default function Onboarding() {
   const [isCreating, setIsCreating] = useState(false)
   const navigate = useNavigate()
   const { createHabit } = useHabits()
+
+  const markOnboardingComplete = async () => {
+    if (!user) return
+    await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('id', user.id)
+  }
 
   const handleGenerate = async () => {
     if (!goal.trim()) return
@@ -62,6 +73,9 @@ export default function Onboarding() {
         await createHabit(habit)
       }
 
+      // Mark onboarding as completed
+      await markOnboardingComplete()
+
       navigate('/dashboard')
     } catch (error) {
       console.error('Failed to create habits:', error)
@@ -69,6 +83,12 @@ export default function Onboarding() {
     } finally {
       setIsCreating(false)
     }
+  }
+
+  const handleSkip = async () => {
+    // Mark onboarding as completed even if they skip
+    await markOnboardingComplete()
+    navigate('/dashboard')
   }
 
   return (
@@ -125,7 +145,7 @@ export default function Onboarding() {
                     )}
                   </Button>
                   <Button
-                    onClick={() => navigate('/dashboard')}
+                    onClick={handleSkip}
                     variant="ghost"
                     className="w-full h-12 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
                   >

@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
+import { supabase } from '@/lib/supabase'
 
 // Pages
 import Landing from '@/pages/Landing'
@@ -21,6 +22,51 @@ import ChallengeDetail from '@/pages/ChallengeDetail'
 import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
+
+// Protected route wrapper that checks onboarding status
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null)
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true)
+
+  useEffect(() => {
+    async function checkOnboarding() {
+      if (!user) {
+        setCheckingOnboarding(false)
+        return
+      }
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      setOnboardingCompleted(data?.onboarding_completed ?? false)
+      setCheckingOnboarding(false)
+    }
+
+    checkOnboarding()
+  }, [user])
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (checkingOnboarding) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!onboardingCompleted) {
+    return <Navigate to="/onboarding" replace />
+  }
+
+  return <>{children}</>
+}
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -51,31 +97,31 @@ function AppRoutes() {
         />
         <Route
           path="/dashboard"
-          element={user ? <Dashboard /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
         <Route
           path="/progress"
-          element={user ? <Progress /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Progress /></ProtectedRoute>}
         />
         <Route
           path="/settings"
-          element={user ? <Settings /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Settings /></ProtectedRoute>}
         />
         <Route
           path="/profile"
-          element={user ? <Profile /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Profile /></ProtectedRoute>}
         />
         <Route
           path="/feed"
-          element={user ? <Feed /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Feed /></ProtectedRoute>}
         />
         <Route
           path="/challenges"
-          element={user ? <Challenges /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><Challenges /></ProtectedRoute>}
         />
         <Route
           path="/challenge/:id"
-          element={user ? <ChallengeDetail /> : <Navigate to="/login" replace />}
+          element={<ProtectedRoute><ChallengeDetail /></ProtectedRoute>}
         />
         <Route path="/profile/:userId" element={<PublicProfile />} />
         <Route path="/privacy" element={<Privacy />} />
