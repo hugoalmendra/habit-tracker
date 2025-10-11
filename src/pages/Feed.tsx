@@ -242,7 +242,7 @@ export default function Feed() {
                 </Avatar>
               </Link>
               <div
-                className="flex-1 h-10 rounded-lg bg-secondary flex items-center px-4 text-muted-foreground cursor-pointer hover:bg-secondary/80 transition-colors"
+                className="flex-1 h-12 md:h-10 rounded-lg bg-secondary flex items-center px-4 text-muted-foreground cursor-pointer hover:bg-secondary/80 transition-colors"
                 onClick={() => setIsCreatePostOpen(true)}
               >
                 Which achievements do you have to share?
