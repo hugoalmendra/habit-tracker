@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -268,16 +268,26 @@ export default function ChallengeDetail() {
                   }`}>
                     {index + 1}
                   </div>
-                  <img
-                    src={participant.user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`}
-                    alt={participant.user?.display_name || 'User'}
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
+                  <Link
+                    to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
+                    className="shrink-0"
+                  >
+                    <img
+                      src={participant.user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`}
+                      alt={participant.user?.display_name || 'User'}
+                      className="h-10 w-10 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                    />
+                  </Link>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {participant.user?.display_name || 'Unknown User'}
-                      {participant.user_id === user?.id && ' (You)'}
-                    </p>
+                    <Link
+                      to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
+                      className="hover:underline"
+                    >
+                      <p className="font-medium text-sm truncate">
+                        {participant.user?.display_name || 'Unknown User'}
+                        {participant.user_id === user?.id && ' (You)'}
+                      </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground">
                       {participant.current_progress} / {challenge.target_value}
                       {challenge.target_type === 'streak' && ` • ${participant.current_streak} day streak`}
