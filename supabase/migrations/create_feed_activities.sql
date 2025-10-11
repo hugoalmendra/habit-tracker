@@ -55,8 +55,7 @@ begin
       new.id,
       jsonb_build_object(
         'habit_name', new.name,
-        'habit_category', new.category,
-        'habit_emoji', new.emoji
+        'habit_category', new.category
       )
     );
   end if;
