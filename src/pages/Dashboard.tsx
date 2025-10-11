@@ -84,14 +84,14 @@ export default function Dashboard() {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (over && active.id !== over.id && habits) {
-      const oldIndex = habits.findIndex((h) => h.id === active.id)
-      const newIndex = habits.findIndex((h) => h.id === over.id)
+    if (over && active.id !== over.id && filteredHabits.length > 0) {
+      const oldIndex = filteredHabits.findIndex((h) => h.id === active.id)
+      const newIndex = filteredHabits.findIndex((h) => h.id === over.id)
 
-      const newHabits = arrayMove(habits, oldIndex, newIndex)
+      const newFilteredHabits = arrayMove(filteredHabits, oldIndex, newIndex)
 
-      // Update display_order for all habits
-      const habitOrders = newHabits.map((habit, index) => ({
+      // Update display_order for reordered habits
+      const habitOrders = newFilteredHabits.map((habit, index) => ({
         id: habit.id,
         display_order: index,
       }))
@@ -279,7 +279,7 @@ export default function Dashboard() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={habits?.map((h) => h.id) || []}
+              items={filteredHabits.map((h) => h.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
