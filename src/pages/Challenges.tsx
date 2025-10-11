@@ -19,8 +19,9 @@ export default function Challenges() {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [isCreateChallengeOpen, setIsCreateChallengeOpen] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'my' | 'joined'>('all')
+  const [filter, setFilter] = useState<'all' | 'my' | 'joined' | 'past'>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [sortFilter, setSortFilter] = useState<'recent' | 'oldest' | 'popular'>('recent')
 
   const { challenges, isLoading, respondToInvite } = useChallenges()
 
@@ -33,14 +34,31 @@ export default function Challenges() {
   }
 
   const filteredChallenges = challenges?.filter(challenge => {
-    // Filter by ownership
+    const endDate = new Date(challenge.end_date)
+    const isPast = endDate < new Date()
+
+    // Filter by ownership and time
     if (filter === 'my' && challenge.creator_id !== user?.id) return false
     if (filter === 'joined' && !(challenge.user_participation?.status === 'accepted' || challenge.user_participation?.status === 'completed')) return false
+    if (filter === 'past' && !isPast) return false
+    if (filter !== 'past' && isPast) return false
 
     // Filter by category
     if (categoryFilter !== 'all' && challenge.category !== categoryFilter) return false
 
     return true
+  }).sort((a, b) => {
+    // Sort challenges
+    if (sortFilter === 'recent') {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }
+    if (sortFilter === 'oldest') {
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    }
+    if (sortFilter === 'popular') {
+      return (b.participant_count || 0) - (a.participant_count || 0)
+    }
+    return 0
   })
 
   const categories = [
@@ -138,62 +156,121 @@ export default function Challenges() {
           </div>
 
           {/* Filters */}
-          <div className="space-y-3">
-            {/* Ownership Filter */}
-            <div className="flex gap-2 flex-wrap">
+          <div className="space-y-4">
+            {/* Tabs - Ownership Filter */}
+            <div className="flex gap-2 border-b border-border">
               <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setFilter('all')}
-                className="rounded-lg"
+                className={`rounded-none border-b-2 transition-colors ${
+                  filter === 'all'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground'
+                }`}
               >
                 All Challenges
               </Button>
               <Button
-                variant={filter === 'my' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setFilter('my')}
-                className="rounded-lg"
+                className={`rounded-none border-b-2 transition-colors ${
+                  filter === 'my'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground'
+                }`}
               >
                 My Challenges
               </Button>
               <Button
-                variant={filter === 'joined' ? 'default' : 'outline'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setFilter('joined')}
-                className="rounded-lg"
+                className={`rounded-none border-b-2 transition-colors ${
+                  filter === 'joined'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground'
+                }`}
               >
                 Joined
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilter('past')}
+                className={`rounded-none border-b-2 transition-colors ${
+                  filter === 'past'
+                    ? 'border-primary text-foreground'
+                    : 'border-transparent text-muted-foreground'
+                }`}
+              >
+                Past Challenges
+              </Button>
             </div>
 
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                variant={categoryFilter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setCategoryFilter('all')}
-                className="rounded-lg"
-              >
-                All Categories
-              </Button>
-              {categories.map((category) => (
+            {/* Category & Sort Filters */}
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* Category Filter */}
+              <div className="flex gap-2 flex-wrap items-center">
+                <span className="text-sm text-muted-foreground">Category:</span>
                 <Button
-                  key={category.name}
-                  variant={categoryFilter === category.name ? 'default' : 'outline'}
+                  variant={categoryFilter === 'all' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setCategoryFilter(category.name)}
-                  className="rounded-lg"
-                  style={
-                    categoryFilter === category.name
-                      ? { backgroundColor: category.color, borderColor: category.color }
-                      : {}
-                  }
+                  onClick={() => setCategoryFilter('all')}
+                  className="rounded-lg h-8"
                 >
-                  <span className="mr-1">{category.emoji}</span>
-                  {category.name}
+                  All
                 </Button>
-              ))}
+                {categories.map((category) => (
+                  <Button
+                    key={category.name}
+                    variant={categoryFilter === category.name ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCategoryFilter(category.name)}
+                    className="rounded-lg h-8"
+                    style={
+                      categoryFilter === category.name
+                        ? { backgroundColor: category.color, borderColor: category.color }
+                        : {}
+                    }
+                  >
+                    {category.name}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="h-6 w-px bg-border hidden sm:block" />
+
+              {/* Sort Filter */}
+              <div className="flex gap-2 flex-wrap items-center">
+                <span className="text-sm text-muted-foreground">Sort:</span>
+                <Button
+                  variant={sortFilter === 'recent' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortFilter('recent')}
+                  className="rounded-lg h-8"
+                >
+                  Most Recent
+                </Button>
+                <Button
+                  variant={sortFilter === 'oldest' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortFilter('oldest')}
+                  className="rounded-lg h-8"
+                >
+                  Oldest
+                </Button>
+                <Button
+                  variant={sortFilter === 'popular' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortFilter('popular')}
+                  className="rounded-lg h-8"
+                >
+                  Most Popular
+                </Button>
+              </div>
             </div>
           </div>
 
