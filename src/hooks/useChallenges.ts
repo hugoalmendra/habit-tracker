@@ -140,27 +140,8 @@ export function useChallenges() {
 
       console.log('Challenge created successfully:', data)
 
-      // Automatically add creator as a participant
+      // Creator is automatically added as participant by database trigger
       if (!data) throw new Error('Failed to create challenge')
-
-      const { error: participantError } = await supabase
-        .from('challenge_participants')
-        .insert({
-          challenge_id: data.id,
-          user_id: user!.id,
-          status: 'accepted',
-          joined_at: new Date().toISOString(),
-          current_progress: 0,
-          current_streak: 0,
-          badge_earned: false
-        })
-
-      if (participantError) {
-        console.error('Error adding creator as participant:', participantError)
-        // Don't throw - challenge was created successfully, this is just a bonus feature
-      } else {
-        console.log('Creator added as participant successfully')
-      }
 
       return data
     },
