@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'framer-motion'
+import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal'
 
 export default function Login() {
   const { theme } = useTheme()
@@ -14,6 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
   const { signIn } = useAuth()
   const navigate = useNavigate()
 
@@ -84,9 +86,18 @@ export default function Login() {
                 />
               </div>
               <div className="space-y-3">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={() => setForgotPasswordOpen(true)}
+                    className="text-sm font-medium text-primary hover:underline underline-offset-4"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -119,6 +130,12 @@ export default function Login() {
           </form>
         </Card>
       </motion.div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
+      />
     </div>
   )
 }
