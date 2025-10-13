@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Trophy } from 'lucide-react'
-import { useBadgesByCategory, CATEGORY_LABELS } from '@/hooks/useBadges'
+import { useBadgesByCategory } from '@/hooks/useBadges'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card } from '@/components/ui/card'
 import BadgeCard from '@/components/badges/BadgeCard'
