@@ -63,18 +63,19 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
           />
 
           {/* Achievement Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{
-              type: 'spring',
-              stiffness: 300,
-              damping: 25,
-              mass: 0.8
-            }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10000] w-full max-w-md px-4"
-          >
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 25,
+                mass: 0.8
+              }}
+              className="w-full max-w-md"
+            >
             <div
               className="relative overflow-hidden rounded-3xl border-2 bg-background p-6 sm:p-8 shadow-2xl"
               style={{ borderColor: achievement.color }}
@@ -218,7 +219,8 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                 </motion.div>
               </div>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
