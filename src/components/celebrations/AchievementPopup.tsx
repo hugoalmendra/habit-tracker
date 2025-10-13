@@ -63,7 +63,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
           />
 
           {/* Achievement Card */}
-          <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4">
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:px-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -74,7 +74,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                 damping: 25,
                 mass: 0.8
               }}
-              className="w-full max-w-md"
+              className="w-full max-w-md max-h-[90vh] overflow-auto"
             >
             <div
               className="relative overflow-hidden rounded-3xl border-2 bg-background p-6 sm:p-8 shadow-2xl"
