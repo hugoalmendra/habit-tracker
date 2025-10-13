@@ -18,7 +18,14 @@ export function useAchievements() {
     const currentRank = getRankFromXP(totalXP)
 
     const lastLevel = localStorage.getItem(STORAGE_KEY)
-    const lastLevelNum = lastLevel ? parseInt(lastLevel) : 0
+    let lastLevelNum = lastLevel ? parseInt(lastLevel) : 0
+
+    // If stored level is higher than current level, reset it (corrupted data)
+    if (lastLevelNum > currentRank.level) {
+      console.log('[Level Check] Resetting corrupted lastLevel from', lastLevelNum, 'to', currentRank.level)
+      lastLevelNum = currentRank.level
+      localStorage.setItem(STORAGE_KEY, currentRank.level.toString())
+    }
 
     console.log('[Level Check]', {
       totalCompletions: completions.length,
