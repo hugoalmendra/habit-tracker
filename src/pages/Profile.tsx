@@ -28,6 +28,7 @@ interface Habit {
   id: string
   name: string
   color: string
+  category: string
   created_at: string
 }
 
@@ -96,6 +97,9 @@ export default function Profile() {
   const [searchResults, setSearchResults] = useState<UserProfile[]>([])
   const [searching, setSearching] = useState(false)
   const [followingStates, setFollowingStates] = useState<Record<string, boolean>>({})
+
+  // Habits filter
+  const [selectedHabitCategory, setSelectedHabitCategory] = useState<string>('all')
 
   useEffect(() => {
     loadProfile()
@@ -172,7 +176,7 @@ export default function Profile() {
       // Load habits
       const { data: habitsData, error: habitsError } = await supabase
         .from('habits')
-        .select('id, name, color, created_at')
+        .select('id, name, color, category, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
 
@@ -773,23 +777,47 @@ export default function Profile() {
           {habits.length > 0 && (
             <Card className="border-border/40 shadow-apple-lg rounded-2xl">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-6">
-                  Current Habits
-                </h2>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {habits.map((habit) => (
-                    <div
-                      key={habit.id}
-                      className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-secondary/50"
-                    >
-                      <div
-                        className="h-3 w-3 rounded-full shrink-0"
-                        style={{ backgroundColor: habit.color }}
-                      />
-                      <span className="font-medium text-foreground">{habit.name}</span>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                    Current Habits
+                  </h2>
+                  <select
+                    value={selectedHabitCategory}
+                    onChange={(e) => setSelectedHabitCategory(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg text-sm bg-secondary border border-border/40 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="Health">Health</option>
+                    <option value="Hustle">Hustle</option>
+                    <option value="Heart">Heart</option>
+                    <option value="Harmony">Harmony</option>
+                    <option value="Happiness">Happiness</option>
+                  </select>
                 </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {habits
+                    .filter((habit) => selectedHabitCategory === 'all' || habit.category === selectedHabitCategory)
+                    .map((habit) => (
+                      <div
+                        key={habit.id}
+                        className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-secondary/50"
+                      >
+                        <div
+                          className="h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: habit.color }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium text-foreground">{habit.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">({habit.category})</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                {habits.filter((habit) => selectedHabitCategory === 'all' || habit.category === selectedHabitCategory).length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No habits in this category
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

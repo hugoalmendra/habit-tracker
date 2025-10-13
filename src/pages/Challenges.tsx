@@ -7,7 +7,7 @@ import { useChallenges } from '@/hooks/useChallenges'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, Target, ChevronDown } from 'lucide-react'
+import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, Target, ChevronDown, Lock } from 'lucide-react'
 import { differenceInDays } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
@@ -299,20 +299,28 @@ export default function Challenges() {
                     >
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1">
                           <div
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl"
                             style={{ backgroundColor: `${getCategoryColor(challenge.category)}20` }}
                           >
                             {challenge.badge_icon}
                           </div>
-                          <div>
-                            <h3 className="font-semibold">{challenge.name}</h3>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{challenge.name}</h3>
+                              {!challenge.is_public && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs">
+                                  <Lock className="h-3 w-3" />
+                                  Private
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">{challenge.category}</p>
                           </div>
                         </div>
                         {isCompleted && (
-                          <CheckCircle2 className="h-5 w-5 text-primary" />
+                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
                         )}
                       </div>
 

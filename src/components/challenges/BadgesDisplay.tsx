@@ -2,12 +2,21 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Trophy } from 'lucide-react'
 import { useBadgesByCategory, CATEGORY_LABELS } from '@/hooks/useBadges'
+import { useAuth } from '@/contexts/AuthContext'
 import { Card } from '@/components/ui/card'
 import BadgeCard from '@/components/badges/BadgeCard'
 
-export default function BadgesDisplay() {
-  const categories = useBadgesByCategory()
+interface BadgesDisplayProps {
+  userId?: string
+}
+
+export default function BadgesDisplay({ userId }: BadgesDisplayProps = {}) {
+  const { user } = useAuth()
+  const categories = useBadgesByCategory(userId)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+
+  // Determine if we're viewing our own profile
+  const isOwnProfile = !userId || userId === user?.id
 
   // Calculate totals
   const allBadges = Object.values(categories).flat()
@@ -15,11 +24,13 @@ export default function BadgesDisplay() {
   const totalBadges = allBadges.length
   const earnedCount = earnedBadges.length
 
+  // For other users' profiles, only show earned badges
+  const badgesToShow = isOwnProfile ? allBadges : earnedBadges
+
   // Filter badges based on selected category
-  const displayBadges =
-    selectedCategory === 'all'
-      ? allBadges
-      : categories[selectedCategory as keyof typeof categories] || []
+  let displayBadges = selectedCategory === 'all'
+    ? badgesToShow
+    : badgesToShow.filter((b) => b.category === selectedCategory)
 
   const categoryTabs = [
     { id: 'all', label: 'All' },
@@ -42,13 +53,15 @@ export default function BadgesDisplay() {
           <h2 className="text-lg font-semibold">Badges</h2>
           {earnedCount > 0 && (
             <span className="text-sm text-muted-foreground">
-              {earnedCount}/{totalBadges}
+              {isOwnProfile ? `${earnedCount}/${totalBadges}` : earnedCount}
             </span>
           )}
         </div>
-        <div className="text-sm text-muted-foreground">
-          {totalBadges > 0 ? Math.round((earnedCount / totalBadges) * 100) : 0}% Complete
-        </div>
+        {isOwnProfile && (
+          <div className="text-sm text-muted-foreground">
+            {totalBadges > 0 ? Math.round((earnedCount / totalBadges) * 100) : 0}% Complete
+          </div>
+        )}
       </div>
 
       {/* Category Tabs */}

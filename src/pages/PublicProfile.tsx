@@ -7,12 +7,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { motion } from 'framer-motion'
-import { User, Moon, Sun } from 'lucide-react'
+import { User, Moon, Sun, ChevronLeft, ChevronRight, Heart, MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, formatDistanceToNow } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
+import BadgesDisplay from '@/components/challenges/BadgesDisplay'
 
 interface Profile {
   display_name: string | null
@@ -31,6 +32,15 @@ interface Habit {
 interface Completion {
   completed_date: string
   habit_id: string
+}
+
+interface Post {
+  id: string
+  content: string
+  created_at: string
+  image_url?: string
+  reactions_count?: number
+  comments_count?: number
 }
 
 interface FollowerProfile {
@@ -58,9 +68,13 @@ export default function PublicProfile() {
   const [followingList, setFollowingList] = useState<FollowerProfile[]>([])
   const [isFollowing, setIsFollowing] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
+  const [recentPosts, setRecentPosts] = useState<Post[]>([])
+  const [postsLoading, setPostsLoading] = useState(true)
+  const [currentPostIndex, setCurrentPostIndex] = useState(0)
 
   useEffect(() => {
     loadPublicProfile()
+    loadRecentPosts()
   }, [userId])
 
   const loadPublicProfile = async () => {
@@ -143,6 +157,45 @@ export default function PublicProfile() {
       console.error('Error loading public profile:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadRecentPosts = async () => {
+    if (!userId) return
+
+    try {
+      setPostsLoading(true)
+
+      const { data: postsData, error } = await supabase
+        .from('posts')
+        .select('id, content, created_at, image_url')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (error) throw error
+
+      // Get reaction and comment counts for each post
+      const postsWithCounts = await Promise.all(
+        (postsData || []).map(async (post) => {
+          const [reactionsResult, commentsResult] = await Promise.all([
+            supabase.from('reactions').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
+            supabase.from('comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
+          ])
+
+          return {
+            ...post,
+            reactions_count: reactionsResult.count || 0,
+            comments_count: commentsResult.count || 0,
+          }
+        })
+      )
+
+      setRecentPosts(postsWithCounts)
+    } catch (error) {
+      console.error('Error loading recent posts:', error)
+    } finally {
+      setPostsLoading(false)
     }
   }
 
@@ -519,6 +572,71 @@ export default function PublicProfile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Recent Posts */}
+          {!postsLoading && recentPosts.length > 0 && (
+            <Card className="border-border/40 shadow-apple-lg rounded-2xl">
+              <CardContent className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                    Recent Activity
+                  </h2>
+                  {recentPosts.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPostIndex(prev => Math.max(0, prev - 1))}
+                        disabled={currentPostIndex === 0}
+                        className="p-2 rounded-lg hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <span className="text-sm text-muted-foreground min-w-[60px] text-center">
+                        {currentPostIndex + 1} / {recentPosts.length}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPostIndex(prev => Math.min(recentPosts.length - 1, prev + 1))}
+                        disabled={currentPostIndex === recentPosts.length - 1}
+                        className="p-2 rounded-lg hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-secondary/50 rounded-2xl p-6">
+                    <p className="text-foreground whitespace-pre-wrap mb-4">
+                      {recentPosts[currentPostIndex].content}
+                    </p>
+                    {recentPosts[currentPostIndex].image_url && (
+                      <img
+                        src={recentPosts[currentPostIndex].image_url}
+                        alt="Post"
+                        className="rounded-xl w-full max-h-96 object-cover mb-4"
+                      />
+                    )}
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        <span>{recentPosts[currentPostIndex].reactions_count || 0} reactions</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        <span>{recentPosts[currentPostIndex].comments_count || 0} comments</span>
+                      </div>
+                      <span className="ml-auto">
+                        {formatDistanceToNow(new Date(recentPosts[currentPostIndex].created_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Badges */}
+          <BadgesDisplay userId={userId} />
         </motion.div>
       </main>
 

@@ -104,7 +104,50 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
         return { completed: true }
       }
     },
-    onSuccess: () => {
+    onMutate: async (input) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['completions'] })
+
+      // Snapshot previous value
+      const previousCompletions = queryClient.getQueryData(['completions', options])
+
+      // Optimistically update
+      queryClient.setQueryData(['completions', options], (old: HabitCompletion[] | undefined) => {
+        if (!old) return old
+
+        // Check if completion already exists
+        const existingIndex = old.findIndex(
+          (c) => c.habit_id === input.habitId && c.completed_date === input.date
+        )
+
+        if (existingIndex >= 0) {
+          // Remove completion (uncomplete)
+          return old.filter((_, i) => i !== existingIndex)
+        } else {
+          // Add completion
+          return [
+            {
+              id: 'optimistic-' + Date.now(),
+              habit_id: input.habitId,
+              user_id: user?.id || '',
+              completed_date: input.date,
+              created_at: new Date().toISOString(),
+            },
+            ...old,
+          ]
+        }
+      })
+
+      return { previousCompletions }
+    },
+    onError: (_err, _input, context) => {
+      // Rollback on error
+      if (context?.previousCompletions) {
+        queryClient.setQueryData(['completions', options], context.previousCompletions)
+      }
+    },
+    onSettled: () => {
+      // Refetch after mutation completes
       queryClient.invalidateQueries({ queryKey: ['completions'] })
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
       queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })

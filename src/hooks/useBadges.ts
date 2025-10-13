@@ -118,7 +118,7 @@ export function useUserBadgesWithProgress(userId?: string) {
   const targetUserId = userId || user?.id
   const queryClient = useQueryClient()
 
-  const { data: allBadges } = useBadgeDefinitions()
+  const { badges: allBadges } = useBadgeDefinitions()
   const { earnedBadges } = useUserBadges(targetUserId)
   const { progress } = useBadgeProgress()
 

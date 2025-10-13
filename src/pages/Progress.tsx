@@ -18,6 +18,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function Progress() {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth() + 1
 
@@ -253,11 +254,27 @@ export default function Progress() {
           >
             <Card className="border-border/40 shadow-apple-lg rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-foreground">Habits Breakdown</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-foreground">Habits Breakdown</CardTitle>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg text-sm bg-secondary border border-border/40 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="Health">Health</option>
+                    <option value="Hustle">Hustle</option>
+                    <option value="Heart">Heart</option>
+                    <option value="Harmony">Harmony</option>
+                    <option value="Happiness">Happiness</option>
+                  </select>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {monthlyData.habits.map((habit) => {
+                  {monthlyData.habits
+                    .filter((habit) => selectedCategory === 'all' || habit.category === selectedCategory)
+                    .map((habit) => {
                     const habitColor = CATEGORY_COLORS[habit.category] || habit.color
 
                     // Get completions for this habit by date
@@ -321,6 +338,11 @@ export default function Progress() {
                       </div>
                     )
                   })}
+                  {monthlyData.habits.filter((habit) => selectedCategory === 'all' || habit.category === selectedCategory).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No habits in this category
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
