@@ -73,7 +73,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
               damping: 25,
               mass: 0.8
             }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10000] w-[90vw] sm:w-[85vw] max-w-md px-4 sm:px-0"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10000] w-[calc(100vw-2rem)] max-w-md"
           >
             <div
               className="relative overflow-hidden rounded-3xl border-2 bg-background p-6 sm:p-8 shadow-2xl"
