@@ -14,9 +14,14 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
   const { user } = useAuth()
 
   const { data: completions, isLoading } = useQuery({
-    queryKey: ['completions', options],
+    queryKey: ['completions', user?.id, options],
     queryFn: async () => {
-      let query = supabase.from('habit_completions').select('*')
+      if (!user?.id) return []
+
+      let query = supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('user_id', user.id)
 
       if (options.habitId) {
         query = query.eq('habit_id', options.habitId)
