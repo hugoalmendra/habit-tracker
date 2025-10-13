@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useCompletions } from './useCompletions'
 import { calculateXP, getRankFromXP } from '@/lib/xpSystem'
 import { Achievement } from '@/components/celebrations/AchievementPopup'
@@ -11,15 +11,10 @@ export function useAchievements() {
   const { completions } = useCompletions()
   const [achievement, setAchievement] = useState<Achievement | null>(null)
 
-  useEffect(() => {
-    if (!completions || completions.length === 0) return
+  const checkLevelUp = useCallback(() => {
+    if (!completions) return
 
-    checkLevelUp()
-    checkStreakMilestone()
-  }, [completions?.length])
-
-  const checkLevelUp = () => {
-    const totalXP = calculateXP(completions?.length || 0)
+    const totalXP = calculateXP(completions.length)
     const currentRank = getRankFromXP(totalXP)
 
     const lastLevel = localStorage.getItem(STORAGE_KEY)
@@ -40,11 +35,13 @@ export function useAchievements() {
         })
       }
     }
-  }
+  }, [completions])
 
-  const checkStreakMilestone = () => {
+  const checkStreakMilestone = useCallback(() => {
+    if (!completions) return
+
     // Calculate current streak
-    const sortedCompletions = [...(completions || [])].sort(
+    const sortedCompletions = [...completions].sort(
       (a, b) => new Date(b.completed_date).getTime() - new Date(a.completed_date).getTime()
     )
 
@@ -99,7 +96,14 @@ export function useAchievements() {
         break
       }
     }
-  }
+  }, [completions])
+
+  useEffect(() => {
+    if (!completions || completions.length === 0) return
+
+    checkLevelUp()
+    checkStreakMilestone()
+  }, [completions, checkLevelUp, checkStreakMilestone])
 
   const clearAchievement = () => {
     setAchievement(null)
