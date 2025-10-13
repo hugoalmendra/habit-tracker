@@ -12,8 +12,10 @@ export function useMonthlyStats({ year, month }: MonthlyStatsOptions) {
   const { user } = useAuth()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['monthlyStats', year, month],
+    queryKey: ['monthlyStats', user?.id, year, month],
     queryFn: async () => {
+      if (!user?.id) return { completions: [], habits: [] }
+
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`
       const endDate = `${year}-${String(month).padStart(2, '0')}-31`
 
@@ -21,6 +23,7 @@ export function useMonthlyStats({ year, month }: MonthlyStatsOptions) {
       const { data: completions, error: completionsError } = await supabase
         .from('habit_completions')
         .select('*')
+        .eq('user_id', user.id)
         .gte('completed_date', startDate)
         .lte('completed_date', endDate)
 
@@ -30,6 +33,7 @@ export function useMonthlyStats({ year, month }: MonthlyStatsOptions) {
       const { data: habits, error: habitsError } = await supabase
         .from('habits')
         .select('*')
+        .eq('user_id', user.id)
 
       if (habitsError) throw habitsError
 
