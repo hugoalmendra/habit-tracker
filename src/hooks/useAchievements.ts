@@ -20,12 +20,23 @@ export function useAchievements() {
     const lastLevel = localStorage.getItem(STORAGE_KEY)
     const lastLevelNum = lastLevel ? parseInt(lastLevel) : 0
 
+    console.log('[Level Check]', {
+      totalCompletions: completions.length,
+      totalXP,
+      currentRank: currentRank.name,
+      currentLevel: currentRank.level,
+      lastLevel: lastLevelNum,
+      shouldLevelUp: currentRank.level > lastLevelNum,
+      willShowPopup: currentRank.level > lastLevelNum && currentRank.level > 1
+    })
+
     if (currentRank.level > lastLevelNum) {
       // Level up achievement!
       localStorage.setItem(STORAGE_KEY, currentRank.level.toString())
 
       // Don't show celebration for level 1 (initial level)
       if (currentRank.level > 1) {
+        console.log('[Level Up!] Showing popup for', currentRank.name)
         setAchievement({
           type: 'level-up',
           title: `${currentRank.name} Achieved!`,
