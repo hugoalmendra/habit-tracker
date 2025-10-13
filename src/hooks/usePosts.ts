@@ -46,6 +46,9 @@ export interface FeedActivity {
     display_name: string
     photo_url: string
   }
+  likes_count?: number
+  comments_count?: number
+  user_liked?: boolean
 }
 
 export type FeedItem = (Post & { item_type: 'post' }) | (FeedActivity & { item_type: 'activity' })
@@ -151,11 +154,27 @@ export function usePosts(filter: FeedFilter = 'for_you') {
       // Enrich activities with related data (habit names, challenge names, etc.)
       const activitiesWithDetails = await Promise.all(
         (activitiesData || []).map(async (activity) => {
-          const userData = await supabase
-            .from('profiles')
-            .select('id, display_name, photo_url')
-            .eq('id', activity.user_id)
-            .maybeSingle()
+          const [userData, likesData, commentsData, userLikeData] = await Promise.all([
+            supabase
+              .from('profiles')
+              .select('id, display_name, photo_url')
+              .eq('id', activity.user_id)
+              .maybeSingle(),
+            supabase
+              .from('activity_likes')
+              .select('id', { count: 'exact', head: true })
+              .eq('activity_id', activity.id),
+            supabase
+              .from('activity_comments')
+              .select('id', { count: 'exact', head: true })
+              .eq('activity_id', activity.id),
+            supabase
+              .from('activity_likes')
+              .select('id')
+              .eq('activity_id', activity.id)
+              .eq('user_id', user!.id)
+              .maybeSingle()
+          ])
 
           // Fetch habit name if it's a habit-related activity
           if (activity.activity_type === 'habit_created' && activity.related_id) {
@@ -215,7 +234,10 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           return {
             ...activity,
             item_type: 'activity' as const,
-            user: userData.data
+            user: userData.data,
+            likes_count: likesData.count || 0,
+            comments_count: commentsData.count || 0,
+            user_liked: !!userLikeData.data
           }
         })
       )
