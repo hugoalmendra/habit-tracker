@@ -108,8 +108,8 @@ export default function FinalCTA() {
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="text-stone-700 hover:text-stone-900 hover:bg-stone-50 border-stone-300 h-12 px-8 text-sm font-light tracking-wider uppercase transition-all duration-300"
+              variant="ghost"
+              className="text-stone-600 hover:text-stone-900 h-12 px-8 text-sm font-light tracking-wider uppercase transition-all duration-300"
             >
               <Link to="/login">Sign In</Link>
             </Button>
