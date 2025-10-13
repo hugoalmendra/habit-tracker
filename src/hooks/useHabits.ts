@@ -8,11 +8,14 @@ export function useHabits() {
   const { user } = useAuth()
 
   const { data: habits, isLoading, error } = useQuery({
-    queryKey: ['habits'],
+    queryKey: ['habits', user?.id],
     queryFn: async () => {
+      if (!user?.id) return []
+
       const { data, error } = await supabase
         .from('habits')
         .select('*')
+        .eq('user_id', user.id)
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false })
 
