@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import Landing from '@/pages/Landing'
 import Login from '@/pages/Login'
 import Signup from '@/pages/Signup'
+import ResetPassword from '@/pages/ResetPassword'
 import Onboarding from '@/pages/Onboarding'
 import Dashboard from '@/pages/Dashboard'
 import Progress from '@/pages/Progress'
@@ -91,6 +92,7 @@ function AppRoutes() {
           path="/signup"
           element={user ? <Navigate to="/onboarding" replace /> : <Signup />}
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/onboarding"
           element={user ? <Onboarding /> : <Navigate to="/login" replace />}
