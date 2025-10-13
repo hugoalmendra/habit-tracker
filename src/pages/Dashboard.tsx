@@ -16,6 +16,7 @@ import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import { useAchievements } from '@/hooks/useAchievements'
+import { useBadgeAchievements } from '@/hooks/useBadgeAchievements'
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
 import {
   DndContext,
@@ -59,6 +60,17 @@ export default function Dashboard() {
   )
 
   const { achievement, clearAchievement } = useAchievements()
+  const { achievement: badgeAchievement, clearAchievement: clearBadgeAchievement } = useBadgeAchievements()
+
+  // Combined achievement display (prioritize badge achievements)
+  const displayAchievement = badgeAchievement || achievement
+  const handleClearAchievement = () => {
+    if (badgeAchievement) {
+      clearBadgeAchievement()
+    } else {
+      clearAchievement()
+    }
+  }
 
   const goToPreviousDay = () => {
     setSelectedDate(subDays(selectedDate, 1))
@@ -325,8 +337,8 @@ export default function Dashboard() {
         onOpenChange={setIsAIModalOpen}
       />
       <AchievementPopup
-        achievement={achievement}
-        onClose={clearAchievement}
+        achievement={displayAchievement}
+        onClose={handleClearAchievement}
       />
     </div>
   )

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Flame, Star, Sparkles, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export type AchievementType = 'level-up' | 'streak-milestone' | 'first-habit'
+export type AchievementType = 'level-up' | 'streak-milestone' | 'first-habit' | 'badge-earned'
 
 export interface Achievement {
   type: AchievementType
@@ -48,7 +49,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
 
   const Icon = iconMap[achievement.icon || 'trophy']
 
-  return (
+  const popup = (
     <AnimatePresence>
       {show && (
         <>
@@ -57,7 +58,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
             onClick={handleClose}
           />
 
@@ -72,10 +73,10 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
               damping: 25,
               mass: 0.8
             }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[90vw] max-w-md"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[10000] w-[90vw] sm:w-[85vw] max-w-md px-4 sm:px-0"
           >
             <div
-              className="relative overflow-hidden rounded-3xl border-2 bg-background p-8 shadow-2xl"
+              className="relative overflow-hidden rounded-3xl border-2 bg-background p-6 sm:p-8 shadow-2xl"
               style={{ borderColor: achievement.color }}
             >
               {/* Animated Background */}
@@ -222,4 +223,6 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
       )}
     </AnimatePresence>
   )
+
+  return createPortal(popup, document.body)
 }
