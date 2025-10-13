@@ -158,9 +158,6 @@ export default function Hero() {
               </Link>
             </Button>
 
-            <p className="text-sm text-stone-500 font-light tracking-wide">
-              Free forever · No credit card
-            </p>
           </motion.div>
 
           {/* Hero Image - Zen minimalist border */}
