@@ -64,9 +64,9 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
 
           {/* Achievement Card */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5, y: 50 }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
             transition={{
               type: 'spring',
               stiffness: 300,
