@@ -16,7 +16,7 @@ export function useAchievements() {
 
     checkLevelUp()
     checkStreakMilestone()
-  }, [completions])
+  }, [completions?.length])
 
   const checkLevelUp = () => {
     const totalXP = calculateXP(completions?.length || 0)
