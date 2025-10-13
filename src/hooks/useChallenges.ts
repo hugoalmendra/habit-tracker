@@ -278,6 +278,59 @@ export function useChallenges() {
     },
   })
 
+  const updateChallengeMutation = useMutation({
+    mutationFn: async ({
+      challengeId,
+      updates
+    }: {
+      challengeId: string
+      updates: {
+        name?: string
+        description?: string
+        category?: string
+        start_date?: string
+        end_date?: string
+        target_type?: string
+        target_value?: number
+        badge_icon?: string
+        badge_color?: string
+        is_public?: boolean
+      }
+    }) => {
+      const { data, error } = await supabase
+        .from('challenges')
+        .update(updates)
+        .eq('id', challengeId)
+        .eq('creator_id', user!.id) // Ensure only creator can update
+        .select()
+        .maybeSingle()
+
+      if (error) throw error
+      if (!data) throw new Error('Challenge not found or you are not the creator')
+
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    },
+  })
+
+  const deleteChallengeMutation = useMutation({
+    mutationFn: async (challengeId: string) => {
+      const { error } = await supabase
+        .from('challenges')
+        .delete()
+        .eq('id', challengeId)
+        .eq('creator_id', user!.id) // Ensure only creator can delete
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
+    },
+  })
+
   // Real-time subscription for challenge updates
   useEffect(() => {
     if (!user) return
@@ -330,6 +383,8 @@ export function useChallenges() {
     challenges,
     isLoading,
     createChallenge: createChallengeMutation.mutateAsync,
+    updateChallenge: updateChallengeMutation.mutateAsync,
+    deleteChallenge: deleteChallengeMutation.mutateAsync,
     inviteParticipants: inviteParticipantsMutation.mutateAsync,
     respondToInvite: respondToInviteMutation.mutateAsync,
     joinChallenge: joinChallengeMutation.mutateAsync,

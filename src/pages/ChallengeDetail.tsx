@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2, LogOut } from 'lucide-react'
+import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2, LogOut, Edit2, Trash2, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges, useChallengeParticipants } from '@/hooks/useChallenges'
 import { useAuth } from '@/contexts/AuthContext'
 import InviteParticipantsModal from '@/components/challenges/InviteParticipantsModal'
+import EditChallengeModal from '@/components/challenges/EditChallengeModal'
 import { format } from 'date-fns'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const CATEGORIES = [
   { name: 'Health', color: '#34C759', emoji: '💪' },
@@ -21,9 +28,10 @@ export default function ChallengeDetail() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
 
-  const { challenges, respondToInvite, recordCompletion, leaveChallenge } = useChallenges()
+  const { challenges, respondToInvite, recordCompletion, leaveChallenge, deleteChallenge } = useChallenges()
   const { participants } = useChallengeParticipants(id!)
 
   const challenge = challenges?.find(c => c.id === id)
@@ -78,6 +86,21 @@ export default function ChallengeDetail() {
     } catch (error) {
       console.error('Error leaving challenge:', error)
       alert('Failed to leave challenge. Please try again.')
+    }
+  }
+
+  const handleDeleteChallenge = async () => {
+    if (!id || !isCreator) return
+
+    const confirmed = window.confirm('Are you sure you want to delete this challenge? This action cannot be undone and all participant data will be lost.')
+    if (!confirmed) return
+
+    try {
+      await deleteChallenge(id)
+      navigate('/challenges')
+    } catch (error) {
+      console.error('Error deleting challenge:', error)
+      alert('Failed to delete challenge. Please try again.')
     }
   }
 
@@ -142,6 +165,28 @@ export default function ChallengeDetail() {
                 <p className="text-muted-foreground text-sm">{challenge.description}</p>
               )}
             </div>
+            {isCreator && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 flex-shrink-0">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit Challenge
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDeleteChallenge}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Challenge
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Challenge Info */}
@@ -339,6 +384,15 @@ export default function ChallengeDetail() {
         challengeId={challenge.id}
         challengeName={challenge.name}
       />
+
+      {/* Edit Modal */}
+      {challenge && (
+        <EditChallengeModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          challenge={challenge}
+        />
+      )}
     </div>
   )
 }
