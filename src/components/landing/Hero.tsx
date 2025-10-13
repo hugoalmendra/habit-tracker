@@ -13,17 +13,6 @@ export default function Hero() {
       <div className="absolute inset-0 dark:opacity-[0.03] opacity-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIi8+PC9nPjwvc3ZnPg==')]" />
       {/* Floating Samurai Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Katana Sword */}
-        <motion.div
-          className="absolute top-20 left-10 text-kaizen-crimson/15 dark:text-kaizen-crimson/20 text-7xl"
-          animate={{
-            y: [0, -30, 0],
-            rotate: [-45, -40, -45],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        >
-          ⚔️
-        </motion.div>
         {/* Torii Gate */}
         <motion.div
           className="absolute top-40 right-20 text-kaizen-gold/15 dark:text-kaizen-gold/20 text-6xl"
@@ -45,17 +34,6 @@ export default function Hero() {
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         >
           🧘
-        </motion.div>
-        {/* Second Katana */}
-        <motion.div
-          className="absolute bottom-20 right-1/3 text-kaizen-crimson/10 dark:text-kaizen-crimson/15 text-6xl"
-          animate={{
-            y: [0, -15, 0],
-            rotate: [45, 50, 45],
-          }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-        >
-          ⚔️
         </motion.div>
       </div>
 

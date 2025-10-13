@@ -162,47 +162,48 @@ export default function Progress() {
           transition={{ delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
           <Card className="border-border/40 shadow-apple-lg rounded-2xl">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-foreground">Monthly Calendar</CardTitle>
-                <div className="flex items-center gap-2">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+                <CardTitle className="text-foreground text-lg sm:text-2xl hidden sm:block">Monthly Calendar</CardTitle>
+                <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-center">
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={previousMonth}
-                    className="h-9 w-9 rounded-lg border-border/60 hover:bg-secondary"
+                    className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg border-border/60 hover:bg-secondary shrink-0"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <span className="min-w-[150px] text-center font-semibold text-foreground">
-                    {format(currentDate, 'MMMM yyyy')}
+                  <span className="text-sm sm:text-base font-semibold text-foreground text-center whitespace-nowrap px-2">
+                    {format(currentDate, 'MMM yyyy')}
                   </span>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={nextMonth}
-                    className="h-9 w-9 rounded-lg border-border/60 hover:bg-secondary"
+                    className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg border-border/60 hover:bg-secondary shrink-0"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="text-muted-foreground">Loading...</div>
                 </div>
               ) : (
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="p-2 text-center text-sm font-semibold text-muted-foreground">
-                      {day}
+                    <div key={day} className="p-1 sm:p-2 text-center text-xs sm:text-sm font-semibold text-muted-foreground">
+                      <span className="hidden sm:inline">{day}</span>
+                      <span className="sm:hidden">{day.slice(0, 1)}</span>
                     </div>
                   ))}
                   {/* Empty cells for days before month starts */}
                   {Array.from({ length: monthStart.getDay() }).map((_, i) => (
-                    <div key={`empty-${i}`} className="p-2" />
+                    <div key={`empty-${i}`} className="p-1 sm:p-2" />
                   ))}
                   {/* Calendar days */}
                   {daysInMonth.map((day) => {
@@ -217,8 +218,8 @@ export default function Progress() {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: day.getDate() * 0.01 }}
-                        className={`relative aspect-square rounded-xl p-2 text-center transition-all hover:scale-105 ${
-                          isToday ? 'ring-2 ring-primary' : ''
+                        className={`relative aspect-square rounded-lg sm:rounded-xl p-1 sm:p-2 text-center transition-all hover:scale-105 ${
+                          isToday ? 'ring-1 sm:ring-2 ring-primary' : ''
                         }`}
                         style={{
                           backgroundColor:
@@ -227,11 +228,11 @@ export default function Progress() {
                               : 'hsl(var(--secondary))',
                         }}
                       >
-                        <div className={`text-sm font-medium ${intensity > 50 ? 'text-white' : 'text-foreground'}`}>
+                        <div className={`text-xs sm:text-sm font-medium ${intensity > 50 ? 'text-white' : 'text-foreground'}`}>
                           {day.getDate()}
                         </div>
                         {completions > 0 && (
-                          <div className={`text-xs ${intensity > 50 ? 'text-white' : 'text-muted-foreground'}`}>
+                          <div className={`text-[10px] sm:text-xs leading-tight ${intensity > 50 ? 'text-white' : 'text-muted-foreground'}`}>
                             {completions}/{totalHabits}
                           </div>
                         )}
@@ -302,7 +303,7 @@ export default function Progress() {
                         </div>
 
                         {/* Calendar Blocks */}
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        <div className="grid grid-cols-[repeat(auto-fit,minmax(24px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(32px,1fr))] gap-1.5 sm:gap-2">
                           {daysInMonth.map((day, index) => {
                             const dayStr = format(day, 'yyyy-MM-dd')
                             const isCompleted = habitCompletionDates.has(dayStr)
@@ -315,7 +316,7 @@ export default function Progress() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: index * 0.01 }}
                                 className={`
-                                  flex-1 min-w-[20px] max-w-[40px] aspect-square rounded-md relative group
+                                  aspect-square rounded-md relative group
                                   ${isCompleted
                                     ? 'opacity-100'
                                     : 'bg-secondary opacity-40'

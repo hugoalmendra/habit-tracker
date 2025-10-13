@@ -155,14 +155,19 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
 
           <motion.button
             onClick={handleToggle}
+            onTouchEnd={(e) => {
+              e.preventDefault()
+              if (!isToggling) {
+                handleToggle()
+              }
+            }}
             disabled={isToggling}
-            className={`flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-3.5 font-medium transition-all ${
+            className={`flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-3.5 font-medium transition-all touch-manipulation active:scale-[0.97] ${
               completed
                 ? 'bg-primary text-primary-foreground shadow-apple-sm'
                 : 'border border-border/60 bg-secondary/50 text-foreground hover:bg-secondary hover:border-border'
             }`}
             whileTap={{ scale: 0.97 }}
-            whileHover={{ scale: completed ? 1 : 1.01 }}
           >
             {completed && (
               <motion.div

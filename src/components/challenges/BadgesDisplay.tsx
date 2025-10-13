@@ -83,7 +83,7 @@ export default function BadgesDisplay({ userId }: BadgesDisplayProps = {}) {
 
       {/* Badges Grid */}
       {displayBadges.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {displayBadges.map((badge, index) => (
             <motion.div
               key={badge.id}
