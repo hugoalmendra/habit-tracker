@@ -8,118 +8,186 @@ export default function Hero() {
   const { theme } = useTheme()
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-kaizen-bg via-white to-kaizen-bg dark:from-black dark:via-kaizen-dark-gray dark:to-black pt-20">
-      {/* Subtle texture overlay for dark mode */}
-      <div className="absolute inset-0 dark:opacity-[0.03] opacity-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIi8+PC9nPjwvc3ZnPg==')]" />
-      {/* Floating Samurai Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Torii Gate */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/kaizen-landing/background-hero-light.png"
+          alt=""
+          className="w-full h-full object-cover dark:hidden"
+        />
+        <img
+          src="/kaizen-landing/background-hero-dark.png"
+          alt=""
+          className="w-full h-full object-cover hidden dark:block"
+        />
+      </div>
+
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-white/40 dark:bg-black/40 z-[1]" />
+
+      {/* Subtle Enso circles in background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
+        {/* Large Enso - top right */}
         <motion.div
-          className="absolute top-40 right-20 text-kaizen-gold/15 dark:text-kaizen-gold/20 text-6xl"
-          animate={{
-            y: [0, -25, 0],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -top-20 -right-20 w-96 h-96"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
         >
-          ⛩️
+          <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.03] dark:opacity-[0.05]">
+            <circle
+              cx="100"
+              cy="100"
+              r="80"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-stone-900 dark:text-stone-100"
+              strokeLinecap="round"
+              strokeDasharray="502"
+              strokeDashoffset="25"
+            />
+          </svg>
         </motion.div>
-        {/* Meditation/Discipline Symbol */}
+
+        {/* Small Enso - bottom left */}
         <motion.div
-          className="absolute bottom-40 left-1/4 text-kaizen-charcoal/10 dark:text-white/10 text-5xl"
-          animate={{
-            y: [0, -20, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-10 -left-10 w-64 h-64"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
         >
-          🧘
+          <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.02] dark:opacity-[0.04]">
+            <circle
+              cx="100"
+              cy="100"
+              r="80"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-stone-900 dark:text-stone-100"
+              strokeLinecap="round"
+              strokeDasharray="502"
+              strokeDashoffset="30"
+            />
+          </svg>
+        </motion.div>
+
+        {/* Bamboo stalks - minimalist */}
+        <motion.div
+          className="absolute top-1/4 right-12 opacity-[0.04] dark:opacity-[0.06]"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div className="flex gap-3">
+            <div className="w-1 h-32 bg-stone-900 dark:bg-stone-100 rounded-full" />
+            <div className="w-1 h-24 bg-stone-900 dark:bg-stone-100 rounded-full" />
+            <div className="w-1 h-28 bg-stone-900 dark:bg-stone-100 rounded-full" />
+          </div>
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-6 relative z-[3]">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
+          {/* Zen symbol above headline */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-kaizen-crimson/10 dark:bg-kaizen-crimson/20 text-kaizen-crimson dark:text-kaizen-crimson text-sm font-medium mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="mb-12"
           >
-            <Sparkles className="h-4 w-4" />
-            Join 10,000+ practitioners on their journey
+            <svg viewBox="0 0 100 100" className="w-16 h-16 mx-auto opacity-30 dark:opacity-40">
+              <circle
+                cx="50"
+                cy="50"
+                r="35"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="text-stone-800 dark:text-stone-200"
+                strokeLinecap="round"
+                strokeDasharray="220"
+                strokeDashoffset="15"
+              />
+            </svg>
           </motion.div>
 
-          {/* Headline */}
+          {/* Headline - Zen style */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold tracking-tight mb-6"
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="text-5xl md:text-7xl lg:text-8xl font-light tracking-wide mb-8 leading-tight"
           >
-            <span className="bg-gradient-to-r from-kaizen-slate via-kaizen-charcoal to-kaizen-slate dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent">
-              Master Your Life,
+            <span className="block text-stone-900 dark:text-stone-100 mb-2">
+              The Way
             </span>
-            <br />
-            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent">
-              One Day at a Time
+            <span className="block text-stone-900 dark:text-stone-100">
+              of Kaizen
             </span>
           </motion.h1>
 
-          {/* Subheadline */}
+          {/* Japanese character for "way" */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="text-6xl font-light text-stone-400/30 dark:text-stone-600/30 mb-8 select-none"
+          >
+            道
+          </motion.div>
+
+          {/* Subheadline - More spacious */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            className="text-lg md:text-xl text-stone-600 dark:text-stone-400 mb-16 max-w-2xl mx-auto leading-relaxed font-light tracking-wide"
           >
-            The Way of Kaizen: Transform through 1% daily improvements. Build habits, track progress, achieve mastery.
+            Transform through small, deliberate steps.
+            <br className="hidden md:block" />
+            Build habits with intention. Achieve mastery through consistency.
           </motion.p>
 
-          {/* CTA Form */}
+          {/* CTA - Minimalist zen button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto mb-6"
+            transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
+            className="flex flex-col items-center gap-6 mb-6"
           >
             <Button
               asChild
               size="lg"
-              className="w-full sm:w-auto bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90 h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all"
+              className="bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 h-12 px-12 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Link to="/signup">
-                Begin Your Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Begin
               </Link>
             </Button>
+
+            <p className="text-sm text-stone-500 dark:text-stone-500 font-light tracking-wide">
+              Free forever · No credit card
+            </p>
           </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-sm text-gray-500 dark:text-gray-400"
-          >
-            Free to start. No credit card required.
-          </motion.p>
-
-          {/* Hero Image */}
+          {/* Hero Image - Zen minimalist border */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-16 relative"
+            transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+            className="mt-24 relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-kaizen-charcoal">
+            <div className="relative overflow-hidden border border-stone-200 dark:border-stone-800 shadow-2xl">
               <img
                 src={theme === 'dark' ? '/dark-hero.jpg' : '/light-hero.jpg'}
                 alt="The Way of Kaizen Dashboard"
-                className="w-full h-auto"
+                className="w-full h-auto opacity-90"
               />
             </div>
-            {/* Shadow effect */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-kaizen-crimson/20 to-transparent blur-3xl transform translate-y-8" />
+            {/* Subtle shadow effect */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-stone-400/10 to-transparent blur-2xl transform translate-y-12" />
           </motion.div>
         </div>
       </div>

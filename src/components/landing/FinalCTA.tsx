@@ -5,93 +5,136 @@ import { ArrowRight } from 'lucide-react'
 
 export default function FinalCTA() {
   return (
-    <section className="py-24 bg-gradient-to-br from-kaizen-bg via-white to-kaizen-bg dark:from-black dark:via-kaizen-dark-gray dark:to-black relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-kaizen-crimson/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-kaizen-gold/20 rounded-full blur-3xl" />
+    <section className="py-32 bg-white dark:bg-black relative overflow-hidden">
+      {/* Zen paper texture */}
+      <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
+
+      {/* Large Enso background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none">
+        <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.02] dark:opacity-[0.04]">
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.5"
+            className="text-stone-900 dark:text-stone-100"
+            strokeLinecap="round"
+            strokeDasharray="565"
+            strokeDashoffset="30"
+          />
+        </svg>
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Headline */}
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Small Enso */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="mb-12"
+          >
+            <svg viewBox="0 0 100 100" className="w-12 h-12 mx-auto opacity-20 dark:opacity-30">
+              <circle
+                cx="50"
+                cy="50"
+                r="30"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="text-stone-800 dark:text-stone-200"
+                strokeLinecap="round"
+                strokeDasharray="188"
+                strokeDashoffset="12"
+              />
+            </svg>
+          </motion.div>
+
+          {/* Headline - Zen style */}
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-6xl font-bold text-kaizen-slate dark:text-white mb-6"
+            transition={{ duration: 1, delay: 0.1 }}
+            className="text-3xl md:text-5xl font-light text-stone-900 dark:text-stone-100 mb-8 tracking-wide leading-tight"
           >
-            Your Journey to Mastery{' '}
-            <span className="bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent">
-              Begins Today
-            </span>
+            Begin Your Practice
           </motion.h2>
+
+          {/* Japanese character */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-5xl font-light text-stone-400/30 dark:text-stone-600/30 mb-12 select-none"
+          >
+            始
+          </motion.div>
 
           {/* Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto"
+            transition={{ duration: 1, delay: 0.3 }}
+            className="text-lg text-stone-600 dark:text-stone-400 mb-16 max-w-xl mx-auto font-light leading-loose"
           >
-            The best time to start was yesterday. The next best time is now.
+            The best time to plant a tree was twenty years ago.
+            <br />
+            The second best time is now.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button - Minimalist */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            transition={{ duration: 1, delay: 0.4 }}
+            className="flex flex-col items-center gap-8 mb-12"
           >
             <Button
               asChild
               size="lg"
-              className="w-full sm:w-auto bg-kaizen-crimson text-white hover:bg-kaizen-crimson/90 h-14 px-10 text-lg shadow-xl hover:shadow-2xl transition-all group"
+              className="bg-stone-900 dark:bg-stone-100 text-stone-50 dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 h-12 px-16 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Link to="/signup">
-                Start Your Journey
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                Begin
               </Link>
             </Button>
 
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="w-full sm:w-auto border-2 border-kaizen-charcoal dark:border-white text-kaizen-charcoal dark:text-white hover:bg-kaizen-charcoal hover:text-white dark:hover:bg-white dark:hover:text-kaizen-charcoal h-14 px-10 text-lg transition-all"
+              variant="ghost"
+              className="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 h-12 px-8 text-sm font-light tracking-wider uppercase transition-all duration-300"
             >
               <Link to="/login">Sign In</Link>
             </Button>
           </motion.div>
+
+          {/* Divider line */}
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            whileInView={{ opacity: 1, scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.5 }}
+            className="w-16 h-px bg-stone-300 dark:bg-stone-700 mx-auto mb-12"
+          />
 
           {/* Trust Badge */}
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-sm text-gray-500 dark:text-gray-400 mt-8"
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-xs text-stone-500 dark:text-stone-500 font-light tracking-wider"
           >
-            Join 10,000+ practitioners • Free to start • No credit card required
+            Free forever · No credit card
           </motion.p>
-
-          {/* Decorative Quote */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700"
-          >
-            <p className="text-lg text-gray-500 dark:text-gray-400 italic">
-              "A journey of a thousand miles begins with a single step"
-            </p>
-            <p className="text-sm text-kaizen-gold font-medium mt-2">— Lao Tzu</p>
-          </motion.div>
         </div>
       </div>
     </section>

@@ -3,55 +3,55 @@ import { Instagram } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-kaizen-charcoal text-white/80 py-12">
+    <footer className="bg-stone-900 dark:bg-zinc-950 text-stone-400 py-16">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="col-span-1 sm:col-span-2 md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <img
                 src="/logo-dark.png"
                 alt="The Way of Kaizen"
-                className="h-8 w-auto"
+                className="h-7 w-auto"
               />
             </div>
-            <p className="text-white/60 text-sm max-w-md">
-              Transform through 1% daily improvements. Build habits, track progress, achieve mastery.
+            <p className="text-stone-500 text-sm max-w-md font-light leading-relaxed">
+              Transform through small, deliberate steps. Build habits with intention.
             </p>
-            <div className="flex gap-4 mt-6">
+            <div className="flex gap-4 mt-8">
               <a
                 href="https://www.instagram.com/the.way.of.kaizen/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-kaizen-crimson flex items-center justify-center transition-colors"
+                className="w-10 h-10 border border-stone-700 hover:border-stone-600 flex items-center justify-center transition-colors"
                 aria-label="Follow us on Instagram"
               >
-                <Instagram className="h-5 w-5" />
+                <Instagram className="h-4 w-4" strokeWidth={1.5} />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-stone-300 font-light mb-6 text-sm tracking-wider uppercase">Product</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <a href="#features" className="hover:text-kaizen-crimson transition-colors">
+                <a href="#features" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   Features
                 </a>
               </li>
               <li>
-                <a href="#how-it-works" className="hover:text-kaizen-crimson transition-colors">
+                <a href="#how-it-works" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   How It Works
                 </a>
               </li>
               <li>
-                <a href="#philosophy" className="hover:text-kaizen-crimson transition-colors">
+                <a href="#philosophy" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   Philosophy
                 </a>
               </li>
               <li>
-                <Link to="/signup" className="hover:text-kaizen-crimson transition-colors">
+                <Link to="/signup" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   Get Started
                 </Link>
               </li>
@@ -60,15 +60,15 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-stone-300 font-light mb-6 text-sm tracking-wider uppercase">Legal</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <Link to="/privacy" className="hover:text-kaizen-crimson transition-colors">
+                <Link to="/privacy" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:text-kaizen-crimson transition-colors">
+                <Link to="/terms" className="text-stone-500 hover:text-stone-300 transition-colors font-light">
                   Terms of Service
                 </Link>
               </li>
@@ -76,13 +76,16 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="w-full h-px bg-stone-800 mb-8" />
+
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-white/50">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-stone-500 font-light tracking-wide">
             © 2025 The Way of Kaizen. All rights reserved.
           </p>
-          <p className="text-sm text-white/50 flex items-center gap-2">
-            Made with <span className="text-kaizen-crimson">❤️</span> and <span className="text-kaizen-gold">改善</span>
+          <p className="text-xs text-stone-500 flex items-center gap-2 font-light">
+            Made with <span className="text-kaizen-crimson">❤️</span> and <span className="text-kaizen-crimson">改善</span>
           </p>
         </div>
       </div>

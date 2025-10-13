@@ -2,63 +2,67 @@ import { motion } from 'framer-motion'
 
 export default function Philosophy() {
   return (
-    <section id="philosophy" className="py-24 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-1/4 left-1/4 text-[20rem] font-bold text-white">
+    <section id="philosophy" className="py-32 bg-stone-900 dark:bg-zinc-950 relative overflow-hidden">
+      {/* Zen paper texture */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
+
+      {/* Large background Kanji - very subtle */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[24rem] font-light text-stone-100">
           改善
         </div>
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Kanji */}
+          {/* Kanji - Minimalist */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="mb-12"
+            transition={{ duration: 1.2 }}
+            className="mb-16"
           >
-            <div className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-kaizen-crimson via-kaizen-crimson-light to-kaizen-crimson">
+            <div className="text-7xl md:text-8xl font-light text-stone-100 mb-6">
               改善
             </div>
-            <p className="text-white/80 text-xl mt-4 tracking-widest">KAIZEN</p>
+            <p className="text-stone-400 text-base tracking-[0.5em] uppercase font-light">Kaizen</p>
+            <p className="text-stone-500 text-sm mt-2 font-light">Continuous Improvement</p>
           </motion.div>
 
-          {/* Quote */}
+          {/* Quote - Zen style */}
           <motion.blockquote
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-2xl md:text-3xl font-medium text-white/90 italic mb-8 leading-relaxed"
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-xl md:text-2xl font-light text-stone-300 mb-12 leading-loose max-w-3xl mx-auto"
           >
             "When you improve a little each day, eventually big things occur. Not tomorrow, not the next day, but eventually a big gain is made."
           </motion.blockquote>
 
-          {/* Divider */}
+          {/* Divider - Minimalist */}
           <motion.div
             initial={{ opacity: 0, scaleX: 0 }}
             whileInView={{ opacity: 1, scaleX: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="h-px w-32 bg-gradient-to-r from-transparent via-kaizen-crimson-light to-transparent mx-auto mb-8"
+            transition={{ duration: 1, delay: 0.4 }}
+            className="h-px w-24 bg-stone-700 mx-auto mb-12"
           />
 
-          {/* Explanation */}
+          {/* Explanation - Zen spacing */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-white/70 text-lg max-w-3xl mx-auto space-y-6"
+            transition={{ duration: 1, delay: 0.6 }}
+            className="text-stone-400 text-base max-w-2xl mx-auto space-y-8 font-light leading-loose"
           >
             <p>
-              <span className="text-kaizen-crimson font-semibold">Kaizen (改善)</span> is the ancient Japanese philosophy of continuous improvement through small, incremental changes.
+              Kaizen is the ancient Japanese philosophy of continuous improvement through small, incremental changes.
             </p>
             <p>
-              Rooted in the samurai tradition of daily discipline and deliberate practice, Kaizen teaches that mastery comes not from dramatic transformations, but from the compound effect of 1% improvements every day.
+              Rooted in the samurai tradition of daily discipline and deliberate practice, Kaizen teaches that mastery comes not from dramatic transformations, but from the compound effect of consistent effort.
             </p>
             <p>
               The Way of Kaizen embodies this timeless wisdom, guiding you to build lasting habits that transform your life, one day at a time.

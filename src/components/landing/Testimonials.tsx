@@ -34,91 +34,112 @@ const stats = [
 
 export default function Testimonials() {
   return (
-    <section className="py-24 bg-white dark:bg-black relative">
-      {/* Dot pattern for dark mode */}
-      <div className="absolute inset-0 dark:opacity-[0.02] opacity-0 pointer-events-none bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
+    <section className="py-32 bg-stone-50 dark:bg-zinc-950 relative">
+      {/* Zen paper texture */}
+      <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
+
       <div className="container mx-auto px-6 relative z-10">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        {/* Section Header - Zen style */}
+        <div className="text-center max-w-2xl mx-auto mb-24">
+          {/* Small Enso */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="mb-8"
+          >
+            <svg viewBox="0 0 100 100" className="w-12 h-12 mx-auto opacity-20 dark:opacity-30">
+              <circle
+                cx="50"
+                cy="50"
+                r="30"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="text-stone-800 dark:text-stone-200"
+                strokeLinecap="round"
+                strokeDasharray="188"
+                strokeDashoffset="12"
+              />
+            </svg>
+          </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-kaizen-slate dark:text-white mb-4"
+            transition={{ duration: 1, delay: 0.1 }}
+            className="text-3xl md:text-4xl font-light text-stone-900 dark:text-stone-100 mb-6 tracking-wide"
           >
-            Trusted by <span className="text-kaizen-crimson">Thousands</span>
+            Voices from the Path
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl text-gray-600 dark:text-gray-300"
+            transition={{ duration: 1, delay: 0.2 }}
+            className="text-lg text-stone-600 dark:text-stone-400 font-light leading-relaxed"
           >
-            Join a community of practitioners committed to daily excellence
+            Stories from those walking the way
           </motion.p>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Minimalist */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
+          transition={{ duration: 1 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-24"
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
+              transition={{ duration: 1, delay: index * 0.15 }}
               className="text-center"
             >
-              <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-kaizen-crimson to-kaizen-crimson-light bg-clip-text text-transparent mb-2">
+              <div className="text-4xl md:text-5xl font-light text-stone-900 dark:text-stone-100 mb-3">
                 {stat.number}
               </div>
-              <div className="text-gray-600 font-medium">{stat.label}</div>
+              <div className="text-stone-500 dark:text-stone-500 text-sm tracking-wider uppercase font-light">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Testimonial Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Testimonial Cards - Zen style */}
+        <div className="grid md:grid-cols-3 gap-12">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.name}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 1, delay: index * 0.15 }}
             >
-              <Card className="h-full border-2 border-gray-200/50 dark:border-gray-800/50 hover:border-kaizen-crimson/30 dark:hover:border-kaizen-crimson/50 hover:shadow-xl dark:hover:shadow-kaizen-crimson/10 transition-all duration-300 dark:bg-kaizen-dark-gray">
-                <CardContent className="p-8">
-                  {/* Rating */}
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-kaizen-gold text-kaizen-gold" />
-                    ))}
-                  </div>
-
+              <Card className="h-full border border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-lg transition-all duration-500 bg-white dark:bg-black rounded-none">
+                <CardContent className="p-10">
                   {/* Quote */}
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                  <p className="text-stone-600 dark:text-stone-400 leading-loose mb-8 font-light">
                     "{testimonial.quote}"
                   </p>
+
+                  {/* Divider */}
+                  <div className="w-12 h-px bg-stone-300 dark:bg-stone-700 mb-8" />
 
                   {/* Author */}
                   <div className="flex items-center gap-4">
                     <img
                       src={testimonial.image}
                       alt={testimonial.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-12 h-12 object-cover border border-stone-300 dark:border-stone-700"
                     />
                     <div>
-                      <div className="font-bold text-kaizen-slate dark:text-white">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
+                      <div className="font-light text-stone-900 dark:text-stone-100">{testimonial.name}</div>
+                      <div className="text-xs text-stone-500 dark:text-stone-500 uppercase tracking-wider font-light">{testimonial.role}</div>
                     </div>
                   </div>
                 </CardContent>
