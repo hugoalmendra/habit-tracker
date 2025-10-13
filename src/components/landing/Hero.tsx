@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Hero() {
