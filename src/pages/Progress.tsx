@@ -10,10 +10,10 @@ import XPBar from '@/components/dashboard/XPBar'
 
 const CATEGORY_COLORS: Record<string, string> = {
   Health: '#34C759',
-  Hustle: '#FF9500',
-  Heart: '#FF3B30',
-  Harmony: '#AF52DE',
-  Happiness: '#FFCC00',
+  Career: '#FF9500',
+  Spirit: '#FF3B30',
+  Mindset: '#AF52DE',
+  Joy: '#FFCC00',
 }
 
 export default function Progress() {
@@ -264,10 +264,10 @@ export default function Progress() {
                   >
                     <option value="all">All Categories</option>
                     <option value="Health">Health</option>
-                    <option value="Hustle">Hustle</option>
-                    <option value="Heart">Heart</option>
-                    <option value="Harmony">Harmony</option>
-                    <option value="Happiness">Happiness</option>
+                    <option value="Career">Career</option>
+                    <option value="Spirit">Spirit</option>
+                    <option value="Mindset">Mindset</option>
+                    <option value="Joy">Joy</option>
                   </select>
                 </div>
               </CardHeader>

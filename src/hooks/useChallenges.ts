@@ -275,6 +275,7 @@ export function useChallenges() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
       queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
+      queryClient.invalidateQueries({ queryKey: ['habits'] })
     },
   })
 

@@ -34,7 +34,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 
-const CATEGORIES = ['All', 'Health', 'Hustle', 'Heart', 'Harmony', 'Happiness'] as const
+const CATEGORIES = ['All', 'Health', 'Career', 'Spirit', 'Mindset', 'Joy'] as const
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useTheme()

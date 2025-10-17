@@ -10,14 +10,14 @@ interface AddHabitModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-type HabitCategory = 'Health' | 'Hustle' | 'Heart' | 'Harmony' | 'Happiness'
+type HabitCategory = 'Health' | 'Career' | 'Spirit' | 'Mindset' | 'Joy'
 
 const CATEGORIES: { name: HabitCategory; color: string; subcategories: string[] }[] = [
   { name: 'Health', color: '#34C759', subcategories: ['Energy', 'Exercise', 'Grounding', 'Nutrition', 'Routine and Rituals'] },
-  { name: 'Hustle', color: '#FF9500', subcategories: ['Training', 'Cash'] },
-  { name: 'Heart', color: '#FF3B30', subcategories: ['Gratitude', 'God'] },
-  { name: 'Harmony', color: '#AF52DE', subcategories: ['Appreciation', 'Relationships', 'Abundance'] },
-  { name: 'Happiness', color: '#FFCC00', subcategories: ['Purpose', 'Play'] },
+  { name: 'Career', color: '#FF9500', subcategories: ['Training', 'Cash'] },
+  { name: 'Spirit', color: '#FF3B30', subcategories: ['Gratitude', 'God'] },
+  { name: 'Mindset', color: '#AF52DE', subcategories: ['Appreciation', 'Relationships', 'Abundance'] },
+  { name: 'Joy', color: '#FFCC00', subcategories: ['Purpose', 'Play'] },
 ]
 
 export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps) {
