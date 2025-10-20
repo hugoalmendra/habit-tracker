@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trophy, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, Trophy, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { format, addDays } from 'date-fns'
@@ -18,11 +18,12 @@ const CATEGORIES = [
   { name: 'Joy', color: '#FFD60A', emoji: '😊' },
 ]
 
-const TARGET_TYPES = [
-  { value: 'daily_completion', label: 'Daily Completion', description: 'Complete the challenge every day' },
-  { value: 'total_count', label: 'Total Count', description: 'Reach a total number of completions' },
-  { value: 'streak', label: 'Streak', description: 'Maintain a consecutive streak' },
-]
+interface ChallengeHabit {
+  name: string
+  description?: string
+  category: string
+  color: string
+}
 
 export default function CreateChallengeModal({ open, onOpenChange }: CreateChallengeModalProps) {
   const [step, setStep] = useState(1)
@@ -31,8 +32,9 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   const [category, setCategory] = useState<string>('Health')
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 30), 'yyyy-MM-dd'))
-  const [targetType, setTargetType] = useState<'daily_completion' | 'total_count' | 'streak'>('daily_completion')
-  const [targetValue, setTargetValue] = useState(7)
+  const [habits, setHabits] = useState<ChallengeHabit[]>([
+    { name: '', description: '', category: 'Health', color: '#34C759' }
+  ])
   const [isPublic, setIsPublic] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -43,6 +45,13 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   const handleSubmit = async () => {
     if (!name.trim()) return
 
+    // Filter out empty habits
+    const validHabits = habits.filter(h => h.name.trim())
+    if (validHabits.length === 0) {
+      alert('Please add at least one habit to the challenge')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const challengeData = {
@@ -51,11 +60,13 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
         category,
         start_date: startDate,
         end_date: endDate,
-        target_type: targetType,
-        target_value: targetValue,
         badge_icon: selectedCategory.emoji,
         badge_color: selectedCategory.color,
         is_public: isPublic,
+        habits: validHabits.map(h => ({
+          ...h,
+          description: h.description?.trim() || undefined
+        }))
       }
 
       await createChallenge(challengeData)
@@ -75,10 +86,25 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
     setCategory('Health')
     setStartDate(format(new Date(), 'yyyy-MM-dd'))
     setEndDate(format(addDays(new Date(), 30), 'yyyy-MM-dd'))
-    setTargetType('daily_completion')
-    setTargetValue(7)
+    setHabits([{ name: '', description: '', category: 'Health', color: '#34C759' }])
     setIsPublic(false)
     onOpenChange(false)
+  }
+
+  const addHabit = () => {
+    setHabits([...habits, { name: '', description: '', category: 'Health', color: '#34C759' }])
+  }
+
+  const removeHabit = (index: number) => {
+    if (habits.length > 1) {
+      setHabits(habits.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateHabit = (index: number, field: keyof ChallengeHabit, value: string) => {
+    const newHabits = [...habits]
+    newHabits[index] = { ...newHabits[index], [field]: value }
+    setHabits(newHabits)
   }
 
   const canProceedStep1 = name.trim().length > 0
@@ -208,7 +234,7 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                     </motion.div>
                   )}
 
-                  {/* Step 2: Dates & Type */}
+                  {/* Step 2: Habits & Dates */}
                   {step === 2 && (
                     <motion.div
                       key="step2"
@@ -247,52 +273,54 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                         </div>
                       </div>
 
-                      {/* Target Type */}
+                      {/* Habits */}
                       <div>
-                        <label className="mb-3 block text-sm font-medium">Challenge Type</label>
-                        <div className="space-y-2">
-                          {TARGET_TYPES.map((type) => (
-                            <button
-                              key={type.value}
-                              type="button"
-                              onClick={() => setTargetType(type.value as any)}
-                              className={`w-full flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
-                                targetType === type.value
-                                  ? 'border-primary bg-primary/5'
-                                  : 'border-border/60 hover:border-border'
-                              }`}
-                            >
-                              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                                targetType === type.value
-                                  ? 'border-primary bg-primary'
-                                  : 'border-border'
-                              }`}>
-                                {targetType === type.value && (
-                                  <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="block text-sm font-medium">Challenge Habits</label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={addHabit}
+                            className="rounded-lg"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Habit
+                          </Button>
+                        </div>
+                        <div className="space-y-3">
+                          {habits.map((habit, index) => (
+                            <div key={index} className="p-4 rounded-xl border border-border/60 bg-secondary/30 space-y-3">
+                              <div className="flex items-start gap-2">
+                                <input
+                                  type="text"
+                                  value={habit.name}
+                                  onChange={(e) => updateHabit(index, 'name', e.target.value)}
+                                  placeholder="Habit name (e.g., Morning Run)"
+                                  className="flex-1 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                />
+                                {habits.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeHabit(index)}
+                                    className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 )}
                               </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">{type.label}</p>
-                                <p className="text-xs text-muted-foreground">{type.description}</p>
-                              </div>
-                            </button>
+                              <textarea
+                                value={habit.description}
+                                onChange={(e) => updateHabit(index, 'description', e.target.value)}
+                                placeholder="Description (optional)"
+                                rows={2}
+                                className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                              />
+                            </div>
                           ))}
                         </div>
-                      </div>
-
-                      {/* Target Value */}
-                      <div>
-                        <label htmlFor="target-value" className="mb-2 block text-sm font-medium">
-                          Target {targetType === 'streak' ? 'Streak Days' : targetType === 'daily_completion' ? 'Days' : 'Count'}
-                        </label>
-                        <input
-                          id="target-value"
-                          type="number"
-                          value={targetValue}
-                          onChange={(e) => setTargetValue(parseInt(e.target.value) || 0)}
-                          min="1"
-                          className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                        />
                       </div>
                     </motion.div>
                   )}
@@ -345,9 +373,9 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Goal:</span>
+                            <span className="text-muted-foreground">Habits:</span>
                             <span className="font-medium">
-                              {targetValue} {targetType === 'daily_completion' ? 'days' : targetType === 'streak' ? 'day streak' : 'completions'}
+                              {habits.filter(h => h.name.trim()).length} habit{habits.filter(h => h.name.trim()).length !== 1 ? 's' : ''}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -355,6 +383,16 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                             <span className="font-medium">{isPublic ? 'Public' : 'Private'}</span>
                           </div>
                         </div>
+                        {habits.filter(h => h.name.trim()).length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-border/40">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Habits:</p>
+                            <ul className="space-y-1">
+                              {habits.filter(h => h.name.trim()).map((habit, index) => (
+                                <li key={index} className="text-xs">• {habit.name}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
