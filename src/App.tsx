@@ -20,6 +20,7 @@ import Profile from '@/pages/Profile'
 import Feed from '@/pages/Feed'
 import Challenges from '@/pages/Challenges'
 import ChallengeDetail from '@/pages/ChallengeDetail'
+import JoinChallenge from '@/pages/JoinChallenge'
 import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
@@ -124,6 +125,10 @@ function AppRoutes() {
         <Route
           path="/challenge/:id"
           element={<ProtectedRoute><ChallengeDetail /></ProtectedRoute>}
+        />
+        <Route
+          path="/challenges/:id/join"
+          element={<ProtectedRoute><JoinChallenge /></ProtectedRoute>}
         />
         <Route path="/profile/:userId" element={<PublicProfile />} />
         <Route path="/privacy" element={<Privacy />} />
