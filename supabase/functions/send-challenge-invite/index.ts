@@ -68,17 +68,18 @@ serve(async (req) => {
 
                   <!-- Header -->
                   <tr>
-                    <td style="padding: 40px 40px 32px; text-align: center; background-color: #000000; border-radius: 16px 16px 0 0;">
-                      <img src="https://app.thewayofkaizen.com/logo-dark.png" alt="The Way of Kaizen" style="height: 48px; margin: 0 auto 16px; display: block;" />
-                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">
-                        Challenge Invitation
-                      </h1>
+                    <td style="padding: 40px 40px; text-align: center; background-color: #000000; border-radius: 16px 16px 0 0;">
+                      <img src="https://app.thewayofkaizen.com/logo-dark.png" alt="The Way of Kaizen" style="height: 48px; margin: 0 auto; display: block;" />
                     </td>
                   </tr>
 
                   <!-- Content -->
                   <tr>
                     <td style="padding: 40px;">
+                      <h1 style="margin: 0 0 24px; color: #18181B; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">
+                        Challenge Invitation
+                      </h1>
+
                       <p style="margin: 0 0 24px; color: #18181B; font-size: 16px; line-height: 1.6;">
                         Hello,
                       </p>
