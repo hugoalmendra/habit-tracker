@@ -199,14 +199,8 @@ export function useChallenges() {
         .eq('id', challengeId)
         .single()
 
-      // Get inviter profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, full_name, email')
-        .eq('id', user!.id)
-        .single()
-
-      const inviterName = profile?.display_name || profile?.full_name || profile?.email || 'Someone'
+      // Use email from auth user (no need to query profiles table which has FK to auth.users)
+      const inviterName = user!.user_metadata?.display_name || user!.user_metadata?.full_name || user!.email || 'Someone'
 
       // Generate unique tokens for each email
       const invites = emails.map(email => ({
