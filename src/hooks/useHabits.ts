@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import type { Habit, FrequencyType, FrequencyConfig, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
+import type { Habit, FrequencyType, FrequencyConfig, SpecificDaysConfig } from '@/lib/types'
 
 // Helper function to check if a habit should be displayed on a specific date
 export function shouldDisplayHabit(habit: Habit, date: Date): boolean {
