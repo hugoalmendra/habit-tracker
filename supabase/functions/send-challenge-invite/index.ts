@@ -163,7 +163,7 @@ Habit Tracker - Build Better Habits Together
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Habit Tracker <invites@habittracker.app>',
+        from: 'The Way of Kaizen <invites@thewayofkaizen.com>',
         to: [to],
         subject: `${inviterName} invited you to join "${challengeName}"`,
         html: htmlContent,
