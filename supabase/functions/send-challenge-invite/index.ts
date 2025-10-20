@@ -69,12 +69,10 @@ serve(async (req) => {
                   <!-- Header -->
                   <tr>
                     <td style="padding: 40px 40px 32px; text-align: center; background-color: #0F172A; border-radius: 16px 16px 0 0;">
+                      <img src="${appUrl}/logo-light.png" alt="The Way of Kaizen" style="height: 48px; margin: 0 auto 16px; display: block;" />
                       <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">
                         Challenge Invitation
                       </h1>
-                      <p style="margin: 8px 0 0; color: #F59E0B; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-                        The Way of Kaizen
-                      </p>
                     </td>
                   </tr>
 
