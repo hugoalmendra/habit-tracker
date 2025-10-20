@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trophy, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, Trophy, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges, Challenge } from '@/hooks/useChallenges'
 import { format } from 'date-fns'
@@ -19,12 +19,6 @@ const CATEGORIES = [
   { name: 'Joy', color: '#FFD60A', emoji: '😊' },
 ]
 
-const TARGET_TYPES = [
-  { value: 'daily_completion', label: 'Daily Completion', description: 'Complete the challenge every day' },
-  { value: 'total_count', label: 'Total Count', description: 'Reach a total number of completions' },
-  { value: 'streak', label: 'Streak', description: 'Maintain a consecutive streak' },
-]
-
 export default function EditChallengeModal({ open, onOpenChange, challenge }: EditChallengeModalProps) {
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
@@ -32,8 +26,6 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
   const [category, setCategory] = useState<string>('Health')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const [targetType, setTargetType] = useState<'daily_completion' | 'total_count' | 'streak'>('daily_completion')
-  const [targetValue, setTargetValue] = useState(7)
   const [isPublic, setIsPublic] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -47,8 +39,6 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
       setCategory(challenge.category)
       setStartDate(challenge.start_date.split('T')[0])
       setEndDate(challenge.end_date.split('T')[0])
-      setTargetType(challenge.target_type)
-      setTargetValue(challenge.target_value)
       setIsPublic(challenge.is_public)
     }
   }, [challenge, open])
@@ -66,8 +56,6 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
         category,
         start_date: startDate,
         end_date: endDate,
-        target_type: targetType,
-        target_value: targetValue,
         badge_icon: selectedCategory.emoji,
         badge_color: selectedCategory.color,
         is_public: isPublic,
@@ -128,7 +116,7 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-semibold tracking-tight">Edit Challenge</h2>
-                  <p className="text-sm text-muted-foreground">Step {step} of 3</p>
+                  <p className="text-sm text-muted-foreground">Step {step} of 2</p>
                 </div>
               </div>
 
@@ -137,8 +125,8 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                 <div className="h-1 bg-secondary rounded-full overflow-hidden">
                   <motion.div
                     className="h-full bg-primary"
-                    initial={{ width: '33%' }}
-                    animate={{ width: `${(step / 3) * 100}%` }}
+                    initial={{ width: '50%' }}
+                    animate={{ width: `${(step / 2) * 100}%` }}
                     transition={{ duration: 0.3 }}
                   />
                 </div>
@@ -215,7 +203,7 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                     </motion.div>
                   )}
 
-                  {/* Step 2: Dates & Type */}
+                  {/* Step 2: Dates, Privacy & Review */}
                   {step === 2 && (
                     <motion.div
                       key="step2"
@@ -254,66 +242,6 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                         </div>
                       </div>
 
-                      {/* Target Type */}
-                      <div>
-                        <label className="mb-3 block text-sm font-medium">Challenge Type</label>
-                        <div className="space-y-2">
-                          {TARGET_TYPES.map((type) => (
-                            <button
-                              key={type.value}
-                              type="button"
-                              onClick={() => setTargetType(type.value as any)}
-                              className={`w-full flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
-                                targetType === type.value
-                                  ? 'border-primary bg-primary/5'
-                                  : 'border-border/60 hover:border-border'
-                              }`}
-                            >
-                              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                                targetType === type.value
-                                  ? 'border-primary bg-primary'
-                                  : 'border-border'
-                              }`}>
-                                {targetType === type.value && (
-                                  <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">{type.label}</p>
-                                <p className="text-xs text-muted-foreground">{type.description}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Target Value */}
-                      <div>
-                        <label htmlFor="target-value" className="mb-2 block text-sm font-medium">
-                          Target {targetType === 'streak' ? 'Streak Days' : targetType === 'daily_completion' ? 'Days' : 'Count'}
-                        </label>
-                        <input
-                          id="target-value"
-                          type="number"
-                          value={targetValue}
-                          onChange={(e) => setTargetValue(parseInt(e.target.value) || 0)}
-                          min="1"
-                          className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Step 3: Privacy & Review */}
-                  {step === 3 && (
-                    <motion.div
-                      key="step3"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-5"
-                    >
                       {/* Public Toggle */}
                       <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                         <div>
@@ -352,9 +280,9 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Goal:</span>
+                            <span className="text-muted-foreground">Habits:</span>
                             <span className="font-medium">
-                              {targetValue} {targetType === 'daily_completion' ? 'days' : targetType === 'streak' ? 'day streak' : 'completions'}
+                              {challenge.habits?.length || 0} habit{(challenge.habits?.length || 0) !== 1 ? 's' : ''}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -362,6 +290,9 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                             <span className="font-medium">{isPublic ? 'Public' : 'Private'}</span>
                           </div>
                         </div>
+                        <p className="text-xs text-muted-foreground pt-2">
+                          Note: Challenge habits cannot be edited after creation.
+                        </p>
                       </div>
                     </motion.div>
                   )}
@@ -378,11 +309,10 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                       onClick={() => setStep(step - 1)}
                       className="rounded-xl"
                     >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
                       Back
                     </Button>
                   )}
-                  {step < 3 ? (
+                  {step < 2 ? (
                     <Button
                       type="button"
                       onClick={() => setStep(step + 1)}
