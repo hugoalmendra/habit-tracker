@@ -227,7 +227,7 @@ export function useChallenges() {
 
       try {
         for (const invite of data) {
-          await supabase.functions.invoke('send-challenge-invite', {
+          const response = await supabase.functions.invoke('send-challenge-invite', {
             body: {
               to: invite.invited_email,
               inviterName,
@@ -237,6 +237,17 @@ export function useChallenges() {
               appUrl,
             },
           })
+
+          // Log the full response for debugging
+          console.log('Edge Function response:', response)
+
+          if (response.error) {
+            console.error('Edge Function returned error:', response.error)
+            // The error response body might be in the FunctionInvokeError
+            console.error('Error context:', response.error.context)
+          } else {
+            console.log('Email sent successfully:', response.data)
+          }
         }
       } catch (emailError) {
         // Log email sending errors but don't fail the invitation
