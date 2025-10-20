@@ -3,6 +3,16 @@ import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
+export interface ChallengeHabit {
+  id: string
+  name: string
+  description?: string
+  category: string
+  color?: string
+  frequency_type?: string
+  frequency_config?: any
+}
+
 export interface Challenge {
   id: string
   creator_id: string
@@ -11,8 +21,6 @@ export interface Challenge {
   category: 'Health' | 'Hustle' | 'Heart' | 'Harmony' | 'Happiness'
   start_date: string
   end_date: string
-  target_type: 'daily_completion' | 'total_count' | 'streak'
-  target_value: number
   badge_icon?: string
   badge_color?: string
   is_public: boolean
@@ -22,10 +30,9 @@ export interface Challenge {
     photo_url: string
   }
   participant_count?: number
+  habits?: ChallengeHabit[]
   user_participation?: {
     status: 'invited' | 'accepted' | 'declined' | 'completed'
-    current_progress: number
-    current_streak: number
     badge_earned: boolean
   }
 }
@@ -37,8 +44,6 @@ export interface ChallengeParticipant {
   status: 'invited' | 'accepted' | 'declined' | 'completed'
   joined_at?: string
   completed_at?: string
-  current_progress: number
-  current_streak: number
   badge_earned: boolean
   user?: {
     display_name: string
@@ -71,10 +76,10 @@ export function useChallenges() {
 
       if (error) throw error
 
-      // Fetch creator details and participant info for each challenge
+      // Fetch creator details, participant info, and habits for each challenge
       const challengesWithDetails = await Promise.all(
         (data || []).map(async (challenge) => {
-          const [creatorData, participantCount, userParticipation] = await Promise.all([
+          const [creatorData, participantCount, userParticipation, challengeHabits] = await Promise.all([
             supabase
               .from('profiles')
               .select('display_name, photo_url')
@@ -87,17 +92,37 @@ export function useChallenges() {
               .in('status', ['accepted', 'completed']),
             supabase
               .from('challenge_participants')
-              .select('status, current_progress, current_streak, badge_earned')
+              .select('status, badge_earned')
               .eq('challenge_id', challenge.id)
               .eq('user_id', user!.id)
-              .maybeSingle()
+              .maybeSingle(),
+            // Fetch habits associated with this challenge
+            supabase
+              .from('challenge_habits')
+              .select(`
+                habit_id,
+                habits:habit_id (
+                  id,
+                  name,
+                  description,
+                  category,
+                  color,
+                  frequency_type,
+                  frequency_config
+                )
+              `)
+              .eq('challenge_id', challenge.id)
           ])
+
+          // Extract habit data from join
+          const habits = challengeHabits.data?.map((ch: any) => ch.habits).filter(Boolean) || []
 
           return {
             ...challenge,
             creator: creatorData.data,
             participant_count: participantCount.count || 0,
-            user_participation: userParticipation.data
+            user_participation: userParticipation.data,
+            habits
           }
         })
       )
@@ -114,36 +139,78 @@ export function useChallenges() {
       category: string
       start_date: string
       end_date: string
-      target_type: string
-      target_value: number
       badge_icon?: string
       badge_color?: string
       is_public: boolean
+      habits: Array<{
+        name: string
+        description?: string
+        category: string
+        color?: string
+        frequency_type?: string
+        frequency_config?: any
+      }>
     }) => {
       console.log('Creating challenge with input:', input)
       console.log('User ID:', user?.id)
 
-      const { data, error } = await supabase
+      const { habits, ...challengeData } = input
+
+      // Create the challenge
+      const { data: challenge, error: challengeError } = await supabase
         .from('challenges')
         .insert({
           creator_id: user!.id,
-          ...input,
+          ...challengeData,
         })
         .select()
         .maybeSingle()
 
-      if (error) {
-        console.error('Challenge creation error:', error)
-        console.error('Error details:', JSON.stringify(error, null, 2))
-        throw error
+      if (challengeError) {
+        console.error('Challenge creation error:', challengeError)
+        console.error('Error details:', JSON.stringify(challengeError, null, 2))
+        throw challengeError
       }
 
-      console.log('Challenge created successfully:', data)
+      if (!challenge) throw new Error('Failed to create challenge')
 
-      // Creator is automatically added as participant by database trigger
-      if (!data) throw new Error('Failed to create challenge')
+      console.log('Challenge created successfully:', challenge)
 
-      return data
+      // Create habits for the challenge
+      if (habits && habits.length > 0) {
+        const habitInserts = habits.map((habit, index) => ({
+          user_id: user!.id,
+          ...habit,
+          display_order: index
+        }))
+
+        const { data: createdHabits, error: habitsError } = await supabase
+          .from('habits')
+          .insert(habitInserts)
+          .select()
+
+        if (habitsError) {
+          console.error('Habits creation error:', habitsError)
+          throw habitsError
+        }
+
+        // Link habits to challenge
+        const challengeHabitLinks = createdHabits.map(habit => ({
+          challenge_id: challenge.id,
+          habit_id: habit.id
+        }))
+
+        const { error: linkError } = await supabase
+          .from('challenge_habits')
+          .insert(challengeHabitLinks)
+
+        if (linkError) {
+          console.error('Challenge-habit link error:', linkError)
+          throw linkError
+        }
+      }
+
+      return challenge
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
@@ -309,40 +376,6 @@ export function useChallenges() {
     },
   })
 
-  const recordCompletionMutation = useMutation({
-    mutationFn: async (challengeId: string) => {
-      const today = new Date().toISOString().split('T')[0]
-
-      // Check if completion already exists for today
-      const { data: existing } = await supabase
-        .from('challenge_completions')
-        .select('id')
-        .eq('challenge_id', challengeId)
-        .eq('user_id', user!.id)
-        .eq('date', today)
-        .maybeSingle()
-
-      if (existing) {
-        // Already completed today, do nothing
-        return
-      }
-
-      // Insert new completion
-      const { error } = await supabase
-        .from('challenge_completions')
-        .insert({
-          challenge_id: challengeId,
-          user_id: user!.id,
-          date: today
-        })
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['challenges'] })
-      queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
-    },
-  })
 
   const leaveChallengeMutation = useMutation({
     mutationFn: async (challengeId: string) => {
@@ -373,8 +406,6 @@ export function useChallenges() {
         category?: string
         start_date?: string
         end_date?: string
-        target_type?: string
-        target_value?: number
         badge_icon?: string
         badge_color?: string
         is_public?: boolean
@@ -448,11 +479,10 @@ export function useChallenges() {
         {
           event: '*',
           schema: 'public',
-          table: 'challenge_completions',
+          table: 'challenge_habits',
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['challenges'] })
-          queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
         }
       )
       .subscribe()
@@ -472,7 +502,6 @@ export function useChallenges() {
     inviteByEmail: inviteByEmailMutation.mutateAsync,
     respondToInvite: respondToInviteMutation.mutateAsync,
     joinChallenge: joinChallengeMutation.mutateAsync,
-    recordCompletion: recordCompletionMutation.mutateAsync,
     leaveChallenge: leaveChallengeMutation.mutateAsync,
   }
 }
@@ -486,11 +515,11 @@ export function useChallengeParticipants(challengeId: string) {
         .select('*')
         .eq('challenge_id', challengeId)
         .in('status', ['accepted', 'completed'])
-        .order('current_progress', { ascending: false })
+        .order('joined_at', { ascending: true })
 
       if (error) throw error
 
-      // Fetch user details for each participant
+      // Fetch user details and calculate progress for each participant
       const participantsWithUsers = await Promise.all(
         (data || []).map(async (participant) => {
           const { data: userData } = await supabase
@@ -499,14 +528,33 @@ export function useChallengeParticipants(challengeId: string) {
             .eq('id', participant.user_id)
             .maybeSingle()
 
+          // Calculate progress by counting completed habits for the challenge
+          // Get habit IDs for this challenge
+          const { data: challengeHabitsData } = await supabase
+            .from('challenge_habits')
+            .select('habit_id')
+            .eq('challenge_id', challengeId)
+
+          const habitIds = challengeHabitsData?.map(ch => ch.habit_id) || []
+
+          // Count completions today
+          const { count } = await supabase
+            .from('habit_completions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', participant.user_id)
+            .in('habit_id', habitIds)
+            .eq('completed_date', new Date().toISOString().split('T')[0])
+
           return {
             ...participant,
-            user: userData
+            user: userData,
+            current_progress: count || 0,
+            total_habits: habitIds.length
           }
         })
       )
 
-      return participantsWithUsers as ChallengeParticipant[]
+      return participantsWithUsers as (ChallengeParticipant & { current_progress: number; total_habits: number })[]
     },
     enabled: !!challengeId,
   })

@@ -187,46 +187,12 @@ export type Database = {
           },
         ]
       }
-      challenge_completions: {
-        Row: {
-          challenge_id: string
-          completed_at: string | null
-          date: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          challenge_id: string
-          completed_at?: string | null
-          date?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          challenge_id?: string
-          completed_at?: string | null
-          date?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_completions_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       challenge_participants: {
         Row: {
           badge_earned: boolean | null
           challenge_id: string
           completed_at: string | null
           created_at: string | null
-          current_progress: number | null
-          current_streak: number | null
           id: string
           joined_at: string | null
           status: string
@@ -237,8 +203,6 @@ export type Database = {
           challenge_id: string
           completed_at?: string | null
           created_at?: string | null
-          current_progress?: number | null
-          current_streak?: number | null
           id?: string
           joined_at?: string | null
           status?: string
@@ -249,8 +213,6 @@ export type Database = {
           challenge_id?: string
           completed_at?: string | null
           created_at?: string | null
-          current_progress?: number | null
-          current_streak?: number | null
           id?: string
           joined_at?: string | null
           status?: string
@@ -262,6 +224,42 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_habits: {
+        Row: {
+          challenge_id: string
+          created_at: string | null
+          habit_id: string
+          id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string | null
+          habit_id: string
+          id?: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string | null
+          habit_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_habits_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_habits_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
             referencedColumns: ["id"]
           },
         ]
@@ -279,8 +277,6 @@ export type Database = {
           is_public: boolean | null
           name: string
           start_date: string
-          target_type: string
-          target_value: number
           updated_at: string | null
         }
         Insert: {
@@ -295,8 +291,6 @@ export type Database = {
           is_public?: boolean | null
           name: string
           start_date: string
-          target_type: string
-          target_value: number
           updated_at?: string | null
         }
         Update: {
@@ -311,8 +305,6 @@ export type Database = {
           is_public?: boolean | null
           name?: string
           start_date?: string
-          target_type?: string
-          target_value?: number
           updated_at?: string | null
         }
         Relationships: []
