@@ -188,6 +188,79 @@ export function useChallenges() {
     }
   })
 
+  const inviteByEmailMutation = useMutation({
+    mutationFn: async ({ challengeId, emails }: { challengeId: string; emails: string[] }) => {
+      console.log('Inviting by email:', { challengeId, emails })
+
+      // Get challenge details
+      const { data: challenge } = await supabase
+        .from('challenges')
+        .select('name, description')
+        .eq('id', challengeId)
+        .single()
+
+      // Get inviter profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, full_name, email')
+        .eq('id', user!.id)
+        .single()
+
+      const inviterName = profile?.display_name || profile?.full_name || profile?.email || 'Someone'
+
+      // Generate unique tokens for each email
+      const invites = emails.map(email => ({
+        challenge_id: challengeId,
+        invited_email: email,
+        invited_by_user_id: user!.id,
+        invite_token: crypto.randomUUID(),
+        status: 'pending' as const
+      }))
+
+      const { data, error } = await supabase
+        .from('pending_challenge_invites')
+        .insert(invites)
+        .select()
+
+      if (error) {
+        console.error('Email invite error:', error)
+        throw error
+      }
+
+      // Send invitation emails via Edge Function
+      // Note: This is optional and requires Edge Function deployment
+      const appUrl = window.location.origin
+
+      try {
+        for (const invite of data) {
+          await supabase.functions.invoke('send-challenge-invite', {
+            body: {
+              to: invite.invited_email,
+              inviterName,
+              challengeName: challenge?.name || 'A Challenge',
+              challengeDescription: challenge?.description || '',
+              inviteToken: invite.invite_token,
+              appUrl,
+            },
+          })
+        }
+      } catch (emailError) {
+        // Log email sending errors but don't fail the invitation
+        console.warn('Failed to send invitation emails:', emailError)
+      }
+
+      console.log('Email invites created successfully:', data)
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      queryClient.invalidateQueries({ queryKey: ['pending-invites'] })
+    },
+    onError: (error) => {
+      console.error('Email invite mutation error:', error)
+    }
+  })
+
   const respondToInviteMutation = useMutation({
     mutationFn: async ({ challengeId, status }: { challengeId: string; status: 'accepted' | 'declined' }) => {
       const updateData: any = { status }
@@ -387,6 +460,7 @@ export function useChallenges() {
     updateChallenge: updateChallengeMutation.mutateAsync,
     deleteChallenge: deleteChallengeMutation.mutateAsync,
     inviteParticipants: inviteParticipantsMutation.mutateAsync,
+    inviteByEmail: inviteByEmailMutation.mutateAsync,
     respondToInvite: respondToInviteMutation.mutateAsync,
     joinChallenge: joinChallengeMutation.mutateAsync,
     recordCompletion: recordCompletionMutation.mutateAsync,
