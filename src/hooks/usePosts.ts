@@ -303,6 +303,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           .eq('id', existing.id)
 
         if (error) throw error
+        return { action: 'removed' }
       } else {
         // Add reaction
         const { error } = await supabase
@@ -314,9 +315,46 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           })
 
         if (error) throw error
+        return { action: 'added' }
       }
     },
-    onSuccess: () => {
+    onMutate: async ({ postId, reaction }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['posts'] })
+
+      // Snapshot previous values
+      const previousData = queryClient.getQueriesData({ queryKey: ['posts'] })
+
+      // Optimistically update all post queries
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: FeedItem[] | undefined) => {
+        if (!old) return old
+
+        return old.map(item => {
+          if (item.item_type === 'post' && item.id === postId) {
+            const isCurrentlyLiked = item.user_reaction === reaction
+            return {
+              ...item,
+              user_reaction: isCurrentlyLiked ? null : reaction,
+              reactions_count: isCurrentlyLiked
+                ? Math.max(0, (item.reactions_count || 0) - 1)
+                : (item.reactions_count || 0) + 1
+            }
+          }
+          return item
+        })
+      })
+
+      return { previousData }
+    },
+    onError: (_err, _input, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
   })

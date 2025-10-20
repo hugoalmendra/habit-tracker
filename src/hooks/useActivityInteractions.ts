@@ -70,6 +70,7 @@ export function useActivityInteractions(activityId: string) {
           .eq('id', existingLike.id)
 
         if (error) throw error
+        return { action: 'removed' }
       } else {
         // Like
         const { error } = await supabase
@@ -80,9 +81,46 @@ export function useActivityInteractions(activityId: string) {
           })
 
         if (error) throw error
+        return { action: 'added' }
       }
     },
-    onSuccess: () => {
+    onMutate: async (activityId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['posts'] })
+
+      // Snapshot previous values
+      const previousData = queryClient.getQueriesData({ queryKey: ['posts'] })
+
+      // Optimistically update all post queries
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any[] | undefined) => {
+        if (!old) return old
+
+        return old.map(item => {
+          if (item.item_type === 'activity' && item.id === activityId) {
+            const isCurrentlyLiked = item.user_liked
+            return {
+              ...item,
+              user_liked: !isCurrentlyLiked,
+              likes_count: isCurrentlyLiked
+                ? Math.max(0, (item.likes_count || 0) - 1)
+                : (item.likes_count || 0) + 1
+            }
+          }
+          return item
+        })
+      })
+
+      return { previousData }
+    },
+    onError: (_err, _input, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
   })
