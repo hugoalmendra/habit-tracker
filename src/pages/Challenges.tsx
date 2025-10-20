@@ -78,10 +78,10 @@ export default function Challenges() {
 
   const categories = [
     { name: 'Health', color: '#34C759', emoji: '💪' },
-    { name: 'Hustle', color: '#FF9500', emoji: '🚀' },
-    { name: 'Heart', color: '#FF2D55', emoji: '❤️' },
-    { name: 'Harmony', color: '#5E5CE6', emoji: '🧘' },
-    { name: 'Happiness', color: '#FFD60A', emoji: '😊' },
+    { name: 'Career', color: '#FF9500', emoji: '🚀' },
+    { name: 'Spirit', color: '#FF2D55', emoji: '❤️' },
+    { name: 'Mindset', color: '#5E5CE6', emoji: '🧘' },
+    { name: 'Joy', color: '#FFD60A', emoji: '😊' },
   ]
 
   const getCategoryColor = (category: string) => {
