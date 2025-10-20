@@ -7,7 +7,7 @@ import { useChallenges } from '@/hooks/useChallenges'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, Target, ChevronDown, Lock } from 'lucide-react'
+import { Plus, Moon, Sun, Trophy, Calendar, Users, CheckCircle2, ListChecks, ChevronDown, Lock } from 'lucide-react'
 import { differenceInDays } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
@@ -346,32 +346,20 @@ export default function Challenges() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <Target className="h-4 w-4 text-muted-foreground" />
+                          <ListChecks className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">
-                            {challenge.target_type === 'daily_completion' && `Complete ${challenge.target_value} days`}
-                            {challenge.target_type === 'total_count' && `${challenge.target_value} completions`}
-                            {challenge.target_type === 'streak' && `${challenge.target_value} day streak`}
+                            {challenge.habits?.length || 0} habit{(challenge.habits?.length || 0) !== 1 ? 's' : ''}
                           </span>
                         </div>
                       </div>
 
-                      {/* Progress */}
-                      {isActive && (
+                      {/* Status Badge */}
+                      {isActive && challenge.user_participation?.badge_earned && (
                         <div className="mb-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium">Progress</span>
-                            <span className="text-xs text-muted-foreground">
-                              {challenge.user_participation?.current_progress}/{challenge.target_value}
-                            </span>
-                          </div>
-                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary transition-all"
-                              style={{
-                                width: `${Math.min((challenge.user_participation?.current_progress || 0) / challenge.target_value * 100, 100)}%`
-                              }}
-                            />
-                          </div>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+                            <Trophy className="h-3 w-3" />
+                            Badge Earned
+                          </span>
                         </div>
                       )}
 
