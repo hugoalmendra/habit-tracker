@@ -9,13 +9,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Edit2, X, Check, Upload, Search, UserPlus, UserMinus, Moon, Sun, ChevronLeft, ChevronRight } from 'lucide-react'
+import { User, Edit2, X, Check, Upload, Search, UserPlus, UserMinus, Moon, Sun, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, formatDistanceToNow } from 'date-fns'
 import BadgesDisplay from '@/components/challenges/BadgesDisplay'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
+import ManageGroupsModal from '@/components/groups/ManageGroupsModal'
 
 interface Profile {
   display_name: string | null
@@ -89,6 +90,7 @@ export default function Profile() {
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
   const [showSearchModal, setShowSearchModal] = useState(false)
+  const [showManageGroupsModal, setShowManageGroupsModal] = useState(false)
   const [followersList, setFollowersList] = useState<FollowerProfile[]>([])
   const [followingList, setFollowingList] = useState<FollowerProfile[]>([])
 
@@ -656,6 +658,14 @@ export default function Profile() {
                       <span>following</span>
                     </button>
                   </div>
+                  <Button
+                    onClick={() => setShowManageGroupsModal(true)}
+                    variant="outline"
+                    className="rounded-xl w-full md:w-auto"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Groups
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -1057,6 +1067,12 @@ export default function Profile() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Manage Groups Modal */}
+      <ManageGroupsModal
+        open={showManageGroupsModal}
+        onOpenChange={setShowManageGroupsModal}
+      />
     </div>
   )
 }

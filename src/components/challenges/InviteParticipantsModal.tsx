@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, UserPlus, Search, Mail, Link2, Check } from 'lucide-react'
+import { X, UserPlus, Search, Mail, Link2, Check, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { useFollowers } from '@/hooks/useFollowers'
+import { useFollowerGroups } from '@/hooks/useFollowerGroups'
 
 interface InviteParticipantsModalProps {
   open: boolean
@@ -12,7 +13,7 @@ interface InviteParticipantsModalProps {
   challengeName: string
 }
 
-type InviteTab = 'friends' | 'email' | 'link'
+type InviteTab = 'friends' | 'groups' | 'email' | 'link'
 
 export default function InviteParticipantsModal({
   open,
@@ -23,12 +24,14 @@ export default function InviteParticipantsModal({
   const [activeTab, setActiveTab] = useState<InviteTab>('friends')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([])
   const [emailInput, setEmailInput] = useState('')
   const [emailList, setEmailList] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
 
   const { following } = useFollowers()
+  const { groups, useGroupMembers } = useFollowerGroups()
   const { inviteParticipants, inviteByEmail } = useChallenges()
 
   // Map following to friends format
@@ -48,6 +51,26 @@ export default function InviteParticipantsModal({
         ? prev.filter(id => id !== friendId)
         : [...prev, friendId]
     )
+  }
+
+  const handleToggleGroup = (groupId: string) => {
+    setSelectedGroups(prev =>
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    )
+  }
+
+  // Get all unique member IDs from selected groups
+  const getGroupMemberIds = () => {
+    const memberIds = new Set<string>()
+    selectedGroups.forEach(groupId => {
+      const group = groups?.find(g => g.id === groupId)
+      if (group?.members) {
+        group.members.forEach(member => memberIds.add(member.follower_id))
+      }
+    })
+    return Array.from(memberIds)
   }
 
   const validateEmail = (email: string) => {
@@ -92,6 +115,7 @@ export default function InviteParticipantsModal({
     e.preventDefault()
 
     if (activeTab === 'friends' && selectedFriends.length === 0) return
+    if (activeTab === 'groups' && selectedGroups.length === 0) return
     if (activeTab === 'email' && emailList.length === 0) return
 
     setIsSubmitting(true)
@@ -100,6 +124,12 @@ export default function InviteParticipantsModal({
         await inviteParticipants({
           challengeId,
           userIds: selectedFriends
+        })
+      } else if (activeTab === 'groups') {
+        const memberIds = getGroupMemberIds()
+        await inviteParticipants({
+          challengeId,
+          userIds: memberIds
         })
       } else {
         await inviteByEmail({
@@ -120,6 +150,7 @@ export default function InviteParticipantsModal({
   const handleClose = () => {
     setSearchQuery('')
     setSelectedFriends([])
+    setSelectedGroups([])
     setEmailInput('')
     setEmailList([])
     setActiveTab('friends')
@@ -170,42 +201,54 @@ export default function InviteParticipantsModal({
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-2 mb-4 p-1 bg-secondary/50 rounded-xl">
+              <div className="grid grid-cols-4 gap-2 mb-4 p-1 bg-secondary/50 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setActiveTab('friends')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     activeTab === 'friends'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <UserPlus className="h-4 w-4" />
-                  Friends
+                  <span className="hidden sm:inline">Friends</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('groups')}
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'groups'
+                      ? 'bg-background shadow-sm text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Groups</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('email')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     activeTab === 'email'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Mail className="h-4 w-4" />
-                  Email
+                  <span className="hidden sm:inline">Email</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('link')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     activeTab === 'link'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Link2 className="h-4 w-4" />
-                  Link
+                  <span className="hidden sm:inline">Link</span>
                 </button>
               </div>
 
@@ -271,6 +314,64 @@ export default function InviteParticipantsModal({
                         {selectedFriends.length} friend{selectedFriends.length !== 1 ? 's' : ''} selected
                       </div>
                     )}
+                  </>
+                ) : activeTab === 'groups' ? (
+                  <>
+                    {/* Groups List */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Select Groups</label>
+                      <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+                        {groups && groups.length > 0 ? (
+                          groups.map((group) => (
+                            <button
+                              key={group.id}
+                              type="button"
+                              onClick={() => handleToggleGroup(group.id)}
+                              className={`w-full flex items-center gap-3 rounded-xl p-4 transition-all hover:bg-secondary ${
+                                selectedGroups.includes(group.id)
+                                  ? 'bg-primary/10 ring-2 ring-primary'
+                                  : 'bg-secondary/50'
+                              }`}
+                            >
+                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                                <Users className="h-6 w-6 text-primary" />
+                              </div>
+                              <div className="flex-1 text-left">
+                                <p className="font-medium text-sm">{group.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {group.member_count || 0} member{group.member_count !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
+                                selectedGroups.includes(group.id)
+                                  ? 'border-primary bg-primary'
+                                  : 'border-border'
+                              }`}>
+                                {selectedGroups.includes(group.id) && (
+                                  <Check className="h-3 w-3 text-primary-foreground" />
+                                )}
+                              </div>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 text-muted-foreground text-sm">
+                            <p className="mb-2">No groups yet</p>
+                            <p className="text-xs">Create groups in your Profile to invite multiple people at once</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Total members preview */}
+                      {selectedGroups.length > 0 && (
+                        <div className="rounded-xl bg-primary/5 p-3 text-sm">
+                          <p className="text-muted-foreground text-center">
+                            {selectedGroups.length} group{selectedGroups.length !== 1 ? 's' : ''} selected
+                            <span className="mx-2">•</span>
+                            {getGroupMemberIds().length} unique member{getGroupMemberIds().length !== 1 ? 's' : ''} will be invited
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : activeTab === 'email' ? (
                   <>
@@ -400,6 +501,7 @@ export default function InviteParticipantsModal({
                       type="submit"
                       disabled={
                         (activeTab === 'friends' && selectedFriends.length === 0) ||
+                        (activeTab === 'groups' && selectedGroups.length === 0) ||
                         (activeTab === 'email' && emailList.length === 0) ||
                         isSubmitting
                       }
