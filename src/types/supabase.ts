@@ -187,6 +187,42 @@ export type Database = {
           },
         ]
       }
+      challenge_habits: {
+        Row: {
+          challenge_id: string
+          created_at: string | null
+          habit_id: string
+          id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string | null
+          habit_id: string
+          id?: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string | null
+          habit_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_habits_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_habits_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_participants: {
         Row: {
           badge_earned: boolean | null
@@ -224,42 +260,6 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_habits: {
-        Row: {
-          challenge_id: string
-          created_at: string | null
-          habit_id: string
-          id: string
-        }
-        Insert: {
-          challenge_id: string
-          created_at?: string | null
-          habit_id: string
-          id?: string
-        }
-        Update: {
-          challenge_id?: string
-          created_at?: string | null
-          habit_id?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_habits_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "challenge_habits_habit_id_fkey"
-            columns: ["habit_id"]
-            isOneToOne: false
-            referencedRelation: "habits"
             referencedColumns: ["id"]
           },
         ]
@@ -344,57 +344,6 @@ export type Database = {
           },
         ]
       }
-      followers: {
-        Row: {
-          created_at: string | null
-          follower_id: string
-          following_id: string
-          id: string
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          follower_id: string
-          following_id: string
-          id?: string
-          status?: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          follower_id?: string
-          following_id?: string
-          id?: string
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      follower_groups: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       follower_group_members: {
         Row: {
           created_at: string | null
@@ -423,6 +372,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      follower_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      followers: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       habit_completions: {
         Row: {
