@@ -180,8 +180,8 @@ export default function PublicProfile() {
       const postsWithCounts = await Promise.all(
         (postsData || []).map(async (post) => {
           const [reactionsResult, commentsResult] = await Promise.all([
-            supabase.from('reactions').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
-            supabase.from('comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
+            supabase.from('post_reactions').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
+            supabase.from('post_comments').select('id', { count: 'exact', head: true }).eq('post_id', post.id),
           ])
 
           return {

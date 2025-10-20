@@ -180,7 +180,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           if (activity.activity_type === 'habit_created' && activity.related_id) {
             const { data: habitData } = await supabase
               .from('habits')
-              .select('name, category, emoji')
+              .select('name, category')
               .eq('id', activity.related_id)
               .maybeSingle()
 
@@ -188,8 +188,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
               activity.metadata = {
                 ...activity.metadata,
                 habit_name: habitData.name,
-                habit_category: habitData.category,
-                habit_emoji: habitData.emoji
+                habit_category: habitData.category
               }
             }
           }
@@ -218,15 +217,14 @@ export function usePosts(filter: FeedFilter = 'for_you') {
           if (activity.activity_type === 'streak_milestone' && activity.metadata.habit_id) {
             const { data: habitData } = await supabase
               .from('habits')
-              .select('name, emoji')
+              .select('name')
               .eq('id', activity.metadata.habit_id)
               .maybeSingle()
 
             if (habitData) {
               activity.metadata = {
                 ...activity.metadata,
-                habit_name: habitData.name,
-                habit_emoji: habitData.emoji
+                habit_name: habitData.name
               }
             }
           }

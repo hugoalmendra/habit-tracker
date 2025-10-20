@@ -49,7 +49,7 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
           <span>
             created a new habit:{' '}
             <span className="font-semibold">
-              {metadata.habit_emoji} {metadata.habit_name}
+              {metadata.habit_name}
             </span>
           </span>
         )
@@ -77,7 +77,7 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
             </span>
             {' '}on{' '}
             <span className="font-semibold">
-              {metadata.habit_emoji} {metadata.habit_name}
+              {metadata.habit_name}
             </span>
           </span>
         )
