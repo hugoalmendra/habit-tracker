@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Users, Search, Check, Trash2 } from 'lucide-react'
+import { X, Users, Search, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFollowers } from '@/hooks/useFollowers'
 import { useFollowerGroups, type FollowerGroup } from '@/hooks/useFollowerGroups'

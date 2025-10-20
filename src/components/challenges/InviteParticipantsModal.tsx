@@ -31,7 +31,7 @@ export default function InviteParticipantsModal({
   const [linkCopied, setLinkCopied] = useState(false)
 
   const { following } = useFollowers()
-  const { groups, useGroupMembers } = useFollowerGroups()
+  const { groups } = useFollowerGroups()
   const { inviteParticipants, inviteByEmail } = useChallenges()
 
   // Map following to friends format
