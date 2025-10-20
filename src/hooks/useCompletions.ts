@@ -110,14 +110,15 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
       }
     },
     onMutate: async (input) => {
-      // Cancel outgoing refetches
+      // Cancel outgoing refetches for all completion queries
       await queryClient.cancelQueries({ queryKey: ['completions'] })
+      await queryClient.cancelQueries({ queryKey: ['weekly-completions'] })
 
-      // Snapshot previous value
-      const previousCompletions = queryClient.getQueryData(['completions', options])
+      // Snapshot previous values
+      const previousData = queryClient.getQueriesData({ queryKey: ['completions'] })
 
-      // Optimistically update
-      queryClient.setQueryData(['completions', options], (old: HabitCompletion[] | undefined) => {
+      // Optimistically update all completion queries
+      queryClient.setQueriesData({ queryKey: ['completions'] }, (old: HabitCompletion[] | undefined) => {
         if (!old) return old
 
         // Check if completion already exists
@@ -143,17 +144,20 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
         }
       })
 
-      return { previousCompletions }
+      return { previousData }
     },
     onError: (_err, _input, context) => {
-      // Rollback on error
-      if (context?.previousCompletions) {
-        queryClient.setQueryData(['completions', options], context.previousCompletions)
+      // Rollback on error - restore all previous query data
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
       }
     },
     onSettled: () => {
       // Refetch after mutation completes
       queryClient.invalidateQueries({ queryKey: ['completions'] })
+      queryClient.invalidateQueries({ queryKey: ['weekly-completions'] })
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
       queryClient.invalidateQueries({ queryKey: ['challenge-participants'] })
     },
