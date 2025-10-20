@@ -218,6 +218,10 @@ export function useChallenges() {
 
       if (error) {
         console.error('Email invite error:', error)
+        // Check if it's a duplicate invitation error
+        if (error.code === '23505') {
+          throw new Error('One or more email addresses have already been invited to this challenge.')
+        }
         throw error
       }
 

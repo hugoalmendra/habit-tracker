@@ -110,7 +110,8 @@ export default function InviteParticipantsModal({
       handleClose()
     } catch (error) {
       console.error('Error inviting participants:', error)
-      alert('Failed to send invitations. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send invitations. Please try again.'
+      alert(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
