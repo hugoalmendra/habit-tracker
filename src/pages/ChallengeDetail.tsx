@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Trophy, UserPlus, Calendar, Target, Award, CheckCircle2, LogOut, Edit2, Trash2, MoreVertical } from 'lucide-react'
+import { ArrowLeft, Trophy, UserPlus, Calendar, Award, LogOut, Edit2, Trash2, MoreVertical, ListChecks } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges, useChallengeParticipants } from '@/hooks/useChallenges'
 import { useAuth } from '@/contexts/AuthContext'
@@ -32,9 +32,8 @@ export default function ChallengeDetail() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
 
-  const { challenges, respondToInvite, recordCompletion, leaveChallenge, deleteChallenge } = useChallenges()
+  const { challenges, respondToInvite, leaveChallenge, deleteChallenge } = useChallenges()
   const { participants } = useChallengeParticipants(id!)
 
   const challenge = challenges?.find(c => c.id === id)
@@ -61,19 +60,6 @@ export default function ChallengeDetail() {
       navigate('/challenges')
     } catch (error) {
       console.error('Error declining invite:', error)
-    }
-  }
-
-  const handleRecordCompletion = async () => {
-    if (!id || !isParticipant) return
-    setIsRecording(true)
-    try {
-      await recordCompletion(id)
-    } catch (error) {
-      console.error('Error recording completion:', error)
-      alert('Failed to record completion. You may have already completed this today.')
-    } finally {
-      setIsRecording(false)
     }
   }
 
@@ -128,10 +114,7 @@ export default function ChallengeDetail() {
   const isActive = today >= startDate && today <= endDate
   const isUpcoming = today < startDate
 
-  const progressPercentage = Math.min(
-    ((userParticipation?.current_progress || 0) / challenge.target_value) * 100,
-    100
-  )
+  const totalHabits = challenge.habits?.length || 0
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -207,11 +190,11 @@ export default function ChallengeDetail() {
             </div>
             <div className="bg-secondary/50 rounded-xl p-3">
               <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Target className="h-4 w-4" />
-                <span className="text-xs font-medium">Target</span>
+                <ListChecks className="h-4 w-4" />
+                <span className="text-xs font-medium">Habits</span>
               </div>
               <p className="text-sm font-semibold">
-                {challenge.target_value} {challenge.target_type === 'daily_completion' ? 'days' : challenge.target_type === 'streak' ? 'day streak' : 'completions'}
+                {totalHabits} {totalHabits === 1 ? 'habit' : 'habits'}
               </p>
             </div>
           </div>
@@ -255,26 +238,34 @@ export default function ChallengeDetail() {
             </div>
           )}
 
-          {/* Progress (for participants) */}
-          {isParticipant && (
+          {/* Habits List */}
+          {challenge.habits && challenge.habits.length > 0 && (
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Your Progress</span>
-                <span className="text-sm text-muted-foreground">
-                  {userParticipation?.current_progress}/{challenge.target_value}
-                </span>
+              <h3 className="text-sm font-medium mb-3">Challenge Habits</h3>
+              <div className="space-y-2">
+                {challenge.habits.map((habit) => (
+                  <div
+                    key={habit.id}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50"
+                  >
+                    <div
+                      className="h-3 w-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: habit.color || '#34C759' }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{habit.name}</p>
+                      {habit.description && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {habit.description}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {habit.category}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-500"
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
-              {challenge.target_type === 'streak' && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Current streak: {userParticipation?.current_streak || 0} days
-                </p>
-              )}
             </div>
           )}
 
@@ -289,21 +280,11 @@ export default function ChallengeDetail() {
                 Invite Friends
               </Button>
             )}
-            {isParticipant && isActive && (
-              <Button
-                onClick={handleRecordCompletion}
-                disabled={isRecording}
-                className="flex-1 rounded-xl bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                {isRecording ? 'Recording...' : 'Mark Complete'}
-              </Button>
-            )}
             {isParticipant && !isCreator && (
               <Button
                 onClick={handleLeaveClick}
                 variant="outline"
-                className="rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                className="flex-1 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Leave
@@ -364,8 +345,7 @@ export default function ChallengeDetail() {
                       </p>
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                      {participant.current_progress} / {challenge.target_value}
-                      {challenge.target_type === 'streak' && ` • ${participant.current_streak} day streak`}
+                      {participant.current_progress || 0} / {participant.total_habits || totalHabits} habits completed today
                     </p>
                   </div>
                   {participant.badge_earned && (
