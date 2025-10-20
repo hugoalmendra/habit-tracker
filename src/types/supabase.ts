@@ -7,119 +7,13 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      challenge_badges: {
-        Row: {
-          badge_color: string
-          badge_icon: string
-          badge_name: string
-          challenge_id: string
-          earned_at: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          badge_color: string
-          badge_icon: string
-          badge_name: string
-          challenge_id: string
-          earned_at?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          badge_color?: string
-          badge_icon?: string
-          badge_name?: string
-          challenge_id?: string
-          earned_at?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_badges_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_completions: {
-        Row: {
-          challenge_id: string
-          date: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          challenge_id: string
-          date: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          challenge_id?: string
-          date?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_completions_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_participants: {
-        Row: {
-          badge_earned: boolean | null
-          challenge_id: string
-          completed_at: string | null
-          current_progress: number | null
-          current_streak: number | null
-          id: string
-          joined_at: string | null
-          status: string
-          user_id: string
-        }
-        Insert: {
-          badge_earned?: boolean | null
-          challenge_id: string
-          completed_at?: string | null
-          current_progress?: number | null
-          current_streak?: number | null
-          id?: string
-          joined_at?: string | null
-          status?: string
-          user_id: string
-        }
-        Update: {
-          badge_earned?: boolean | null
-          challenge_id?: string
-          completed_at?: string | null
-          current_progress?: number | null
-          current_streak?: number | null
-          id?: string
-          joined_at?: string | null
-          status?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_participants_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       activity_comments: {
         Row: {
           activity_id: string
@@ -181,6 +75,197 @@ export type Database = {
           },
         ]
       }
+      badge_definitions: {
+        Row: {
+          category: string
+          color: string
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type: string | null
+          requirement_value: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          category: string
+          color: string
+          created_at?: string | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          category?: string
+          color?: string
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      badge_progress: {
+        Row: {
+          badge_id: string
+          current_value: number | null
+          id: string
+          metadata: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          current_value?: number | null
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          current_value?: number | null
+          id?: string
+          metadata?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_progress_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_badges: {
+        Row: {
+          badge_color: string
+          badge_icon: string
+          badge_name: string
+          challenge_id: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_color: string
+          badge_icon: string
+          badge_name: string
+          challenge_id: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_color?: string
+          badge_icon?: string
+          badge_name?: string
+          challenge_id?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_badges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_completions: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          date: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          date?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          date?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_completions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_participants: {
+        Row: {
+          badge_earned: boolean | null
+          challenge_id: string
+          completed_at: string | null
+          created_at: string | null
+          current_progress: number | null
+          current_streak: number | null
+          id: string
+          joined_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          badge_earned?: boolean | null
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          current_progress?: number | null
+          current_streak?: number | null
+          id?: string
+          joined_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          badge_earned?: boolean | null
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          current_progress?: number | null
+          current_streak?: number | null
+          id?: string
+          joined_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
           badge_color: string | null
@@ -196,6 +281,7 @@ export type Database = {
           start_date: string
           target_type: string
           target_value: number
+          updated_at: string | null
         }
         Insert: {
           badge_color?: string | null
@@ -211,6 +297,7 @@ export type Database = {
           start_date: string
           target_type: string
           target_value: number
+          updated_at?: string | null
         }
         Update: {
           badge_color?: string | null
@@ -226,8 +313,44 @@ export type Database = {
           start_date?: string
           target_type?: string
           target_value?: number
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      feed_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          related_id: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          related_id?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          related_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       followers: {
         Row: {
@@ -291,10 +414,13 @@ export type Database = {
       habits: {
         Row: {
           category: string
+          challenge_id: string | null
           color: string | null
           created_at: string | null
           description: string | null
           display_order: number | null
+          frequency_config: Json | null
+          frequency_type: string | null
           id: string
           name: string
           updated_at: string | null
@@ -302,10 +428,13 @@ export type Database = {
         }
         Insert: {
           category?: string
+          challenge_id?: string | null
           color?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          frequency_config?: Json | null
+          frequency_type?: string | null
           id?: string
           name: string
           updated_at?: string | null
@@ -313,16 +442,27 @@ export type Database = {
         }
         Update: {
           category?: string
+          challenge_id?: string | null
           color?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          frequency_config?: Json | null
+          frequency_type?: string | null
           id?: string
           name?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "habits_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -331,7 +471,7 @@ export type Database = {
           from_user_id: string | null
           id: string
           metadata: Json | null
-          read: boolean
+          read: boolean | null
           type: string
           user_id: string
         }
@@ -341,7 +481,7 @@ export type Database = {
           from_user_id?: string | null
           id?: string
           metadata?: Json | null
-          read?: boolean
+          read?: boolean | null
           type: string
           user_id: string
         }
@@ -351,11 +491,58 @@ export type Database = {
           from_user_id?: string | null
           id?: string
           metadata?: Json | null
-          read?: boolean
+          read?: boolean | null
           type?: string
           user_id?: string
         }
         Relationships: []
+      }
+      pending_challenge_invites: {
+        Row: {
+          accepted_by_user_id: string | null
+          challenge_id: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          invite_token: string
+          invited_by_user_id: string
+          invited_email: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_by_user_id?: string | null
+          challenge_id: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_token: string
+          invited_by_user_id: string
+          invited_email: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_by_user_id?: string | null
+          challenge_id?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_token?: string
+          invited_by_user_id?: string
+          invited_email?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_challenge_invites_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
@@ -363,6 +550,7 @@ export type Database = {
           created_at: string | null
           id: string
           post_id: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -370,6 +558,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           post_id: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -377,6 +566,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           post_id?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -451,53 +641,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pending_challenge_invites: {
-        Row: {
-          accepted_by_user_id: string | null
-          challenge_id: string
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          invited_by_user_id: string
-          invited_email: string
-          invite_token: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          accepted_by_user_id?: string | null
-          challenge_id: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          invited_by_user_id: string
-          invited_email: string
-          invite_token: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          accepted_by_user_id?: string | null
-          challenge_id?: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          invited_by_user_id?: string
-          invited_email?: string
-          invite_token?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pending_challenge_invites_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           bio: string | null
@@ -507,6 +650,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_public: boolean | null
+          onboarding_completed: boolean | null
           photo_url: string | null
           updated_at: string | null
         }
@@ -518,6 +662,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_public?: boolean | null
+          onboarding_completed?: boolean | null
           photo_url?: string | null
           updated_at?: string | null
         }
@@ -529,10 +674,46 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_public?: boolean | null
+          onboarding_completed?: boolean | null
           photo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      shared_habit_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          shared_habit_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          shared_habit_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          shared_habit_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_habit_messages_shared_habit_id_fkey"
+            columns: ["shared_habit_id"]
+            isOneToOne: false
+            referencedRelation: "shared_habits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shared_habits: {
         Row: {
@@ -562,14 +743,70 @@ export type Database = {
           status?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shared_habits_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badge_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_and_award_badge: {
+        Args: { p_badge_id: string; p_metadata?: Json; p_user_id: string }
+        Returns: boolean
+      }
+      check_and_award_badges: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      update_badge_progress: {
+        Args: {
+          p_badge_id: string
+          p_metadata?: Json
+          p_user_id: string
+          p_value: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -580,27 +817,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -608,20 +851,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -629,20 +876,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -650,29 +901,41 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

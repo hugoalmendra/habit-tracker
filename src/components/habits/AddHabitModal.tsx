@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogDrawerContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useHabits } from '@/hooks/useHabits'
+import type { FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
 
 interface AddHabitModalProps {
   open: boolean
@@ -20,22 +21,47 @@ const CATEGORIES: { name: HabitCategory; color: string; subcategories: string[] 
   { name: 'Joy', color: '#FFCC00', subcategories: ['Purpose', 'Play'] },
 ]
 
+const DAY_NAMES = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
+const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
 export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<HabitCategory>('Health')
+  const [frequencyType, setFrequencyType] = useState<FrequencyType>('daily')
+  const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
+  const [weeklyTarget, setWeeklyTarget] = useState(3)
+  const [weekResetDay, setWeekResetDay] = useState(0)
   const { createHabit, isCreating } = useHabits()
 
   const selectedCategory = CATEGORIES.find(c => c.name === category)!
   const color = selectedCategory.color
 
+  const toggleDay = (day: number) => {
+    setSelectedDays(prev =>
+      prev.includes(day)
+        ? prev.filter(d => d !== day)
+        : [...prev, day].sort((a, b) => a - b)
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    let frequencyConfig = null
+    if (frequencyType === 'specific_days') {
+      frequencyConfig = { days: selectedDays } as SpecificDaysConfig
+    } else if (frequencyType === 'weekly_target') {
+      frequencyConfig = { target: weeklyTarget, reset_day: weekResetDay } as WeeklyTargetConfig
+    }
+
     await createHabit({
       name,
       description,
       category,
       color,
+      frequency_type: frequencyType,
+      frequency_config: frequencyConfig,
     })
     handleClose()
   }
@@ -44,22 +70,26 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
     setName('')
     setDescription('')
     setCategory('Health')
+    setFrequencyType('daily')
+    setSelectedDays([0, 1, 2, 3, 4, 5, 6])
+    setWeeklyTarget(3)
+    setWeekResetDay(0)
     onOpenChange(false)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[460px] rounded-2xl border-border/40 shadow-apple-lg">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader className="space-y-3 pb-6">
-            <DialogTitle className="text-2xl font-semibold tracking-tight">
+      <DialogDrawerContent className="md:max-w-[520px] max-md:pb-safe">
+        <form onSubmit={handleSubmit} className="p-6 max-md:p-4">
+          <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4">
+            <DialogTitle className="text-2xl max-md:text-xl font-semibold tracking-tight">
               Create New Habit
             </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              Add a new habit to track. Choose a name, description, and color.
+            <DialogDescription className="text-base max-md:text-sm text-muted-foreground">
+              Add a new habit to track with custom frequency.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-5 py-2">
+          <div className="grid gap-4 max-md:gap-3.5 py-2">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-sm font-medium">
                 Habit Name
@@ -87,33 +117,135 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
                 className="h-12 rounded-xl border-border/50 bg-secondary/50 px-4 text-base placeholder:text-muted-foreground/60 focus:border-primary/50 focus:bg-background focus:ring-1 focus:ring-primary/20 transition-all"
               />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2.5 max-md:space-y-2">
               <Label className="text-sm font-medium">Category</Label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 max-md:grid-cols-3 gap-2 max-md:gap-2.5">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat.name}
                     type="button"
                     onClick={() => setCategory(cat.name)}
-                    className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex flex-col items-center gap-1.5 max-md:gap-1 p-2.5 max-md:p-2 rounded-xl transition-all hover:scale-105 active:scale-95 ${
                       category === cat.name
                         ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background bg-secondary'
                         : 'opacity-70 hover:opacity-100 hover:bg-secondary/50'
                     }`}
                   >
                     <div
-                      className="h-8 w-8 rounded-full"
+                      className="h-7 w-7 max-md:h-9 max-md:w-9 rounded-full"
                       style={{ backgroundColor: cat.color }}
                     />
-                    <span className="text-xs font-medium">{cat.name}</span>
+                    <span className="text-[10px] max-md:text-xs font-medium leading-tight">{cat.name}</span>
                   </button>
                 ))}
               </div>
               {selectedCategory.subcategories.length > 0 && (
-                <div className="text-xs text-muted-foreground pt-1">
+                <div className="text-[11px] max-md:text-xs text-muted-foreground pt-1">
                   <span className="font-medium">Includes:</span> {selectedCategory.subcategories.join(', ')}
                 </div>
               )}
+            </div>
+
+            {/* Frequency Selector */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Frequency</Label>
+              <div className="space-y-3">
+                {/* Daily Option */}
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-secondary/50 transition-all cursor-pointer">
+                  <input
+                    type="radio"
+                    name="frequency"
+                    checked={frequencyType === 'daily'}
+                    onChange={() => setFrequencyType('daily')}
+                    className="h-4 w-4 text-primary"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">Daily</div>
+                    <div className="text-xs text-muted-foreground">Track this habit every day</div>
+                  </div>
+                </label>
+
+                {/* Specific Days Option */}
+                <label className="flex flex-col gap-3 p-3 rounded-xl border border-border/50 hover:bg-secondary/50 transition-all cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="frequency"
+                      checked={frequencyType === 'specific_days'}
+                      onChange={() => setFrequencyType('specific_days')}
+                      className="h-4 w-4 text-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Specific Days</div>
+                      <div className="text-xs text-muted-foreground">Only show on selected days</div>
+                    </div>
+                  </div>
+                  {frequencyType === 'specific_days' && (
+                    <div className="flex gap-2 pl-7">
+                      {DAY_NAMES.map((day, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => toggleDay(index)}
+                          className={`h-9 w-9 rounded-lg text-xs font-medium transition-all ${
+                            selectedDays.includes(index)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </label>
+
+                {/* Weekly Target Option */}
+                <label className="flex flex-col gap-3 p-3 rounded-xl border border-border/50 hover:bg-secondary/50 transition-all cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="frequency"
+                      checked={frequencyType === 'weekly_target'}
+                      onChange={() => setFrequencyType('weekly_target')}
+                      className="h-4 w-4 text-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Weekly Target</div>
+                      <div className="text-xs text-muted-foreground">Complete X times per week</div>
+                    </div>
+                  </div>
+                  {frequencyType === 'weekly_target' && (
+                    <div className="flex flex-col gap-3 pl-7">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Complete</span>
+                        <select
+                          value={weeklyTarget}
+                          onChange={(e) => setWeeklyTarget(Number(e.target.value))}
+                          className="h-9 px-3 rounded-lg border border-border/50 bg-background text-sm"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                            <option key={n} value={n}>{n}</option>
+                          ))}
+                        </select>
+                        <span className="text-sm text-muted-foreground">times per week</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Week starts on</span>
+                        <select
+                          value={weekResetDay}
+                          onChange={(e) => setWeekResetDay(Number(e.target.value))}
+                          className="h-9 px-3 rounded-lg border border-border/50 bg-background text-sm"
+                        >
+                          {FULL_DAY_NAMES.map((day, index) => (
+                            <option key={index} value={index}>{day}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </label>
+              </div>
             </div>
           </div>
           <DialogFooter className="pt-6 gap-3">
@@ -134,7 +266,7 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </DialogDrawerContent>
     </Dialog>
   )
 }

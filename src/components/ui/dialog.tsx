@@ -106,6 +106,54 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
+// Responsive Dialog/Drawer Content - Desktop: centered dialog, Mobile: bottom drawer
+const DialogDrawerContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        // Base styles
+        "fixed z-50 w-full bg-background shadow-lg duration-200",
+        // Desktop (md+): centered dialog
+        "md:left-[50%] md:top-[50%] md:max-w-lg md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-2xl md:border md:border-border/40",
+        // Desktop animations
+        "md:data-[state=open]:animate-in md:data-[state=closed]:animate-out",
+        "md:data-[state=closed]:fade-out-0 md:data-[state=open]:fade-in-0",
+        "md:data-[state=closed]:zoom-out-95 md:data-[state=open]:zoom-in-95",
+        "md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%]",
+        "md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
+        // Mobile (<md): bottom drawer
+        "max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:rounded-t-2xl",
+        "max-md:max-h-[90vh] max-md:overflow-y-auto",
+        // Mobile animations
+        "max-md:data-[state=open]:animate-in max-md:data-[state=closed]:animate-out",
+        "max-md:data-[state=closed]:fade-out-0 max-md:data-[state=open]:fade-in-0",
+        "max-md:data-[state=closed]:slide-out-to-bottom max-md:data-[state=open]:slide-in-from-bottom",
+        className
+      )}
+      {...props}
+    >
+      {/* Mobile pull handle indicator */}
+      <div className="md:hidden flex justify-center pt-3 pb-2">
+        <div className="w-12 h-1 bg-muted-foreground/30 rounded-full" />
+      </div>
+
+      {children}
+
+      {/* Close button */}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogDrawerContent.displayName = "DialogDrawerContent"
+
 export {
   Dialog,
   DialogPortal,
@@ -113,6 +161,7 @@ export {
   DialogClose,
   DialogTrigger,
   DialogContent,
+  DialogDrawerContent,
   DialogHeader,
   DialogFooter,
   DialogTitle,

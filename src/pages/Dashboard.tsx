@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { useHabits } from '@/hooks/useHabits'
+import { useHabits, shouldDisplayHabit, getWeekStart, getWeekEnd } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -18,6 +18,7 @@ import GlobalSearch from '@/components/layout/GlobalSearch'
 import { useAchievements } from '@/hooks/useAchievements'
 import { useBadgeAchievements } from '@/hooks/useBadgeAchievements'
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
+import type { FrequencyType, WeeklyTargetConfig } from '@/lib/types'
 import {
   DndContext,
   closestCenter,
@@ -45,18 +46,72 @@ export default function Dashboard() {
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
 
   const { habits, isLoading, updateHabitOrder } = useHabits()
+
+  // Get the earliest possible week start for any weekly target habit
+  const earliestWeekStart = (habits || [])
+    .filter(h => (h.frequency_type as FrequencyType) === 'weekly_target')
+    .map(h => {
+      const config = h.frequency_config as WeeklyTargetConfig
+      const resetDay = config?.reset_day || 0
+      return getWeekStart(selectedDate, resetDay)
+    })
+    .reduce((earliest, current) =>
+      !earliest || current < earliest ? current : earliest
+    , null as Date | null)
+
+  // Fetch completions for the selected date and the full week (for weekly target calculations)
+  const weekStartStr = earliestWeekStart ? format(earliestWeekStart, 'yyyy-MM-dd') : selectedDateStr
+  const weekEndStr = format(selectedDate, 'yyyy-MM-dd')
+
   const { completions: dateCompletions } = useCompletions({
-    startDate: selectedDateStr,
-    endDate: selectedDateStr,
+    startDate: weekStartStr,
+    endDate: weekEndStr,
   })
 
   // Filter by category
-  const filteredHabits = selectedCategory === 'All'
+  const categoryFilteredHabits = selectedCategory === 'All'
     ? (habits || [])
     : (habits || []).filter(h => h.category === selectedCategory)
 
+  // Filter by frequency - only show habits that should display on the selected date
+  const filteredHabits = categoryFilteredHabits.filter(habit => {
+    // First check if the habit should be displayed based on frequency type and config
+    if (!shouldDisplayHabit(habit, selectedDate)) {
+      return false
+    }
+
+    // For weekly target habits, hide if target is already met for the week
+    const frequencyType = (habit.frequency_type as FrequencyType) || 'daily'
+    if (frequencyType === 'weekly_target' && habit.frequency_config) {
+      const config = habit.frequency_config as WeeklyTargetConfig
+      const resetDay = config.reset_day || 0
+      const weekStart = getWeekStart(selectedDate, resetDay)
+      const weekEnd = getWeekEnd(selectedDate, resetDay)
+
+      // Count completions for this week
+      const weekStartStr = format(weekStart, 'yyyy-MM-dd')
+      const weekEndStr = format(weekEnd, 'yyyy-MM-dd')
+
+      const weekCompletions = (dateCompletions || []).filter(
+        c => c.habit_id === habit.id &&
+             c.completed_date >= weekStartStr &&
+             c.completed_date <= weekEndStr
+      ).length
+
+      // Hide if weekly target is met
+      if (weekCompletions >= config.target) {
+        return false
+      }
+    }
+
+    return true
+  })
+
+  // Only consider completions for the selected date when showing completion status
   const completedHabitIds = new Set(
-    dateCompletions?.map((c) => c.habit_id) || []
+    (dateCompletions || [])
+      .filter(c => c.completed_date === selectedDateStr)
+      .map(c => c.habit_id)
   )
 
   const { achievement, clearAchievement } = useAchievements()

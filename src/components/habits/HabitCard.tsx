@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Check, GripVertical, Pencil, Trophy } from 'lucide-react'
-import { useHabits } from '@/hooks/useHabits'
-import { useCompletions } from '@/hooks/useCompletions'
-import type { Habit } from '@/lib/types'
+import { Trash2, Check, GripVertical, Pencil, Trophy, Calendar, Target } from 'lucide-react'
+import { useHabits, getWeekStart, getWeekEnd } from '@/hooks/useHabits'
+import { useCompletions, useWeeklyCompletions } from '@/hooks/useCompletions'
+import type { Habit, FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import EditHabitModal from './EditHabitModal'
@@ -25,6 +25,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   Happiness: '#FFCC00',
 }
 
+const DAY_ABBREVIATIONS = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
+
 export default function HabitCard({ habit, completed, selectedDate, index }: HabitCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -32,6 +34,46 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
   const { toggleCompletion, isToggling } = useCompletions()
 
   const categoryColor = CATEGORY_COLORS[habit.category] || habit.color
+
+  // Get frequency info
+  const frequencyType = (habit.frequency_type as FrequencyType) || 'daily'
+
+  // For weekly target habits, get the weekly completion count
+  const resetDay = frequencyType === 'weekly_target' && habit.frequency_config
+    ? (habit.frequency_config as WeeklyTargetConfig).reset_day
+    : 0
+  const weekStart = getWeekStart(new Date(selectedDate), resetDay)
+  const weekEnd = getWeekEnd(new Date(selectedDate), resetDay)
+  const { weeklyCount } = useWeeklyCompletions(
+    habit.id,
+    weekStart.toISOString().split('T')[0],
+    weekEnd.toISOString().split('T')[0]
+  )
+
+  // Generate frequency badge text
+  const getFrequencyBadge = () => {
+    if (frequencyType === 'daily') {
+      return null // Don't show badge for daily habits (default)
+    }
+
+    if (frequencyType === 'specific_days' && habit.frequency_config) {
+      const config = habit.frequency_config as SpecificDaysConfig
+      const dayLabels = config.days
+        .sort((a, b) => a - b)
+        .map(d => DAY_ABBREVIATIONS[d])
+        .join(' ')
+      return { icon: Calendar, text: dayLabels }
+    }
+
+    if (frequencyType === 'weekly_target' && habit.frequency_config) {
+      const config = habit.frequency_config as WeeklyTargetConfig
+      return { icon: Target, text: `${weeklyCount}/${config.target} weekly` }
+    }
+
+    return null
+  }
+
+  const frequencyBadge = getFrequencyBadge()
 
   const {
     attributes,
@@ -115,6 +157,12 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                 >
                   {habit.category}
                 </span>
+                {frequencyBadge && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-muted text-muted-foreground flex items-center gap-1">
+                    <frequencyBadge.icon className="h-3 w-3" />
+                    {frequencyBadge.text}
+                  </span>
+                )}
                 {habit.challenge_id && (
                   <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-primary/10 text-primary flex items-center gap-1">
                     <Trophy className="h-3 w-3" />

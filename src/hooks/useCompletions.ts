@@ -166,3 +166,32 @@ export function useCompletions(options: UseCompletionsOptions = {}) {
     isToggling: toggleMutation.isPending,
   }
 }
+
+// Hook to get weekly completion count for a specific habit
+export function useWeeklyCompletions(habitId: string, weekStart: string, weekEnd: string) {
+  const { user } = useAuth()
+
+  const { data: weeklyCount = 0, isLoading } = useQuery({
+    queryKey: ['weekly-completions', user?.id, habitId, weekStart, weekEnd],
+    queryFn: async () => {
+      if (!user?.id || !habitId) return 0
+
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('habit_id', habitId)
+        .gte('completed_date', weekStart)
+        .lte('completed_date', weekEnd)
+
+      if (error) throw error
+      return data?.length || 0
+    },
+    enabled: !!user && !!habitId && !!weekStart && !!weekEnd,
+  })
+
+  return {
+    weeklyCount,
+    isLoading,
+  }
+}
