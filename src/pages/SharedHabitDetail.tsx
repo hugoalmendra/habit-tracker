@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { format, startOfWeek, addDays, isSameDay, endOfWeek } from 'date-fns'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCompletions } from '@/hooks/useCompletions'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface SharedHabitData {
   id: string
@@ -54,6 +55,7 @@ export default function SharedHabitDetail() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [messageText, setMessageText] = useState('')
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Fetch shared habit details
@@ -202,10 +204,12 @@ export default function SharedHabitDetail() {
     }
   }
 
-  const handleLeaveSharedHabit = () => {
-    if (window.confirm('Are you sure you want to leave this shared habit?')) {
-      leaveSharedHabitMutation.mutate()
-    }
+  const handleLeaveClick = () => {
+    setShowLeaveConfirm(true)
+  }
+
+  const handleConfirmLeave = () => {
+    leaveSharedHabitMutation.mutate()
   }
 
   const isCompleted = (userId: string, date: Date): boolean => {
@@ -254,7 +258,7 @@ export default function SharedHabitDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleLeaveSharedHabit}
+            onClick={handleLeaveClick}
             className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <UserMinus className="h-4 w-4" />
@@ -391,6 +395,18 @@ export default function SharedHabitDetail() {
           </motion.div>
         </div>
       </main>
+
+      {/* Leave Confirmation */}
+      <ConfirmDialog
+        open={showLeaveConfirm}
+        onOpenChange={setShowLeaveConfirm}
+        onConfirm={handleConfirmLeave}
+        title="Leave Shared Habit"
+        description="Are you sure you want to leave this shared habit? You will no longer be able to see the progress or chat with your partner."
+        confirmText="Leave"
+        cancelText="Cancel"
+        variant="warning"
+      />
     </div>
   )
 }

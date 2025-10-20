@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useFollowerGroups, type FollowerGroup } from '@/hooks/useFollowerGroups'
 import CreateGroupModal from './CreateGroupModal'
 import EditGroupModal from './EditGroupModal'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface ManageGroupsModalProps {
   open: boolean
@@ -14,7 +15,9 @@ interface ManageGroupsModalProps {
 export default function ManageGroupsModal({ open, onOpenChange }: ManageGroupsModalProps) {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<FollowerGroup | null>(null)
+  const [groupToDelete, setGroupToDelete] = useState<FollowerGroup | null>(null)
 
   const { groups, loadingGroups, deleteGroup, isDeleting } = useFollowerGroups()
 
@@ -23,13 +26,16 @@ export default function ManageGroupsModal({ open, onOpenChange }: ManageGroupsMo
     setShowEditModal(true)
   }
 
-  const handleDeleteGroup = async (group: FollowerGroup) => {
-    if (!window.confirm(`Are you sure you want to delete "${group.name}"? This cannot be undone.`)) {
-      return
-    }
+  const handleDeleteClick = (group: FollowerGroup) => {
+    setGroupToDelete(group)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!groupToDelete) return
 
     try {
-      await deleteGroup(group.id)
+      await deleteGroup(groupToDelete.id)
     } catch (error) {
       console.error('Error deleting group:', error)
       alert(`Failed to delete group: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -147,7 +153,7 @@ export default function ManageGroupsModal({ open, onOpenChange }: ManageGroupsMo
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleDeleteGroup(group)}
+                              onClick={() => handleDeleteClick(group)}
                               disabled={isDeleting}
                               className="flex-1 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
                             >
@@ -194,6 +200,18 @@ export default function ManageGroupsModal({ open, onOpenChange }: ManageGroupsMo
         open={showEditModal}
         onOpenChange={setShowEditModal}
         group={selectedGroup}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title="Delete Group"
+        description={`Are you sure you want to delete "${groupToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
       />
     </>
   )

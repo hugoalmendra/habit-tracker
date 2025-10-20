@@ -15,6 +15,7 @@ import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import CreatePostModal from '@/components/feed/CreatePostModal'
 import ActivityCard from '@/components/feed/ActivityCard'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -99,6 +100,8 @@ export default function Feed() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [profile, setProfile] = useState<{ photo_url: string | null, display_name: string | null } | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [postToDelete, setPostToDelete] = useState<string | null>(null)
 
   const { posts, isLoading, toggleReaction, deletePost, addComment } = usePosts(filter)
 
@@ -130,10 +133,14 @@ export default function Feed() {
     await toggleReaction({ postId, reaction })
   }
 
-  const handleDeletePost = async (postId: string) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
-      await deletePost(postId)
-    }
+  const handleDeleteClick = (postId: string) => {
+    setPostToDelete(postId)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return
+    await deletePost(postToDelete)
   }
 
   const handleAddComment = async (postId: string) => {
@@ -325,7 +332,7 @@ export default function Feed() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeletePost(item.id)}
+                            onClick={() => handleDeleteClick(item.id)}
                             className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -388,6 +395,18 @@ export default function Feed() {
       </main>
 
       <CreatePostModal open={isCreatePostOpen} onOpenChange={setIsCreatePostOpen} />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }

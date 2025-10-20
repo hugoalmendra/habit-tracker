@@ -7,6 +7,7 @@ import { useChallenges, useChallengeParticipants } from '@/hooks/useChallenges'
 import { useAuth } from '@/contexts/AuthContext'
 import InviteParticipantsModal from '@/components/challenges/InviteParticipantsModal'
 import EditChallengeModal from '@/components/challenges/EditChallengeModal'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { format } from 'date-fns'
 import {
   DropdownMenu,
@@ -29,6 +30,8 @@ export default function ChallengeDetail() {
   const { user } = useAuth()
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
 
   const { challenges, respondToInvite, recordCompletion, leaveChallenge, deleteChallenge } = useChallenges()
@@ -74,11 +77,12 @@ export default function ChallengeDetail() {
     }
   }
 
-  const handleLeaveChallenge = async () => {
-    if (!id || !isParticipant || isCreator) return
+  const handleLeaveClick = () => {
+    setShowLeaveConfirm(true)
+  }
 
-    const confirmed = window.confirm('Are you sure you want to leave this challenge? Your progress will be lost.')
-    if (!confirmed) return
+  const handleConfirmLeave = async () => {
+    if (!id) return
 
     try {
       await leaveChallenge(id)
@@ -89,11 +93,12 @@ export default function ChallengeDetail() {
     }
   }
 
-  const handleDeleteChallenge = async () => {
-    if (!id || !isCreator) return
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
 
-    const confirmed = window.confirm('Are you sure you want to delete this challenge? This action cannot be undone and all participant data will be lost.')
-    if (!confirmed) return
+  const handleConfirmDelete = async () => {
+    if (!id) return
 
     try {
       await deleteChallenge(id)
@@ -178,7 +183,7 @@ export default function ChallengeDetail() {
                     Edit Challenge
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={handleDeleteChallenge}
+                    onClick={handleDeleteClick}
                     className="text-red-600 focus:text-red-600"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -296,7 +301,7 @@ export default function ChallengeDetail() {
             )}
             {isParticipant && !isCreator && (
               <Button
-                onClick={handleLeaveChallenge}
+                onClick={handleLeaveClick}
                 variant="outline"
                 className="rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
               >
@@ -393,6 +398,30 @@ export default function ChallengeDetail() {
           challenge={challenge}
         />
       )}
+
+      {/* Leave Confirmation */}
+      <ConfirmDialog
+        open={showLeaveConfirm}
+        onOpenChange={setShowLeaveConfirm}
+        onConfirm={handleConfirmLeave}
+        title="Leave Challenge"
+        description="Are you sure you want to leave this challenge? Your progress will be lost."
+        confirmText="Leave"
+        cancelText="Cancel"
+        variant="warning"
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title="Delete Challenge"
+        description="Are you sure you want to delete this challenge? This action cannot be undone and all participant data will be lost."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }

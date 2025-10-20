@@ -9,6 +9,7 @@ import type { Habit, FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } fro
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import EditHabitModal from './EditHabitModal'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface HabitCardProps {
   habit: Habit & { isShared?: boolean; sharedHabitId?: string; challenge_id?: string | null }
@@ -30,6 +31,7 @@ const DAY_ABBREVIATIONS = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
 export default function HabitCard({ habit, completed, selectedDate, index }: HabitCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { deleteHabit } = useHabits()
   const { toggleCompletion, isToggling } = useCompletions()
 
@@ -96,11 +98,13 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
     })
   }
 
-  const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete "${habit.name}"?`)) {
-      setIsDeleting(true)
-      await deleteHabit(habit.id)
-    }
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true)
+    await deleteHabit(habit.id)
   }
 
 
@@ -190,7 +194,7 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={handleDelete}
+                    onClick={handleDeleteClick}
                     disabled={isDeleting}
                     className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-lg"
                   >
@@ -238,6 +242,17 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
         habit={habit}
         open={showEditModal}
         onOpenChange={setShowEditModal}
+      />
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title="Delete Habit"
+        description={`Are you sure you want to delete "${habit.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
       />
     </div>
   )
