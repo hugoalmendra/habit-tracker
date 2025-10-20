@@ -451,6 +451,53 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_challenge_invites: {
+        Row: {
+          accepted_by_user_id: string | null
+          challenge_id: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          invited_by_user_id: string
+          invited_email: string
+          invite_token: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_by_user_id?: string | null
+          challenge_id: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invited_by_user_id: string
+          invited_email: string
+          invite_token: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_by_user_id?: string | null
+          challenge_id?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invited_by_user_id?: string
+          invited_email?: string
+          invite_token?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_challenge_invites_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio: string | null
