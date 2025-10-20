@@ -75,7 +75,7 @@ export default function ManageGroupsModal({ open, onOpenChange }: ManageGroupsMo
                 {/* Content */}
                 <div className="p-6">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center justify-between mb-6 pr-8">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                         <Users className="h-5 w-5 text-primary" />

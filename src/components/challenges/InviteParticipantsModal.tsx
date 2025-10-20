@@ -327,10 +327,10 @@ export default function InviteParticipantsModal({
                               key={group.id}
                               type="button"
                               onClick={() => handleToggleGroup(group.id)}
-                              className={`w-full flex items-center gap-3 rounded-xl p-4 transition-all hover:bg-secondary ${
+                              className={`w-full flex items-center gap-3 rounded-xl p-4 transition-all hover:bg-secondary border-2 ${
                                 selectedGroups.includes(group.id)
-                                  ? 'bg-primary/10 ring-2 ring-primary'
-                                  : 'bg-secondary/50'
+                                  ? 'bg-primary/10 border-primary'
+                                  : 'bg-secondary/50 border-transparent'
                               }`}
                             >
                               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
