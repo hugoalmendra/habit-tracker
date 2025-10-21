@@ -81,10 +81,6 @@ export default function Challenges() {
     { name: 'Joy', color: '#FFD60A', emoji: '😊' },
   ]
 
-  const getCategoryColor = (category: string) => {
-    const cat = categories.find(c => c.name === category)
-    return cat?.color || '#34C759'
-  }
 
   const getDaysRemaining = (endDate: string) => {
     return differenceInDays(new Date(endDate), new Date())
@@ -292,7 +288,6 @@ export default function Challenges() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground">{challenge.category}</p>
                           </div>
                         </div>
                         {isCompleted && (

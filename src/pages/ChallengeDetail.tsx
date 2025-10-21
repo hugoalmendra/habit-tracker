@@ -16,13 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-const CATEGORIES = [
-  { name: 'Health', color: '#34C759', emoji: '💪' },
-  { name: 'Hustle', color: '#FF9500', emoji: '🚀' },
-  { name: 'Heart', color: '#FF2D55', emoji: '❤️' },
-  { name: 'Harmony', color: '#5E5CE6', emoji: '🧘' },
-  { name: 'Happiness', color: '#FFD60A', emoji: '😊' },
-]
 
 export default function ChallengeDetail() {
   const { id } = useParams<{ id: string }>()
@@ -138,12 +131,12 @@ export default function ChallengeDetail() {
           className="bg-card rounded-2xl p-6 shadow-apple border border-border/60"
         >
           <div className="flex items-start gap-4 mb-4">
-            {category && (
+            {challenge.badge_icon && (
               <div
                 className="h-14 w-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ backgroundColor: category.color }}
+                style={{ backgroundColor: challenge.badge_color || '#3b82f6' }}
               >
-                {category.emoji}
+                {challenge.badge_icon}
               </div>
             )}
             <div className="flex-1 min-w-0">

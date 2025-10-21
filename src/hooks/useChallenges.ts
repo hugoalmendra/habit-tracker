@@ -22,6 +22,7 @@ export interface Challenge {
   end_date: string
   badge_icon?: string
   badge_color?: string
+  icon_name?: string | null
   is_public: boolean
   created_at: string
   creator?: {

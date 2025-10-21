@@ -95,7 +95,7 @@ export default function GlobalSearch() {
       // Search challenges
       const { data: challengesData } = await supabase
         .from('challenges')
-        .select('id, name, description, category, creator_id')
+        .select('id, name, description, creator_id')
         .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
         .limit(5)
 
@@ -229,9 +229,6 @@ export default function GlobalSearch() {
                       <p className="text-sm font-medium text-foreground">
                         {challenge.name}
                       </p>
-                      <Badge variant="secondary" className="text-xs">
-                        {challenge.category}
-                      </Badge>
                     </div>
                     {challenge.description && (
                       <p className="text-xs text-muted-foreground line-clamp-2">
