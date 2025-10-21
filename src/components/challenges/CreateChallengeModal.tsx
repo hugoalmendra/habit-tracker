@@ -136,13 +136,14 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   }
 
   const toggleHabit = (index: number) => {
-    const newExpanded = new Set(expandedHabits)
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index)
+    // Accordion behavior: only one habit expanded at a time
+    if (expandedHabits.has(index)) {
+      // If clicking on the expanded habit, collapse it
+      setExpandedHabits(new Set())
     } else {
-      newExpanded.add(index)
+      // Expand the clicked habit and collapse all others
+      setExpandedHabits(new Set([index]))
     }
-    setExpandedHabits(newExpanded)
   }
 
   const updateHabit = (index: number, field: keyof ChallengeHabit, value: any) => {
