@@ -574,6 +574,7 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                                     )}
                                   </div>
                                 </div>
+                                      </div>
                                     </motion.div>
                                   )}
                                 </AnimatePresence>
