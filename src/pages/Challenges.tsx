@@ -270,14 +270,14 @@ export default function Challenges() {
                         <div className="flex items-center gap-3 flex-1">
                           <div
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl"
-                            style={{ backgroundColor: `${getCategoryColor(challenge.category)}20` }}
+                            style={{ backgroundColor: `${challenge.badge_color || '#3b82f6'}20` }}
                           >
                             {challenge.icon_name && (() => {
                               const IconComponent = getIconComponent(challenge.icon_name)
                               return IconComponent ? (
                                 <IconComponent
                                   className="h-6 w-6"
-                                  style={{ color: getCategoryColor(challenge.category) }}
+                                  style={{ color: challenge.badge_color || '#3b82f6' }}
                                 />
                               ) : challenge.badge_icon
                             })() || challenge.badge_icon}

@@ -469,7 +469,6 @@ export type Database = {
           display_order: number | null
           frequency_config: Json | null
           frequency_type: string | null
-          icon_name: string | null
           id: string
           name: string
           updated_at: string | null
@@ -484,7 +483,6 @@ export type Database = {
           display_order?: number | null
           frequency_config?: Json | null
           frequency_type?: string | null
-          icon_name?: string | null
           id?: string
           name: string
           updated_at?: string | null
@@ -499,7 +497,6 @@ export type Database = {
           display_order?: number | null
           frequency_config?: Json | null
           frequency_type?: string | null
-          icon_name?: string | null
           id?: string
           name?: string
           updated_at?: string | null

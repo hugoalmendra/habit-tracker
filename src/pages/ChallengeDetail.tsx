@@ -37,7 +37,6 @@ export default function ChallengeDetail() {
   const { participants } = useChallengeParticipants(id!)
 
   const challenge = challenges?.find(c => c.id === id)
-  const category = CATEGORIES.find(c => c.name === challenge?.category)
 
   const isCreator = challenge?.creator_id === user?.id
   const userParticipation = challenge?.user_participation

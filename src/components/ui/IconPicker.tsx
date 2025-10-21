@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Dumbbell, Book, Coffee, Utensils, Moon, Sun, Heart, Brain,
+  Dumbbell, Book, Coffee, Moon, Sun, Heart, Brain,
   Sparkles, Target, TrendingUp, Music, Palette, Camera,
   Bike, Waves, Leaf, Zap, Star, Award,
   Clock, Calendar, CheckCircle2, Activity, Footprints, Apple,

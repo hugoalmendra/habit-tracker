@@ -22,7 +22,7 @@ interface ChallengeResult {
   id: string
   name: string
   description: string | null
-  category: string
+  creator_id: string
   creator?: {
     display_name: string | null
   }
