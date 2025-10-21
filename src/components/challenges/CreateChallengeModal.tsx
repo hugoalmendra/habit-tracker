@@ -344,7 +344,7 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                               {/* Category */}
                               <div>
                                 <label className="text-xs font-medium text-muted-foreground mb-2 block">Category</label>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                   {HABIT_CATEGORIES.map((cat) => (
                                     <button
                                       key={cat.name}
