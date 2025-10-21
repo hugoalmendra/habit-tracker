@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import InviteParticipantsModal from '@/components/challenges/InviteParticipantsModal'
 import EditChallengeModal from '@/components/challenges/EditChallengeModal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import { getIconComponent } from '@/components/ui/IconPicker'
 import { format } from 'date-fns'
 import {
   DropdownMenu,
@@ -131,14 +132,20 @@ export default function ChallengeDetail() {
           className="bg-card rounded-2xl p-6 shadow-apple border border-border/60"
         >
           <div className="flex items-start gap-4 mb-4">
-            {challenge.badge_icon && (
-              <div
-                className="h-14 w-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ backgroundColor: challenge.badge_color || '#3b82f6' }}
-              >
-                {challenge.badge_icon}
-              </div>
-            )}
+            <div
+              className="h-14 w-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+              style={{ backgroundColor: `${challenge.badge_color || '#3b82f6'}20` }}
+            >
+              {challenge.icon_name && (() => {
+                const IconComponent = getIconComponent(challenge.icon_name)
+                return IconComponent ? (
+                  <IconComponent
+                    className="h-7 w-7"
+                    style={{ color: challenge.badge_color || '#3b82f6' }}
+                  />
+                ) : challenge.badge_icon
+              })() || challenge.badge_icon}
+            </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold mb-1">{challenge.name}</h1>
               {challenge.description && (
