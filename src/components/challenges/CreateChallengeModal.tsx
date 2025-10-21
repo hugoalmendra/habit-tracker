@@ -121,8 +121,8 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
       frequency_type: 'daily',
       frequency_config: null
     }])
-    // Expand the new habit by default
-    setExpandedHabits(new Set([...expandedHabits, newIndex]))
+    // Collapse all previous habits and expand only the new one
+    setExpandedHabits(new Set([newIndex]))
   }
 
   const removeHabit = (index: number) => {
@@ -332,17 +332,6 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                               <div key={index} className="rounded-xl border border-border/60 bg-secondary/30 overflow-hidden">
                                 {/* Header - Always Visible */}
                                 <div className="flex items-center gap-2 p-3">
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleHabit(index)}
-                                    className="shrink-0 p-1 hover:bg-secondary rounded transition-colors"
-                                  >
-                                    {isExpanded ? (
-                                      <ChevronUp className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronDown className="h-4 w-4" />
-                                    )}
-                                  </button>
                                   <input
                                     type="text"
                                     value={habit.name}
@@ -361,6 +350,17 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
                                   )}
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleHabit(index)}
+                                    className="shrink-0 p-1 hover:bg-secondary rounded transition-colors"
+                                  >
+                                    {isExpanded ? (
+                                      <ChevronUp className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronDown className="h-4 w-4" />
+                                    )}
+                                  </button>
                                 </div>
 
                                 {/* Collapsible Content */}
