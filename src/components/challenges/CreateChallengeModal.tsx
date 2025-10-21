@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trophy, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { X, Trophy, ChevronLeft, ChevronRight, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { format, addDays } from 'date-fns'
@@ -51,6 +51,7 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   ])
   const [isPublic, setIsPublic] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [expandedHabits, setExpandedHabits] = useState<Set<number>>(new Set([0]))
 
   const { createChallenge } = useChallenges()
 
@@ -111,6 +112,7 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
   }
 
   const addHabit = () => {
+    const newIndex = habits.length
     setHabits([...habits, {
       name: '',
       description: '',
@@ -119,12 +121,28 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
       frequency_type: 'daily',
       frequency_config: null
     }])
+    // Expand the new habit by default
+    setExpandedHabits(new Set([...expandedHabits, newIndex]))
   }
 
   const removeHabit = (index: number) => {
     if (habits.length > 1) {
       setHabits(habits.filter((_, i) => i !== index))
+      // Remove from expanded set
+      const newExpanded = new Set(expandedHabits)
+      newExpanded.delete(index)
+      setExpandedHabits(newExpanded)
     }
+  }
+
+  const toggleHabit = (index: number) => {
+    const newExpanded = new Set(expandedHabits)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedHabits(newExpanded)
   }
 
   const updateHabit = (index: number, field: keyof ChallengeHabit, value: any) => {
@@ -308,32 +326,55 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                           </Button>
                         </div>
                         <div className="space-y-4">
-                          {habits.map((habit, index) => (
-                            <div key={index} className="p-4 rounded-xl border border-border/60 bg-secondary/30 space-y-3">
-                              {/* Habit Name */}
-                              <div className="flex items-start gap-2">
-                                <input
-                                  type="text"
-                                  value={habit.name}
-                                  onChange={(e) => updateHabit(index, 'name', e.target.value)}
-                                  placeholder="Habit name (e.g., Morning Run)"
-                                  className="flex-1 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-                                />
-                                {habits.length > 1 && (
-                                  <Button
+                          {habits.map((habit, index) => {
+                            const isExpanded = expandedHabits.has(index)
+                            return (
+                              <div key={index} className="rounded-xl border border-border/60 bg-secondary/30 overflow-hidden">
+                                {/* Header - Always Visible */}
+                                <div className="flex items-center gap-2 p-3">
+                                  <button
                                     type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => removeHabit(index)}
-                                    className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+                                    onClick={() => toggleHabit(index)}
+                                    className="shrink-0 p-1 hover:bg-secondary rounded transition-colors"
                                   >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
+                                    {isExpanded ? (
+                                      <ChevronUp className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronDown className="h-4 w-4" />
+                                    )}
+                                  </button>
+                                  <input
+                                    type="text"
+                                    value={habit.name}
+                                    onChange={(e) => updateHabit(index, 'name', e.target.value)}
+                                    placeholder="Habit name (e.g., Morning Run)"
+                                    className="flex-1 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                  />
+                                  {habits.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => removeHabit(index)}
+                                      className="shrink-0 h-9 w-9 text-destructive hover:bg-destructive/10"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
 
-                              {/* Description */}
-                              <textarea
+                                {/* Collapsible Content */}
+                                <AnimatePresence>
+                                  {isExpanded && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="space-y-3 px-4 pb-4"
+                                    >
+                                      {/* Description */}
+                                      <textarea
                                 value={habit.description}
                                 onChange={(e) => updateHabit(index, 'description', e.target.value)}
                                 placeholder="Description (optional)"
@@ -533,9 +574,12 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                                     )}
                                   </div>
                                 </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       </div>
                     </motion.div>
