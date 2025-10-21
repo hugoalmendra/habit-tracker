@@ -47,23 +47,28 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!name.trim()) return
 
-    let frequencyConfig = null
-    if (frequencyType === 'specific_days') {
-      frequencyConfig = { days: selectedDays } as SpecificDaysConfig
-    } else if (frequencyType === 'weekly_target') {
-      frequencyConfig = { target: weeklyTarget, reset_day: weekResetDay } as WeeklyTargetConfig
+    try {
+      let frequencyConfig = null
+      if (frequencyType === 'specific_days') {
+        frequencyConfig = { days: selectedDays } as SpecificDaysConfig
+      } else if (frequencyType === 'weekly_target') {
+        frequencyConfig = { target: weeklyTarget, reset_day: weekResetDay } as WeeklyTargetConfig
+      }
+
+      await createHabit({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        category,
+        color,
+        frequency_type: frequencyType,
+        frequency_config: frequencyConfig,
+      })
+      handleClose()
+    } catch (error) {
+      console.error('Error creating habit:', error)
     }
-
-    await createHabit({
-      name,
-      description,
-      category,
-      color,
-      frequency_type: frequencyType,
-      frequency_config: frequencyConfig,
-    })
-    handleClose()
   }
 
   const handleClose = () => {
@@ -79,9 +84,9 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogDrawerContent className="md:max-w-[600px] max-md:pb-safe max-h-[90vh]">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4 px-6 pt-6 max-md:px-4 max-md:pt-4">
+      <DialogDrawerContent className="md:max-w-[600px] max-md:pb-safe max-h-[90vh] flex flex-col overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4 px-6 pt-6 max-md:px-4 max-md:pt-4 flex-shrink-0">
             <DialogTitle className="text-2xl max-md:text-xl font-semibold tracking-tight">
               Create New Habit
             </DialogTitle>
@@ -89,7 +94,7 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
               Add a new habit to track with custom frequency.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 max-md:gap-3.5 py-2 px-6 max-md:px-4 overflow-y-auto flex-1">
+          <div className="grid gap-4 max-md:gap-3.5 py-2 px-6 max-md:px-4 overflow-y-auto flex-1 min-h-0">
             <div className="space-y-3">
               <Label htmlFor="name" className="text-sm font-medium">
                 Habit Name
@@ -248,7 +253,7 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
               </div>
             </div>
           </div>
-          <DialogFooter className="pt-6 pb-6 px-6 gap-3 max-md:px-4 max-md:pb-4 border-t border-border/40">
+          <DialogFooter className="pt-6 pb-6 px-6 gap-3 max-md:px-4 max-md:pb-4 border-t border-border/40 flex-shrink-0">
             <Button
               type="button"
               variant="outline"

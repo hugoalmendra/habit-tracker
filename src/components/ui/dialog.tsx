@@ -128,7 +128,7 @@ const DialogDrawerContent = React.forwardRef<
         "md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
         // Mobile (<md): bottom drawer
         "max-md:bottom-0 max-md:left-0 max-md:right-0 max-md:rounded-t-2xl",
-        "max-md:max-h-[90vh] max-md:overflow-y-auto",
+        "max-md:max-h-[90vh]",
         // Mobile animations
         "max-md:data-[state=open]:animate-in max-md:data-[state=closed]:animate-out",
         "max-md:data-[state=closed]:fade-out-0 max-md:data-[state=open]:fade-in-0",
