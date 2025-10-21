@@ -73,14 +73,6 @@ export default function Challenges() {
     return 0
   })
 
-  const categories = [
-    { name: 'Health', color: '#34C759', emoji: '💪' },
-    { name: 'Career', color: '#FF9500', emoji: '🚀' },
-    { name: 'Spirit', color: '#FF2D55', emoji: '❤️' },
-    { name: 'Mindset', color: '#5E5CE6', emoji: '🧘' },
-    { name: 'Joy', color: '#FFD60A', emoji: '😊' },
-  ]
-
 
   const getDaysRemaining = (endDate: string) => {
     return differenceInDays(new Date(endDate), new Date())
