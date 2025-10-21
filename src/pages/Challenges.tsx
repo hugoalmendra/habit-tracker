@@ -13,6 +13,7 @@ import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import CreateChallengeModal from '@/components/challenges/CreateChallengeModal'
+import { getIconComponent } from '@/components/ui/IconPicker'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +27,6 @@ export default function Challenges() {
   const navigate = useNavigate()
   const [isCreateChallengeOpen, setIsCreateChallengeOpen] = useState(false)
   const [filter, setFilter] = useState<'all' | 'joined' | 'past'>('all')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [sortFilter, setSortFilter] = useState<'recent' | 'oldest' | 'popular'>('recent')
 
   const { challenges, isLoading, respondToInvite, joinChallenge } = useChallenges()
@@ -57,9 +57,6 @@ export default function Challenges() {
     }
     if (filter === 'past' && !isPast) return false
     if (filter !== 'past' && isPast) return false
-
-    // Filter by category
-    if (categoryFilter !== 'all' && challenge.category !== categoryFilter) return false
 
     return true
   }).sort((a, b) => {
@@ -213,37 +210,8 @@ export default function Challenges() {
               </Button>
             </div>
 
-            {/* Category & Sort Filters */}
-            <div className="flex flex-wrap gap-2 items-center justify-between">
-              {/* Category Filter */}
-              <div className="flex gap-2 flex-wrap items-center">
-                <span className="text-sm text-muted-foreground">Category:</span>
-                <Button
-                  variant={categoryFilter === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCategoryFilter('all')}
-                  className="rounded-lg h-8"
-                >
-                  All
-                </Button>
-                {categories.map((category) => (
-                  <Button
-                    key={category.name}
-                    variant={categoryFilter === category.name ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setCategoryFilter(category.name)}
-                    className="rounded-lg h-8"
-                    style={
-                      categoryFilter === category.name
-                        ? { backgroundColor: category.color, borderColor: category.color }
-                        : {}
-                    }
-                  >
-                    {category.name}
-                  </Button>
-                ))}
-              </div>
-
+            {/* Sort Filter */}
+            <div className="flex justify-end">
               {/* Sort Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -304,7 +272,15 @@ export default function Challenges() {
                             className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl"
                             style={{ backgroundColor: `${getCategoryColor(challenge.category)}20` }}
                           >
-                            {challenge.badge_icon}
+                            {challenge.icon_name && (() => {
+                              const IconComponent = getIconComponent(challenge.icon_name)
+                              return IconComponent ? (
+                                <IconComponent
+                                  className="h-6 w-6"
+                                  style={{ color: getCategoryColor(challenge.category) }}
+                                />
+                              ) : challenge.badge_icon
+                            })() || challenge.badge_icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">

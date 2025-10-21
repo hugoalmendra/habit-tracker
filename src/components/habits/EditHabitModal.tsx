@@ -105,9 +105,9 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogDrawerContent className="md:max-w-[520px] max-md:pb-safe">
-        <form onSubmit={handleSubmit} className="p-6 max-md:p-4">
-          <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4">
+      <DialogDrawerContent className="md:max-w-[600px] max-md:pb-safe max-h-[90vh]">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4 px-6 pt-6 max-md:px-4 max-md:pt-4">
             <DialogTitle className="text-2xl max-md:text-xl font-semibold tracking-tight">
               Edit Habit
             </DialogTitle>
@@ -116,7 +116,7 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 max-md:gap-3.5 py-2">
+          <div className="grid gap-4 max-md:gap-3.5 py-2 px-6 max-md:px-4 overflow-y-auto flex-1">
             {/* Habit Name */}
             <div className="space-y-3">
               <Label htmlFor="name" className="text-sm font-medium">
@@ -281,7 +281,7 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
             </div>
           </div>
 
-          <DialogFooter className="pt-6 gap-3">
+          <DialogFooter className="pt-6 pb-6 px-6 gap-3 max-md:px-4 max-md:pb-4 border-t border-border/40">
             <Button
               type="button"
               variant="outline"

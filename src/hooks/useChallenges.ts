@@ -18,7 +18,6 @@ export interface Challenge {
   creator_id: string
   name: string
   description?: string
-  category: 'Health' | 'Hustle' | 'Heart' | 'Harmony' | 'Happiness'
   start_date: string
   end_date: string
   badge_icon?: string
@@ -136,7 +135,6 @@ export function useChallenges() {
     mutationFn: async (input: {
       name: string
       description?: string
-      category: string
       start_date: string
       end_date: string
       badge_icon?: string
@@ -529,27 +527,36 @@ export function useChallengeParticipants(challengeId: string) {
             .maybeSingle()
 
           // Calculate progress by counting completed habits for the challenge
-          // Get habit IDs for this challenge
-          const { data: challengeHabitsData } = await supabase
+          // First, get this user's habits
+          const { data: userHabits } = await supabase
+            .from('habits')
+            .select('id')
+            .eq('user_id', participant.user_id)
+
+          const userHabitIds = userHabits?.map(h => h.id) || []
+
+          // Then, get which of those habits are part of this challenge
+          const { data: userChallengeHabitsData } = await supabase
             .from('challenge_habits')
             .select('habit_id')
             .eq('challenge_id', challengeId)
+            .in('habit_id', userHabitIds)
 
-          const habitIds = challengeHabitsData?.map(ch => ch.habit_id) || []
+          const challengeHabitIds = userChallengeHabitsData?.map(ch => ch.habit_id) || []
 
-          // Count completions today
+          // Count completions today for this user's challenge habits
           const { count } = await supabase
             .from('habit_completions')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', participant.user_id)
-            .in('habit_id', habitIds)
+            .in('habit_id', challengeHabitIds)
             .eq('completed_date', new Date().toISOString().split('T')[0])
 
           return {
             ...participant,
             user: userData,
             current_progress: count || 0,
-            total_habits: habitIds.length
+            total_habits: challengeHabitIds.length
           }
         })
       )

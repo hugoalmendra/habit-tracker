@@ -268,11 +268,11 @@ export type Database = {
         Row: {
           badge_color: string | null
           badge_icon: string | null
-          category: string
           created_at: string | null
           creator_id: string
           description: string | null
           end_date: string
+          icon_name: string | null
           id: string
           is_public: boolean | null
           name: string
@@ -282,11 +282,11 @@ export type Database = {
         Insert: {
           badge_color?: string | null
           badge_icon?: string | null
-          category: string
           created_at?: string | null
           creator_id: string
           description?: string | null
           end_date: string
+          icon_name?: string | null
           id?: string
           is_public?: boolean | null
           name: string
@@ -296,11 +296,11 @@ export type Database = {
         Update: {
           badge_color?: string | null
           badge_icon?: string | null
-          category?: string
           created_at?: string | null
           creator_id?: string
           description?: string | null
           end_date?: string
+          icon_name?: string | null
           id?: string
           is_public?: boolean | null
           name?: string
@@ -469,6 +469,7 @@ export type Database = {
           display_order: number | null
           frequency_config: Json | null
           frequency_type: string | null
+          icon_name: string | null
           id: string
           name: string
           updated_at: string | null
@@ -483,6 +484,7 @@ export type Database = {
           display_order?: number | null
           frequency_config?: Json | null
           frequency_type?: string | null
+          icon_name?: string | null
           id?: string
           name: string
           updated_at?: string | null
@@ -497,6 +499,7 @@ export type Database = {
           display_order?: number | null
           frequency_config?: Json | null
           frequency_type?: string | null
+          icon_name?: string | null
           id?: string
           name?: string
           updated_at?: string | null

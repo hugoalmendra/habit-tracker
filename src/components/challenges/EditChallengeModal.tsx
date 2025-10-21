@@ -11,19 +11,10 @@ interface EditChallengeModalProps {
   challenge: Challenge
 }
 
-const CATEGORIES = [
-  { name: 'Health', color: '#34C759', emoji: '💪' },
-  { name: 'Career', color: '#FF9500', emoji: '🚀' },
-  { name: 'Spirit', color: '#FF2D55', emoji: '❤️' },
-  { name: 'Mindset', color: '#5E5CE6', emoji: '🧘' },
-  { name: 'Joy', color: '#FFD60A', emoji: '😊' },
-]
-
 export default function EditChallengeModal({ open, onOpenChange, challenge }: EditChallengeModalProps) {
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<string>('Health')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [isPublic, setIsPublic] = useState(false)
@@ -36,14 +27,11 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
     if (challenge && open) {
       setName(challenge.name)
       setDescription(challenge.description || '')
-      setCategory(challenge.category)
       setStartDate(challenge.start_date.split('T')[0])
       setEndDate(challenge.end_date.split('T')[0])
       setIsPublic(challenge.is_public)
     }
   }, [challenge, open])
-
-  const selectedCategory = CATEGORIES.find(c => c.name === category) || CATEGORIES[0]
 
   const handleSubmit = async () => {
     if (!name.trim()) return
@@ -53,11 +41,8 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
       const updates = {
         name: name.trim(),
         description: description.trim() || undefined,
-        category,
         start_date: startDate,
         end_date: endDate,
-        badge_icon: selectedCategory.emoji,
-        badge_color: selectedCategory.color,
         is_public: isPublic,
       }
 
@@ -170,35 +155,10 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                           id="description"
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Run at least 5km every day for 30 days"
+                          placeholder="Build healthy habits together with friends"
                           rows={4}
                           className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                         />
-                      </div>
-
-                      {/* Category */}
-                      <div>
-                        <label className="mb-3 block text-sm font-medium">Category</label>
-                        <div className="grid grid-cols-5 gap-2">
-                          {CATEGORIES.map((cat) => (
-                            <button
-                              key={cat.name}
-                              type="button"
-                              onClick={() => setCategory(cat.name)}
-                              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 active:scale-95 ${
-                                category === cat.name
-                                  ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background bg-secondary'
-                                  : 'opacity-70 hover:opacity-100 hover:bg-secondary/50'
-                              }`}
-                            >
-                              <div
-                                className="h-8 w-8 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: cat.color }}
-                              />
-                              <span className="text-xs font-medium">{cat.name}</span>
-                            </button>
-                          ))}
-                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -268,10 +228,6 @@ export default function EditChallengeModal({ open, onOpenChange, challenge }: Ed
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Name:</span>
                             <span className="font-medium">{name || 'Not set'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Category:</span>
-                            <span className="font-medium">{category}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Duration:</span>

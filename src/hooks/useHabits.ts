@@ -54,15 +54,44 @@ export function useHabits() {
     queryFn: async () => {
       if (!user?.id) return []
 
-      const { data, error } = await supabase
+      // First get all habits
+      const { data: habitsData, error: habitsError } = await supabase
         .from('habits')
         .select('*')
         .eq('user_id', user.id)
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      return data as Habit[]
+      if (habitsError) throw habitsError
+
+      // Then get challenge associations for these habits
+      const habitIds = habitsData?.map(h => h.id) || []
+      const { data: challengeHabits } = await supabase
+        .from('challenge_habits')
+        .select('habit_id, challenge_id, challenges(name, end_date)')
+        .in('habit_id', habitIds)
+
+      // Create a map of habit_id to challenge info
+      const challengeMap = new Map(
+        challengeHabits?.map(ch => [
+          ch.habit_id,
+          {
+            challenge_id: ch.challenge_id,
+            challenge_name: (ch.challenges as any)?.name,
+            challenge_end_date: (ch.challenges as any)?.end_date
+          }
+        ]) || []
+      )
+
+      // Merge challenge info into habits
+      const habitsWithChallenges = habitsData?.map(habit => ({
+        ...habit,
+        challenge_id: challengeMap.get(habit.id)?.challenge_id || null,
+        challenge_name: challengeMap.get(habit.id)?.challenge_name || null,
+        challenge_end_date: challengeMap.get(habit.id)?.challenge_end_date || null,
+      }))
+
+      return habitsWithChallenges as Habit[]
     },
     enabled: !!user,
   })

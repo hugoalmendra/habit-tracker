@@ -3,7 +3,11 @@ export type { Json } from '../types/supabase'
 
 import type { Database } from '../types/supabase'
 
-export type Habit = Database['public']['Tables']['habits']['Row']
+export type Habit = Database['public']['Tables']['habits']['Row'] & {
+  challenge_id?: string | null
+  challenge_name?: string | null
+  challenge_end_date?: string | null
+}
 export type HabitCompletion = Database['public']['Tables']['habit_completions']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 

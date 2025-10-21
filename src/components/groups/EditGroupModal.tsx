@@ -201,7 +201,7 @@ export default function EditGroupModal({ open, onOpenChange, group }: EditGroupM
                     </div>
 
                     {/* Members List */}
-                    <div className="max-h-[250px] overflow-y-auto space-y-2 pr-2">
+                    <div className="max-h-[250px] overflow-y-auto space-y-2 p-1">
                       {filteredFriends && filteredFriends.length > 0 ? (
                         filteredFriends.map((friend) => (
                           <button

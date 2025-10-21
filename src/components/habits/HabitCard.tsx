@@ -12,7 +12,7 @@ import EditHabitModal from './EditHabitModal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface HabitCardProps {
-  habit: Habit & { isShared?: boolean; sharedHabitId?: string; challenge_id?: string | null }
+  habit: Habit & { isShared?: boolean; sharedHabitId?: string }
   completed: boolean
   selectedDate: string
   index: number
@@ -149,7 +149,7 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
                   {habit.name}
                 </h3>
                 <span
@@ -167,10 +167,10 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                     {frequencyBadge.text}
                   </span>
                 )}
-                {habit.challenge_id && (
+                {habit.challenge_id && habit.challenge_name && (
                   <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-primary/10 text-primary flex items-center gap-1">
                     <Trophy className="h-3 w-3" />
-                    Challenge
+                    {habit.challenge_name}
                   </span>
                 )}
               </div>

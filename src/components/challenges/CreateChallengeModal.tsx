@@ -4,43 +4,55 @@ import { X, Trophy, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { format, addDays } from 'date-fns'
+import type { FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
+import IconPicker from '@/components/ui/IconPicker'
 
 interface CreateChallengeModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-const CATEGORIES = [
+const HABIT_CATEGORIES = [
   { name: 'Health', color: '#34C759', emoji: '💪' },
   { name: 'Career', color: '#FF9500', emoji: '🚀' },
-  { name: 'Spirit', color: '#FF2D55', emoji: '❤️' },
-  { name: 'Mindset', color: '#5E5CE6', emoji: '🧘' },
-  { name: 'Joy', color: '#FFD60A', emoji: '😊' },
+  { name: 'Spirit', color: '#FF3B30', emoji: '❤️' },
+  { name: 'Mindset', color: '#AF52DE', emoji: '🧘' },
+  { name: 'Joy', color: '#FFCC00', emoji: '😊' },
 ]
+
+const DAY_NAMES = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
+const FULL_DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 interface ChallengeHabit {
   name: string
   description?: string
   category: string
   color: string
+  frequency_type: FrequencyType
+  frequency_config: SpecificDaysConfig | WeeklyTargetConfig | null
 }
 
 export default function CreateChallengeModal({ open, onOpenChange }: CreateChallengeModalProps) {
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<string>('Health')
+  const [iconName, setIconName] = useState<string | null>(null)
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 30), 'yyyy-MM-dd'))
   const [habits, setHabits] = useState<ChallengeHabit[]>([
-    { name: '', description: '', category: 'Health', color: '#34C759' }
+    {
+      name: '',
+      description: '',
+      category: 'Health',
+      color: '#34C759',
+      frequency_type: 'daily',
+      frequency_config: null
+    }
   ])
   const [isPublic, setIsPublic] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { createChallenge } = useChallenges()
-
-  const selectedCategory = CATEGORIES.find(c => c.name === category) || CATEGORIES[0]
 
   const handleSubmit = async () => {
     if (!name.trim()) return
@@ -57,11 +69,11 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
       const challengeData = {
         name: name.trim(),
         description: description.trim() || undefined,
-        category,
+        icon_name: iconName,
         start_date: startDate,
         end_date: endDate,
-        badge_icon: selectedCategory.emoji,
-        badge_color: selectedCategory.color,
+        badge_icon: '🏆',
+        badge_color: '#FFD700',
         is_public: isPublic,
         habits: validHabits.map(h => ({
           ...h,
@@ -83,16 +95,30 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
     setStep(1)
     setName('')
     setDescription('')
-    setCategory('Health')
+    setIconName(null)
     setStartDate(format(new Date(), 'yyyy-MM-dd'))
     setEndDate(format(addDays(new Date(), 30), 'yyyy-MM-dd'))
-    setHabits([{ name: '', description: '', category: 'Health', color: '#34C759' }])
+    setHabits([{
+      name: '',
+      description: '',
+      category: 'Health',
+      color: '#34C759',
+      frequency_type: 'daily',
+      frequency_config: null
+    }])
     setIsPublic(false)
     onOpenChange(false)
   }
 
   const addHabit = () => {
-    setHabits([...habits, { name: '', description: '', category: 'Health', color: '#34C759' }])
+    setHabits([...habits, {
+      name: '',
+      description: '',
+      category: 'Health',
+      color: '#34C759',
+      frequency_type: 'daily',
+      frequency_config: null
+    }])
   }
 
   const removeHabit = (index: number) => {
@@ -101,10 +127,21 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
     }
   }
 
-  const updateHabit = (index: number, field: keyof ChallengeHabit, value: string) => {
+  const updateHabit = (index: number, field: keyof ChallengeHabit, value: any) => {
     const newHabits = [...habits]
     newHabits[index] = { ...newHabits[index], [field]: value }
     setHabits(newHabits)
+  }
+
+  const toggleDay = (habitIndex: number, day: number) => {
+    const habit = habits[habitIndex]
+    const config = habit.frequency_config as SpecificDaysConfig
+    const currentDays = config?.days || [0, 1, 2, 3, 4, 5, 6]
+    const newDays = currentDays.includes(day)
+      ? currentDays.filter(d => d !== day)
+      : [...currentDays, day].sort((a, b) => a - b)
+
+    updateHabit(habitIndex, 'frequency_config', { days: newDays })
   }
 
   const canProceedStep1 = name.trim().length > 0
@@ -119,17 +156,17 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-lg rounded-2xl bg-background shadow-apple-lg max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-lg rounded-2xl bg-background shadow-apple-lg max-h-[90vh] flex flex-col pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -201,36 +238,18 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                           id="description"
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Run at least 5km every day for 30 days"
+                          placeholder="Build healthy habits together with friends"
                           rows={4}
                           className="w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                         />
                       </div>
 
-                      {/* Category */}
-                      <div>
-                        <label className="mb-3 block text-sm font-medium">Category</label>
-                        <div className="grid grid-cols-5 gap-2">
-                          {CATEGORIES.map((cat) => (
-                            <button
-                              key={cat.name}
-                              type="button"
-                              onClick={() => setCategory(cat.name)}
-                              className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 active:scale-95 ${
-                                category === cat.name
-                                  ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background bg-secondary'
-                                  : 'opacity-70 hover:opacity-100 hover:bg-secondary/50'
-                              }`}
-                            >
-                              <div
-                                className="h-8 w-8 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: cat.color }}
-                              />
-                              <span className="text-xs font-medium">{cat.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      {/* Icon Picker */}
+                      <IconPicker
+                        value={iconName}
+                        onChange={setIconName}
+                        label="Challenge Icon (optional)"
+                      />
                     </motion.div>
                   )}
 
@@ -288,9 +307,10 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                             Add Habit
                           </Button>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {habits.map((habit, index) => (
                             <div key={index} className="p-4 rounded-xl border border-border/60 bg-secondary/30 space-y-3">
+                              {/* Habit Name */}
                               <div className="flex items-start gap-2">
                                 <input
                                   type="text"
@@ -311,6 +331,8 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                                   </Button>
                                 )}
                               </div>
+
+                              {/* Description */}
                               <textarea
                                 value={habit.description}
                                 onChange={(e) => updateHabit(index, 'description', e.target.value)}
@@ -318,6 +340,200 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                                 rows={2}
                                 className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                               />
+
+                              {/* Category */}
+                              <div>
+                                <label className="text-xs font-medium text-muted-foreground mb-2 block">Category</label>
+                                <div className="flex gap-2">
+                                  {HABIT_CATEGORIES.map((cat) => (
+                                    <button
+                                      key={cat.name}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        const newHabits = [...habits]
+                                        newHabits[index] = {
+                                          ...newHabits[index],
+                                          category: cat.name,
+                                          color: cat.color
+                                        }
+                                        setHabits(newHabits)
+                                      }}
+                                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                        habit.category === cat.name
+                                          ? 'ring-2 ring-foreground ring-offset-1 ring-offset-background bg-secondary'
+                                          : 'opacity-60 hover:opacity-100 hover:bg-secondary/50'
+                                      }`}
+                                    >
+                                      <div
+                                        className="h-3 w-3 rounded-full"
+                                        style={{ backgroundColor: cat.color }}
+                                      />
+                                      {cat.name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Frequency */}
+                              <div>
+                                <label className="text-xs font-medium text-muted-foreground mb-2 block">Frequency</label>
+                                <div className="space-y-2">
+                                  {/* Daily */}
+                                  <div
+                                    onClick={(e) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      const newHabits = [...habits]
+                                      newHabits[index] = {
+                                        ...newHabits[index],
+                                        frequency_type: 'daily',
+                                        frequency_config: null
+                                      }
+                                      setHabits(newHabits)
+                                    }}
+                                    className="flex items-center gap-2 p-2 rounded-lg border border-border/40 hover:bg-secondary/50 cursor-pointer"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`frequency-${index}`}
+                                      checked={habit.frequency_type === 'daily'}
+                                      onChange={() => {}}
+                                      className="h-3.5 w-3.5 text-primary pointer-events-none"
+                                    />
+                                    <div className="flex-1">
+                                      <div className="font-medium text-xs">Daily</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Specific Days */}
+                                  <div className="flex flex-col gap-2 p-2 rounded-lg border border-border/40 hover:bg-secondary/50">
+                                    <div
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        const newHabits = [...habits]
+                                        newHabits[index] = {
+                                          ...newHabits[index],
+                                          frequency_type: 'specific_days',
+                                          frequency_config: { days: [0, 1, 2, 3, 4, 5, 6] }
+                                        }
+                                        setHabits(newHabits)
+                                      }}
+                                      className="flex items-center gap-2 cursor-pointer"
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={`frequency-${index}`}
+                                        checked={habit.frequency_type === 'specific_days'}
+                                        onChange={() => {}}
+                                        className="h-3.5 w-3.5 text-primary pointer-events-none"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="font-medium text-xs">Specific Days</div>
+                                      </div>
+                                    </div>
+                                    {habit.frequency_type === 'specific_days' && (
+                                      <div className="flex gap-1.5 pl-5">
+                                        {DAY_NAMES.map((day, dayIndex) => {
+                                          const config = habit.frequency_config as SpecificDaysConfig
+                                          const selectedDays = config?.days || [0, 1, 2, 3, 4, 5, 6]
+                                          return (
+                                            <button
+                                              key={dayIndex}
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation()
+                                                toggleDay(index, dayIndex)
+                                              }}
+                                              className={`h-7 w-7 rounded-md text-xs font-medium transition-all ${
+                                                selectedDays.includes(dayIndex)
+                                                  ? 'bg-primary text-primary-foreground'
+                                                  : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                                              }`}
+                                            >
+                                              {day}
+                                            </button>
+                                          )
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Weekly Target */}
+                                  <div className="flex flex-col gap-2 p-2 rounded-lg border border-border/40 hover:bg-secondary/50">
+                                    <div
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        const newHabits = [...habits]
+                                        newHabits[index] = {
+                                          ...newHabits[index],
+                                          frequency_type: 'weekly_target',
+                                          frequency_config: { target: 3, reset_day: 0 }
+                                        }
+                                        setHabits(newHabits)
+                                      }}
+                                      className="flex items-center gap-2 cursor-pointer"
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={`frequency-${index}`}
+                                        checked={habit.frequency_type === 'weekly_target'}
+                                        onChange={() => {}}
+                                        className="h-3.5 w-3.5 text-primary pointer-events-none"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="font-medium text-xs">Weekly Target</div>
+                                      </div>
+                                    </div>
+                                    {habit.frequency_type === 'weekly_target' && (
+                                      <div className="flex flex-col gap-2 pl-5" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs text-muted-foreground">Complete</span>
+                                          <select
+                                            value={(habit.frequency_config as WeeklyTargetConfig)?.target || 3}
+                                            onChange={(e) => {
+                                              e.stopPropagation()
+                                              const config = habit.frequency_config as WeeklyTargetConfig
+                                              updateHabit(index, 'frequency_config', {
+                                                target: Number(e.target.value),
+                                                reset_day: config?.reset_day || 0
+                                              })
+                                            }}
+                                            className="h-7 px-2 rounded-md border border-border/50 bg-background text-xs"
+                                          >
+                                            {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                                              <option key={n} value={n}>{n}</option>
+                                            ))}
+                                          </select>
+                                          <span className="text-xs text-muted-foreground">times/week</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs text-muted-foreground">Week starts</span>
+                                          <select
+                                            value={(habit.frequency_config as WeeklyTargetConfig)?.reset_day || 0}
+                                            onChange={(e) => {
+                                              e.stopPropagation()
+                                              const config = habit.frequency_config as WeeklyTargetConfig
+                                              updateHabit(index, 'frequency_config', {
+                                                target: config?.target || 3,
+                                                reset_day: Number(e.target.value)
+                                              })
+                                            }}
+                                            className="h-7 px-2 rounded-md border border-border/50 bg-background text-xs"
+                                          >
+                                            {FULL_DAY_NAMES.map((day, dayIndex) => (
+                                              <option key={dayIndex} value={dayIndex}>{day}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -363,10 +579,6 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                             <span className="font-medium">{name || 'Not set'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Category:</span>
-                            <span className="font-medium">{category}</span>
-                          </div>
-                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Duration:</span>
                             <span className="font-medium">
                               {format(new Date(startDate), 'MMM d')} - {format(new Date(endDate), 'MMM d, yyyy')}
@@ -388,7 +600,9 @@ export default function CreateChallengeModal({ open, onOpenChange }: CreateChall
                             <p className="text-xs font-medium text-muted-foreground mb-2">Habits:</p>
                             <ul className="space-y-1">
                               {habits.filter(h => h.name.trim()).map((habit, index) => (
-                                <li key={index} className="text-xs">• {habit.name}</li>
+                                <li key={index} className="text-xs">
+                                  • {habit.name} ({habit.frequency_type === 'daily' ? 'Daily' : habit.frequency_type === 'specific_days' ? 'Specific Days' : 'Weekly Target'})
+                                </li>
                               ))}
                             </ul>
                           </div>
