@@ -112,126 +112,128 @@ export default function CreatePostModal({ open, onOpenChange }: CreatePostModalP
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 max-md:items-end max-md:p-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-lg rounded-2xl bg-background p-6 shadow-apple-lg"
+              className="relative w-full max-w-lg rounded-2xl bg-background shadow-apple-lg max-md:rounded-b-none max-md:max-h-[90vh] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close button */}
-              <button
-                onClick={handleClose}
-                className="absolute right-4 top-4 rounded-lg p-2 text-muted-foreground hover:bg-secondary transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              {/* Header - Fixed */}
+              <div className="flex items-center justify-between p-6 pb-4 border-b border-border/40 flex-shrink-0">
+                <h2 className="text-2xl font-semibold tracking-tight">Create Post</h2>
+                <button
+                  onClick={handleClose}
+                  className="rounded-lg p-2 text-muted-foreground hover:bg-secondary transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-              {/* Header */}
-              <h2 className="mb-6 text-2xl font-semibold tracking-tight">Create Post</h2>
+              {/* Form - Scrollable */}
+              <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                  {/* Content */}
+                  <div>
+                    <label htmlFor="content" className="mb-2 block text-sm font-medium">
+                      What's on your mind?
+                    </label>
+                    <textarea
+                      id="content"
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      placeholder="Share your progress, thoughts, or achievements..."
+                      rows={5}
+                      className="w-full rounded-xl border border-border/60 bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                      required
+                      autoFocus
+                    />
+                  </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Content */}
-                <div>
-                  <label htmlFor="content" className="mb-2 block text-sm font-medium">
-                    What's on your mind?
-                  </label>
-                  <textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Share your progress, thoughts, or achievements..."
-                    rows={5}
-                    className="w-full rounded-xl border border-border/60 bg-background px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-                    required
-                    autoFocus
-                  />
-                </div>
+                  {/* Image Upload */}
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
 
-                {/* Image Upload */}
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-
-                  {imagePreview ? (
-                    <div className="relative rounded-xl overflow-hidden border border-border/60">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-48 object-cover"
-                      />
+                    {imagePreview ? (
+                      <div className="relative rounded-xl overflow-hidden border border-border/60">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          onClick={handleRemoveImage}
+                          className="absolute top-2 right-2 h-8 w-8 rounded-lg shadow-lg"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         type="button"
-                        variant="destructive"
-                        size="icon"
-                        onClick={handleRemoveImage}
-                        className="absolute top-2 right-2 h-8 w-8 rounded-lg shadow-lg"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full rounded-xl border-dashed"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Image className="h-4 w-4 mr-2" />
+                        Add Image
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full rounded-xl border-dashed"
-                    >
-                      <Image className="h-4 w-4 mr-2" />
-                      Add Image
-                    </Button>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Privacy */}
-                <div>
-                  <label className="mb-3 block text-sm font-medium">Privacy</label>
-                  <div className="grid gap-2">
-                    {PRIVACY_OPTIONS.map((option) => {
-                      const Icon = option.icon
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setPrivacy(option.value)}
-                          className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
-                            privacy === option.value
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border/60 hover:border-border'
-                          }`}
-                        >
-                          <Icon className="h-5 w-5 shrink-0" />
-                          <div className="flex-1">
-                            <p className="font-medium">{option.label}</p>
-                            <p className="text-xs text-muted-foreground">{option.description}</p>
-                          </div>
-                          <div className={`h-5 w-5 rounded-full border-2 ${
-                            privacy === option.value
-                              ? 'border-primary bg-primary'
-                              : 'border-border'
-                          }`}>
-                            {privacy === option.value && (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      )
-                    })}
+                  {/* Privacy */}
+                  <div>
+                    <label className="mb-3 block text-sm font-medium">Privacy</label>
+                    <div className="grid gap-2">
+                      {PRIVACY_OPTIONS.map((option) => {
+                        const Icon = option.icon
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setPrivacy(option.value)}
+                            className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+                              privacy === option.value
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border/60 hover:border-border'
+                            }`}
+                          >
+                            <Icon className="h-5 w-5 shrink-0" />
+                            <div className="flex-1">
+                              <p className="font-medium">{option.label}</p>
+                              <p className="text-xs text-muted-foreground">{option.description}</p>
+                            </div>
+                            <div className={`h-5 w-5 rounded-full border-2 ${
+                              privacy === option.value
+                                ? 'border-primary bg-primary'
+                                : 'border-border'
+                            }`}>
+                              {privacy === option.value && (
+                                <div className="h-full w-full flex items-center justify-center">
+                                  <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-3 pt-2">
+                {/* Actions - Fixed Footer */}
+                <div className="flex gap-3 p-6 pt-4 border-t border-border/40 flex-shrink-0">
                   <Button
                     type="button"
                     variant="outline"
