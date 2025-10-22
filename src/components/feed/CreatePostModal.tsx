@@ -124,13 +124,13 @@ export default function CreatePostModal({ open, onOpenChange }: CreatePostModalP
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 max-md:items-end max-md:p-0">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 max-md:items-end max-md:p-0 max-md:pb-16">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-lg rounded-2xl bg-background shadow-apple-lg max-md:rounded-b-none max-md:max-h-[90vh] flex flex-col overflow-hidden"
+              className="relative w-full max-w-lg rounded-2xl bg-background shadow-apple-lg max-md:rounded-b-none max-md:max-h-[calc(90vh-4rem)] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header - Fixed */}
