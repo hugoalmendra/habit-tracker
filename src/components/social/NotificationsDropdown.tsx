@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useSharedHabits } from '@/hooks/useSharedHabits'
 import { Button } from '@/components/ui/button'
@@ -7,14 +8,56 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Bell, X, User as UserIcon, Check, XCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
+import type { Notification } from '@/hooks/useNotifications'
 
 export default function NotificationsDropdown() {
+  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false)
   const [processingInvite, setProcessingInvite] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, hasMore, loadMore, isLoading } = useNotifications()
   const { acceptInvite, declineInvite } = useSharedHabits()
+
+  // Get the route path for a notification based on its type
+  const getNotificationLink = (notification: Notification): string | null => {
+    switch (notification.type) {
+      case 'follow':
+        return notification.from_user_id ? `/profile/${notification.from_user_id}` : null
+
+      case 'shared_habit_invite':
+        // Don't navigate for invites with action buttons - they handle their own flow
+        return null
+
+      case 'shared_habit_completion':
+        if (notification.metadata && 'habit_id' in notification.metadata) {
+          return `/dashboard?habit=${notification.metadata.habit_id}`
+        }
+        return '/dashboard'
+
+      case 'post_reaction':
+      case 'post_comment':
+        if (notification.metadata && 'post_id' in notification.metadata) {
+          return `/feed?post=${notification.metadata.post_id}`
+        }
+        return '/feed'
+
+      case 'achievement':
+        return '/profile'
+
+      case 'challenge_invite':
+        if (notification.metadata && 'challenge_id' in notification.metadata) {
+          return `/challenge/${notification.metadata.challenge_id}`
+        }
+        return '/challenges'
+
+      case 'recognition':
+        return notification.from_user_id ? `/profile/${notification.from_user_id}` : null
+
+      default:
+        return null
+    }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -28,9 +71,22 @@ export default function NotificationsDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleNotificationClick = async (notificationId: string, read: boolean) => {
-    if (!read) {
-      await markAsRead(notificationId)
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if unread
+    if (!notification.read) {
+      await markAsRead(notification.id)
+    }
+
+    // Get the link for this notification
+    const link = getNotificationLink(notification)
+
+    if (link) {
+      // Close the dropdown/modal
+      setIsOpen(false)
+      setIsMobileModalOpen(false)
+
+      // Navigate to the link
+      navigate(link)
     }
   }
 
@@ -82,7 +138,7 @@ export default function NotificationsDropdown() {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                onClick={() => handleNotificationClick(notification.id, notification.read)}
+                onClick={() => handleNotificationClick(notification)}
                 className={`p-4 cursor-pointer transition-all hover:bg-secondary/50 ${
                   !notification.read ? 'bg-primary/5' : ''
                 }`}
