@@ -112,7 +112,7 @@ export default function Login() {
             <CardFooter className="flex flex-col space-y-4 pt-2">
               <Button
                 type="submit"
-                className="h-14 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+                className="h-14 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground active:scale-[0.98] transition-all shadow-lg shadow-primary/25"
                 disabled={loading}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
