@@ -100,7 +100,7 @@ export default function Navigation() {
                   Philosophy
                 </a>
                 <div className="pt-4 space-y-2">
-                  <Button variant="outline" asChild className="w-full font-medium rounded-none border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-stone-50">
+                  <Button variant="ghost" asChild className="w-full font-medium rounded-none text-stone-900 hover:bg-transparent">
                     <Link to="/login">Login</Link>
                   </Button>
                   <Button
