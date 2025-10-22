@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Globe, Users, Lock, Image, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,18 @@ export default function CreatePostModal({ open, onOpenChange }: CreatePostModalP
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { createPost } = usePosts()
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -134,7 +146,11 @@ export default function CreatePostModal({ open, onOpenChange }: CreatePostModalP
 
               {/* Form - Scrollable */}
               <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                <div
+                  className="flex-1 overflow-y-auto px-6 py-5 space-y-5"
+                  onTouchMove={(e) => e.stopPropagation()}
+                  onWheel={(e) => e.stopPropagation()}
+                >
                   {/* Content */}
                   <div>
                     <label htmlFor="content" className="mb-2 block text-sm font-medium">
