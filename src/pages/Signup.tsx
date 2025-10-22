@@ -59,7 +59,7 @@ export default function Signup() {
                 Click the link in the email to confirm your account and start building better habits.
               </p>
               <Link to="/login">
-                <Button className="w-full h-12 rounded-xl">
+                <Button className="w-full h-14 rounded-xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30">
                   Back to Sign In
                 </Button>
               </Link>
@@ -170,7 +170,7 @@ export default function Signup() {
             <CardFooter className="flex flex-col space-y-4 pt-2">
               <Button
                 type="submit"
-                className="h-12 w-full rounded-xl bg-primary text-base font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-apple-sm"
+                className="h-14 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
                 disabled={loading}
               >
                 {loading ? 'Creating account...' : 'Create account'}
