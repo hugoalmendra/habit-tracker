@@ -430,3 +430,58 @@ export function useComments(postId: string) {
     isLoading,
   }
 }
+
+export interface ReactionUser {
+  id: string
+  user_id: string
+  reaction: 'like' | 'celebrate' | 'support' | 'love' | 'fire'
+  created_at: string
+  user?: {
+    id: string
+    display_name: string
+    photo_url: string
+  }
+}
+
+export function usePostReactions(postId: string | null) {
+  const { user } = useAuth()
+
+  const { data: reactions, isLoading } = useQuery({
+    queryKey: ['post-reactions', postId],
+    queryFn: async () => {
+      if (!postId) return []
+
+      const { data, error } = await supabase
+        .from('post_reactions')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Fetch user details for each reaction
+      const reactionsWithUsers = await Promise.all(
+        (data || []).map(async (reaction) => {
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('id, display_name, photo_url')
+            .eq('id', reaction.user_id)
+            .maybeSingle()
+
+          return {
+            ...reaction,
+            user: userData
+          }
+        })
+      )
+
+      return reactionsWithUsers as ReactionUser[]
+    },
+    enabled: !!user && !!postId,
+  })
+
+  return {
+    reactions,
+    isLoading,
+  }
+}

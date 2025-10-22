@@ -16,6 +16,7 @@ import GlobalSearch from '@/components/layout/GlobalSearch'
 import CreatePostModal from '@/components/feed/CreatePostModal'
 import ActivityCard from '@/components/feed/ActivityCard'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import ReactionUsersModal from '@/components/feed/ReactionUsersModal'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -102,6 +103,8 @@ export default function Feed() {
   const [profile, setProfile] = useState<{ photo_url: string | null, display_name: string | null } | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [postToDelete, setPostToDelete] = useState<string | null>(null)
+  const [showReactionsModal, setShowReactionsModal] = useState(false)
+  const [selectedPostForReactions, setSelectedPostForReactions] = useState<string | null>(null)
 
   const { posts, isLoading, toggleReaction, deletePost, addComment } = usePosts(filter)
 
@@ -356,15 +359,27 @@ export default function Feed() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-4 pt-4 border-t border-border">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleReaction(item.id, 'like')}
-                          className={item.user_reaction === 'like' ? 'text-primary' : ''}
-                        >
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          {item.reactions_count || 0}
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReaction(item.id, 'like')}
+                            className={`${item.user_reaction === 'like' ? 'text-primary' : ''} hover:bg-secondary`}
+                          >
+                            <ThumbsUp className="h-4 w-4" />
+                          </Button>
+                          {item.reactions_count > 0 && (
+                            <button
+                              onClick={() => {
+                                setSelectedPostForReactions(item.id)
+                                setShowReactionsModal(true)
+                              }}
+                              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors px-1"
+                            >
+                              {item.reactions_count}
+                            </button>
+                          )}
+                        </div>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -395,6 +410,13 @@ export default function Feed() {
       </main>
 
       <CreatePostModal open={isCreatePostOpen} onOpenChange={setIsCreatePostOpen} />
+
+      {/* Reactions Modal */}
+      <ReactionUsersModal
+        postId={selectedPostForReactions}
+        open={showReactionsModal}
+        onOpenChange={setShowReactionsModal}
+      />
 
       {/* Delete Confirmation */}
       <ConfirmDialog
