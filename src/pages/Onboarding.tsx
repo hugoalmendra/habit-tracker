@@ -30,10 +30,16 @@ export default function Onboarding() {
 
   const markOnboardingComplete = async () => {
     if (!user) return
-    await supabase
+
+    const { error } = await supabase
       .from('profiles')
       .update({ onboarding_completed: true } as any)
       .eq('id', user.id)
+
+    if (error) {
+      console.error('Error marking onboarding as complete:', error)
+      throw new Error('Failed to complete onboarding. Please try again.')
+    }
   }
 
   const handleGenerate = async () => {
@@ -79,16 +85,21 @@ export default function Onboarding() {
       navigate('/dashboard')
     } catch (error) {
       console.error('Failed to create habits:', error)
-      // TODO: Show error toast
+      alert(error instanceof Error ? error.message : 'Failed to create habits. Please try again.')
     } finally {
       setIsCreating(false)
     }
   }
 
   const handleSkip = async () => {
-    // Mark onboarding as completed even if they skip
-    await markOnboardingComplete()
-    navigate('/dashboard')
+    try {
+      // Mark onboarding as completed even if they skip
+      await markOnboardingComplete()
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('Failed to skip onboarding:', error)
+      alert('Failed to complete setup. Please try again.')
+    }
   }
 
   return (

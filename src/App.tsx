@@ -25,6 +25,48 @@ import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
 
+// Redirect authenticated users to the correct page based on onboarding status
+function AuthenticatedRedirect() {
+  const { user } = useAuth()
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null)
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true)
+
+  useEffect(() => {
+    async function checkOnboarding() {
+      if (!user) {
+        setCheckingOnboarding(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (error) {
+        console.error('Error checking onboarding status:', error)
+      }
+
+      setOnboardingCompleted((data as any)?.onboarding_completed ?? false)
+      setCheckingOnboarding(false)
+    }
+
+    checkOnboarding()
+  }, [user])
+
+  if (checkingOnboarding) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  // If onboarding not completed, go to onboarding; otherwise go to dashboard
+  return <Navigate to={onboardingCompleted ? "/dashboard" : "/onboarding"} replace />
+}
+
 // Protected route wrapper that checks onboarding status
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -38,11 +80,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('onboarding_completed')
         .eq('id', user.id)
         .maybeSingle()
+
+      if (error) {
+        console.error('Error checking onboarding status:', error)
+      }
 
       setOnboardingCompleted((data as any)?.onboarding_completed ?? false)
       setCheckingOnboarding(false)
@@ -87,11 +133,11 @@ function AppRoutes() {
         <Route path="/" element={<Landing />} />
         <Route
           path="/login"
-          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+          element={user ? <AuthenticatedRedirect /> : <Login />}
         />
         <Route
           path="/signup"
-          element={user ? <Navigate to="/onboarding" replace /> : <Signup />}
+          element={user ? <AuthenticatedRedirect /> : <Signup />}
         />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route
