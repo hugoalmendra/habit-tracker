@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Users, UserPlus, Lock, Globe, MoreVertical, LogOut, Edit2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Users, UserPlus, Lock, Globe, MoreVertical, LogOut, Edit2, Trash2, Shield, UserMinus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -10,11 +10,13 @@ import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { useAuth } from '@/contexts/AuthContext'
 import Spinner from '@/components/ui/Spinner'
 import EditPublicGroupModal from '@/components/groups/EditPublicGroupModal'
+import InviteMembersModal from '@/components/groups/InviteMembersModal'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 
 export default function GroupDetail() {
@@ -22,6 +24,7 @@ export default function GroupDetail() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
 
   const {
     useGroupDetails,
@@ -29,8 +32,12 @@ export default function GroupDetail() {
     joinGroup,
     leaveGroup,
     deleteGroup,
+    removeMember,
+    promoteToAdmin,
     isJoining,
     isLeaving,
+    isRemoving,
+    isPromoting,
   } = usePublicGroups()
 
   const { data: group, isLoading: loadingGroup } = useGroupDetails(id || null)
@@ -94,6 +101,30 @@ export default function GroupDetail() {
         navigate('/groups')
       } catch (error) {
         console.error('Error deleting group:', error)
+      }
+    }
+  }
+
+  const handleRemoveMember = async (userId: string, memberName: string) => {
+    if (!id) return
+    if (confirm(`Are you sure you want to remove ${memberName} from this group?`)) {
+      try {
+        await removeMember({ groupId: id, userId })
+      } catch (error) {
+        console.error('Error removing member:', error)
+        alert('Failed to remove member. Please try again.')
+      }
+    }
+  }
+
+  const handlePromoteToAdmin = async (userId: string, memberName: string) => {
+    if (!id) return
+    if (confirm(`Are you sure you want to promote ${memberName} to admin?`)) {
+      try {
+        await promoteToAdmin({ groupId: id, userId })
+      } catch (error) {
+        console.error('Error promoting member:', error)
+        alert('Failed to promote member. Please try again.')
       }
     }
   }
@@ -249,9 +280,21 @@ export default function GroupDetail() {
           transition={{ delay: 0.1 }}
           className="mt-6"
         >
-          <h2 className="text-xl font-semibold mb-4">
-            Members ({members?.length || 0})
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">
+              Members ({members?.length || 0})
+            </h2>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsInviteModalOpen(true)}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Members
+              </Button>
+            )}
+          </div>
 
           {loadingMembers ? (
             <div className="flex justify-center py-8">
@@ -259,33 +302,80 @@ export default function GroupDetail() {
             </div>
           ) : members && members.length > 0 ? (
             <div className="grid gap-3 sm:grid-cols-2">
-              {members.map((member) => (
-                <Card key={member.id} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={member.profile?.photo_url || undefined} />
-                      <AvatarFallback>
-                        {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {member.profile?.display_name || 'Unknown'}
-                      </p>
-                      {member.profile?.username && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          @{member.profile.username}
+              {members.map((member) => {
+                const isCurrentUser = member.user_id === user?.id
+                const isMemberAdmin = member.role === 'admin'
+                const canManageMember = isAdmin && !isCurrentUser && member.user_id !== group?.created_by
+
+                return (
+                  <Card key={member.id} className="p-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={member.profile?.photo_url || undefined} />
+                        <AvatarFallback>
+                          {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">
+                          {member.profile?.display_name || 'Unknown'}
+                          {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
                         </p>
+                        {member.profile?.username && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            @{member.profile.username}
+                          </p>
+                        )}
+                      </div>
+                      {isMemberAdmin && (
+                        <Badge variant="secondary" className="text-xs">
+                          Admin
+                        </Badge>
+                      )}
+                      {canManageMember && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={isRemoving || isPromoting}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {!isMemberAdmin && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => handlePromoteToAdmin(
+                                    member.user_id,
+                                    member.profile?.display_name || 'this member'
+                                  )}
+                                >
+                                  <Shield className="mr-2 h-4 w-4" />
+                                  Promote to Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleRemoveMember(
+                                member.user_id,
+                                member.profile?.display_name || 'this member'
+                              )}
+                            >
+                              <UserMinus className="mr-2 h-4 w-4" />
+                              Remove from Group
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     </div>
-                    {member.role === 'admin' && (
-                      <Badge variant="secondary" className="text-xs">
-                        Admin
-                      </Badge>
-                    )}
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                )
+              })}
             </div>
           ) : (
             <Card className="p-8 text-center">
@@ -301,6 +391,16 @@ export default function GroupDetail() {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           group={group}
+        />
+      )}
+
+      {/* Invite Members Modal */}
+      {group && id && (
+        <InviteMembersModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          groupId={id}
+          groupName={group.name}
         />
       )}
     </div>

@@ -491,6 +491,23 @@ export function usePublicGroups() {
     },
   })
 
+  // Promote member to admin (admin only)
+  const promoteToAdminMutation = useMutation({
+    mutationFn: async (input: { groupId: string; userId: string }) => {
+      const { error } = await supabase
+        .from('user_group_memberships' as any)
+        .update({ role: 'admin' })
+        .eq('group_id', input.groupId)
+        .eq('user_id', input.userId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['group-members'] })
+      queryClient.invalidateQueries({ queryKey: ['group-details'] })
+    },
+  })
+
   return {
     // Data
     publicGroups,
@@ -516,6 +533,7 @@ export function usePublicGroups() {
     acceptInvitation: acceptInvitationMutation.mutateAsync,
     declineInvitation: declineInvitationMutation.mutateAsync,
     removeMember: removeMemberMutation.mutateAsync,
+    promoteToAdmin: promoteToAdminMutation.mutateAsync,
 
     // Mutation states
     isCreating: createGroupMutation.isPending,
@@ -524,5 +542,7 @@ export function usePublicGroups() {
     isJoining: joinGroupMutation.isPending,
     isLeaving: leaveGroupMutation.isPending,
     isInviting: inviteUserMutation.isPending,
+    isRemoving: removeMemberMutation.isPending,
+    isPromoting: promoteToAdminMutation.isPending,
   }
 }
