@@ -206,8 +206,6 @@ export default function Profile() {
         .eq('following_id', user.id)
         .eq('status', 'accepted')
 
-      console.log('[Profile] Followers count for userId', user.id, ':', followersCount, 'Error:', followersCountError)
-
       setFollowersCount(followersCount || 0)
 
       // Load following count
