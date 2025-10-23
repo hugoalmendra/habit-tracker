@@ -62,6 +62,14 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
               <span className="font-semibold">{count} challenges</span>
             </span>
           )
+        case 'challenge_completed':
+          return (
+            <span>
+              completed{' '}
+              <span className="font-semibold">{count} challenges</span>
+              {' '}and earned badges!
+            </span>
+          )
         default:
           return <span>completed {count} activities</span>
       }

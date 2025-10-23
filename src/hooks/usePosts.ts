@@ -87,13 +87,13 @@ const ACTIVITY_IMPORTANCE: Record<string, number> = {
 
 // Group similar activities from the same user on the same day
 function groupActivities(activities: FeedActivity[]): FeedActivity[] {
-  const groupableTypes = ['habit_created', 'challenge_joined']
+  const groupableTypes = ['habit_created', 'challenge_joined', 'challenge_completed']
   const grouped: FeedActivity[] = []
   const groupMap = new Map<string, FeedActivity[]>()
 
   activities.forEach(activity => {
     if (!groupableTypes.includes(activity.activity_type)) {
-      // Don't group important activities
+      // Don't group important milestones/achievements
       grouped.push(activity)
       return
     }
@@ -124,8 +124,8 @@ function groupActivities(activities: FeedActivity[]): FeedActivity[] {
           grouped_count: group.length,
           grouped_items: group.map(a => ({
             id: a.id,
-            name: a.activity_type === 'habit_created' ? a.metadata.habit_name : a.metadata.challenge_name,
-            category: a.activity_type === 'habit_created' ? a.metadata.habit_category : a.metadata.challenge_category,
+            name: a.metadata.challenge_name || a.metadata.habit_name,
+            category: a.metadata.challenge_category || a.metadata.habit_category,
           }))
         }
       }
