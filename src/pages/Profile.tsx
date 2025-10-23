@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFollowers } from '@/hooks/useFollowers'
+import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -66,6 +67,7 @@ export default function Profile() {
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { followUser, unfollowUser, checkIsFollowing } = useFollowers()
+  const { myGroups } = usePublicGroups()
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [habits, setHabits] = useState<Habit[]>([])
@@ -670,6 +672,51 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Public Groups */}
+          {myGroups && myGroups.length > 0 && (
+            <Card className="border-border/40 shadow-apple-lg rounded-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Groups</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/groups')}
+                    className="text-sm"
+                  >
+                    View All
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {myGroups.slice(0, 6).map((group) => (
+                    <button
+                      key={group.id}
+                      onClick={() => navigate(`/groups/${group.id}`)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/60 hover:border-primary hover:bg-primary/5 transition-all group"
+                    >
+                      <div className="h-8 w-8 rounded-full overflow-hidden bg-secondary flex items-center justify-center shrink-0">
+                        {group.avatar_url ? (
+                          <img
+                            src={group.avatar_url}
+                            alt={group.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-medium">
+                            {group.name.substring(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                        {group.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats */}
           <div className="grid gap-5 md:grid-cols-3">

@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFollowers } from '@/hooks/useFollowers'
+import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -72,6 +73,7 @@ export default function PublicProfile() {
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [postsLoading, setPostsLoading] = useState(true)
   const [currentPostIndex, setCurrentPostIndex] = useState(0)
+  const [userGroups, setUserGroups] = useState<any[]>([])
 
   useEffect(() => {
     loadPublicProfile()
@@ -153,6 +155,23 @@ export default function PublicProfile() {
       if (user && userId !== user.id) {
         const following = await checkIsFollowing(userId)
         setIsFollowing(following)
+      }
+
+      // Load user's public groups
+      const { data: memberships } = await supabase
+        .from('user_group_memberships')
+        .select('group_id')
+        .eq('user_id', userId)
+
+      if (memberships && memberships.length > 0) {
+        const groupIds = memberships.map(m => m.group_id)
+        const { data: groupsData } = await supabase
+          .from('public_groups')
+          .select('id, name, avatar_url, is_private')
+          .in('id', groupIds)
+          .eq('is_private', false) // Only show public groups on public profile
+
+        setUserGroups(groupsData || [])
       }
     } catch (error) {
       console.error('Error loading public profile:', error)
@@ -466,6 +485,43 @@ export default function PublicProfile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Public Groups */}
+          {userGroups.length > 0 && (
+            <Card className="border-border/40 shadow-apple-lg rounded-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Groups</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {userGroups.slice(0, 6).map((group) => (
+                    <button
+                      key={group.id}
+                      onClick={() => navigate(`/groups/${group.id}`)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/60 hover:border-primary hover:bg-primary/5 transition-all group"
+                    >
+                      <div className="h-8 w-8 rounded-full overflow-hidden bg-secondary flex items-center justify-center shrink-0">
+                        {group.avatar_url ? (
+                          <img
+                            src={group.avatar_url}
+                            alt={group.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-medium">
+                            {group.name.substring(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                        {group.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats */}
           <div className="grid gap-5 md:grid-cols-3">

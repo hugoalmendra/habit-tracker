@@ -24,6 +24,8 @@ import Challenges from '@/pages/Challenges'
 import ChallengeDetail from '@/pages/ChallengeDetail'
 import JoinChallenge from '@/pages/JoinChallenge'
 import PublicProfile from '@/pages/PublicProfile'
+import Groups from '@/pages/Groups'
+import GroupDetail from '@/pages/GroupDetail'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
 import Groups from '@/pages/Groups'
@@ -179,6 +181,14 @@ function AppRoutes() {
         <Route
           path="/challenges/:id/join"
           element={<ProtectedRoute><JoinChallenge /></ProtectedRoute>}
+        />
+        <Route
+          path="/groups"
+          element={<ProtectedRoute><Groups /></ProtectedRoute>}
+        />
+        <Route
+          path="/groups/:id"
+          element={<ProtectedRoute><GroupDetail /></ProtectedRoute>}
         />
         <Route path="/profile/:userId" element={<PublicProfile />} />
         <Route path="/privacy" element={<Privacy />} />
