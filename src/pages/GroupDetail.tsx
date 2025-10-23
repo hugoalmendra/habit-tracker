@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Users, UserPlus, Lock, Globe, MoreVertical, LogOut, Edit2, Trash2, Shield, UserMinus } from 'lucide-react'
+import { ArrowLeft, Users, UserPlus, Lock, Globe, MoreVertical, LogOut, Edit2, Trash2, Shield, UserMinus, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import Spinner from '@/components/ui/Spinner'
 import EditPublicGroupModal from '@/components/groups/EditPublicGroupModal'
 import InviteMembersModal from '@/components/groups/InviteMembersModal'
+import { format } from 'date-fns'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +27,8 @@ export default function GroupDetail() {
   const { user } = useAuth()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [groupActivities, setGroupActivities] = useState<any[]>([])
+  const [loadingActivities, setLoadingActivities] = useState(true)
 
   const {
     useGroupDetails,
@@ -46,6 +50,54 @@ export default function GroupDetail() {
   const isCreator = group?.created_by === user?.id
   const isMember = group?.is_member
   const isAdmin = group?.is_admin
+
+  // Load group activities
+  useEffect(() => {
+    if (id && members) {
+      loadGroupActivities()
+    }
+  }, [id, members])
+
+  const loadGroupActivities = async () => {
+    if (!id || !members) return
+
+    setLoadingActivities(true)
+    try {
+      const memberIds = members.map(m => m.user_id)
+
+      // Get recent habit completions from group members
+      const { data: completions, error } = await supabase
+        .from('feed_activities')
+        .select('*')
+        .in('user_id', memberIds)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (error) throw error
+
+      // Fetch user profiles for each activity
+      const activitiesWithProfiles = await Promise.all(
+        (completions || []).map(async (activity) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, display_name, photo_url')
+            .eq('id', activity.user_id)
+            .maybeSingle()
+
+          return {
+            ...activity,
+            user_profile: profile
+          }
+        })
+      )
+
+      setGroupActivities(activitiesWithProfiles)
+    } catch (error) {
+      console.error('Error loading group activities:', error)
+    } finally {
+      setLoadingActivities(false)
+    }
+  }
 
   const handleJoinGroup = async () => {
     if (!id) return
@@ -383,6 +435,62 @@ export default function GroupDetail() {
             </Card>
           )}
         </motion.div>
+
+        {/* Activity Feed Section */}
+        {isMember && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-6"
+          >
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recent Activity
+            </h2>
+
+            {loadingActivities ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="md" />
+              </div>
+            ) : groupActivities.length > 0 ? (
+              <div className="space-y-3">
+                {groupActivities.map((activity) => (
+                  <Card key={activity.id} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={activity.user_profile?.photo_url || undefined} />
+                        <AvatarFallback>
+                          {activity.user_profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">
+                            {activity.user_profile?.display_name || 'Unknown'}
+                          </span>
+                          <span className="text-muted-foreground">
+                            completed
+                          </span>
+                          <span className="font-medium truncate">
+                            {activity.habit_name}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {format(new Date(activity.created_at), 'MMM d, yyyy • h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No recent activity</p>
+              </Card>
+            )}
+          </motion.div>
+        )}
       </div>
 
       {/* Edit Group Modal */}
