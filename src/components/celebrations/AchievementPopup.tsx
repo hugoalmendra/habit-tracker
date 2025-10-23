@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trophy, Flame, Star, Sparkles, X } from 'lucide-react'
+import { Trophy, Flame, Star, Sparkles, X, Award } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export type AchievementType = 'level-up' | 'streak-milestone' | 'first-habit' | 'badge-earned'
+export type AchievementType = 'level-up' | 'streak-milestone' | 'first-habit' | 'badge-earned' | 'challenge-completed'
 
 export interface Achievement {
   type: AchievementType
   title: string
   description: string
   color: string
-  icon?: 'trophy' | 'flame' | 'star' | 'sparkles'
+  icon?: 'trophy' | 'flame' | 'star' | 'sparkles' | 'award'
+  customIcon?: string // For emoji icons from badges
+  customColor?: string // For badge colors
 }
 
 interface AchievementPopupProps {
@@ -24,6 +26,7 @@ const iconMap = {
   flame: Flame,
   star: Star,
   sparkles: Sparkles,
+  award: Award,
 }
 
 export default function AchievementPopup({ achievement, onClose }: AchievementPopupProps) {
@@ -48,6 +51,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
   if (!achievement) return null
 
   const Icon = iconMap[achievement.icon || 'trophy']
+  const displayColor = achievement.customColor || achievement.color
 
   const popup = (
     <AnimatePresence>
@@ -78,13 +82,13 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
             >
             <div
               className="relative overflow-hidden rounded-3xl border-2 bg-background p-6 sm:p-8 shadow-2xl"
-              style={{ borderColor: achievement.color }}
+              style={{ borderColor: displayColor }}
             >
               {/* Animated Background */}
               <div
                 className="absolute inset-0 opacity-10"
                 style={{
-                  background: `radial-gradient(circle at 50% 50%, ${achievement.color} 0%, transparent 70%)`
+                  background: `radial-gradient(circle at 50% 50%, ${displayColor} 0%, transparent 70%)`
                 }}
               />
 
@@ -113,7 +117,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                     }}
                     className="absolute w-2 h-2 rounded-full"
                     style={{
-                      backgroundColor: achievement.color,
+                      backgroundColor: displayColor,
                       left: '50%',
                       top: '50%'
                     }}
@@ -144,7 +148,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                     delay: 0.2
                   }}
                   className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full"
-                  style={{ backgroundColor: `${achievement.color}20` }}
+                  style={{ backgroundColor: `${displayColor}20` }}
                 >
                   <motion.div
                     animate={{
@@ -156,7 +160,11 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                       repeatDelay: 0.5
                     }}
                   >
-                    <Icon className="h-10 w-10" style={{ color: achievement.color }} />
+                    {achievement.customIcon ? (
+                      <div className="text-4xl">{achievement.customIcon}</div>
+                    ) : (
+                      <Icon className="h-10 w-10" style={{ color: displayColor }} />
+                    )}
                   </motion.div>
                 </motion.div>
 
@@ -170,8 +178,8 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                   <span
                     className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
                     style={{
-                      backgroundColor: `${achievement.color}20`,
-                      color: achievement.color
+                      backgroundColor: `${displayColor}20`,
+                      color: displayColor
                     }}
                   >
                     Achievement Unlocked
@@ -184,7 +192,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                   className="text-2xl sm:text-3xl font-bold mb-3"
-                  style={{ color: achievement.color }}
+                  style={{ color: displayColor }}
                 >
                   {achievement.title}
                 </motion.h2>
@@ -210,7 +218,7 @@ export default function AchievementPopup({ achievement, onClose }: AchievementPo
                     onClick={handleClose}
                     className="rounded-xl px-8 py-6 text-base font-bold shadow-lg"
                     style={{
-                      backgroundColor: achievement.color,
+                      backgroundColor: displayColor,
                       color: 'white'
                     }}
                   >

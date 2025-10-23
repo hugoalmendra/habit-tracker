@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
@@ -203,9 +204,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <CelebrationProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </CelebrationProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

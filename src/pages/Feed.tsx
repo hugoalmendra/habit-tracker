@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
@@ -106,7 +106,8 @@ export default function Feed() {
   const [showReactionsModal, setShowReactionsModal] = useState(false)
   const [selectedPostForReactions, setSelectedPostForReactions] = useState<string | null>(null)
 
-  const { posts, isLoading, toggleReaction, deletePost, addComment } = usePosts(filter)
+  const { posts, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage, toggleReaction, deletePost, addComment } = usePosts(filter)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
 
   // Load user profile for avatar
   useEffect(() => {
@@ -119,6 +120,23 @@ export default function Feed() {
         .then(({ data }) => setProfile(data))
     }
   }, [user])
+
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(loadMoreRef.current)
+    return () => observer.disconnect()
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage])
 
   const toggleComments = (postId: string) => {
     setExpandedComments(prev => {
@@ -288,6 +306,18 @@ export default function Feed() {
             >
               Following
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setFilter('my_activity')}
+              className={`rounded-none border-b-2 transition-colors ${
+                filter === 'my_activity'
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground'
+              }`}
+            >
+              My Activity
+            </Button>
           </div>
 
           {/* Posts and Activities */}
@@ -300,111 +330,139 @@ export default function Feed() {
               <p className="text-muted-foreground">No activity yet. Be the first to share!</p>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {posts?.map((item: FeedItem) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  {item.item_type === 'activity' ? (
-                    <ActivityCard activity={item} />
-                  ) : (
-                    <Card className="p-6">
-                      {/* Post Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="shrink-0">
-                            <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                              <AvatarImage src={item.user?.photo_url || undefined} />
-                              <AvatarFallback>
-                                {item.user?.display_name?.[0]?.toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Link>
-                          <div>
-                            <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="hover:underline">
-                              <p className="font-semibold">{item.user?.display_name}</p>
+            <>
+              <div className="space-y-4">
+                {posts?.map((item: FeedItem) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {item.item_type === 'activity' ? (
+                      <ActivityCard activity={item} showAsYou={filter === 'my_activity'} />
+                    ) : (
+                      <Card className="p-6">
+                        {/* Post Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="shrink-0">
+                              <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                                <AvatarImage src={item.user?.photo_url || undefined} />
+                                <AvatarFallback>
+                                  {item.user?.display_name?.[0]?.toUpperCase() || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
                             </Link>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                            </p>
+                            <div>
+                              <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="hover:underline">
+                                <p className="font-semibold">
+                                  {filter === 'my_activity' && item.user_id === user?.id ? 'You' : item.user?.display_name}
+                                </p>
+                              </Link>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
                           </div>
+                          {item.user_id === user?.id && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteClick(item.id)}
+                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
-                        {item.user_id === user?.id && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteClick(item.id)}
-                            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+
+                        {/* Post Content */}
+                        <p className="mb-4 whitespace-pre-wrap">{item.content}</p>
+
+                        {/* Post Image */}
+                        {item.image_url && (
+                          <div className="mb-4 rounded-xl overflow-hidden border border-border/60">
+                            <img
+                              src={item.image_url}
+                              alt="Post image"
+                              className="w-full h-auto object-contain"
+                            />
+                          </div>
                         )}
-                      </div>
 
-                      {/* Post Content */}
-                      <p className="mb-4 whitespace-pre-wrap">{item.content}</p>
-
-                      {/* Post Image */}
-                      {item.image_url && (
-                        <div className="mb-4 rounded-xl overflow-hidden border border-border/60">
-                          <img
-                            src={item.image_url}
-                            alt="Post image"
-                            className="w-full h-auto object-contain"
-                          />
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-4 pt-4 border-t border-border">
-                        <div className="flex items-center gap-1">
+                        {/* Actions */}
+                        <div className="flex items-center gap-4 pt-4 border-t border-border">
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleReaction(item.id, 'like')}
+                              className={`${item.user_reaction === 'like' ? 'text-primary' : ''} hover:bg-secondary`}
+                            >
+                              <ThumbsUp className="h-4 w-4" />
+                            </Button>
+                            {item.reactions_count > 0 && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPostForReactions(item.id)
+                                  setShowReactionsModal(true)
+                                }}
+                                className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors px-1"
+                              >
+                                {item.reactions_count}
+                              </button>
+                            )}
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleReaction(item.id, 'like')}
-                            className={`${item.user_reaction === 'like' ? 'text-primary' : ''} hover:bg-secondary`}
+                            onClick={() => toggleComments(item.id)}
                           >
-                            <ThumbsUp className="h-4 w-4" />
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            {item.comments_count || 0}
                           </Button>
-                          {item.reactions_count > 0 && (
-                            <button
-                              onClick={() => {
-                                setSelectedPostForReactions(item.id)
-                                setShowReactionsModal(true)
-                              }}
-                              className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors px-1"
-                            >
-                              {item.reactions_count}
-                            </button>
-                          )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleComments(item.id)}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-1" />
-                          {item.comments_count || 0}
-                        </Button>
-                      </div>
 
-                      {/* Comments Section */}
-                      {expandedComments.has(item.id) && (
-                        <CommentsSection
-                          postId={item.id}
-                          commentInput={commentInputs[item.id] || ''}
-                          onCommentInputChange={(value) => setCommentInputs(prev => ({ ...prev, [item.id]: value }))}
-                          onAddComment={() => handleAddComment(item.id)}
-                          onKeyDown={(e) => handleCommentKeyDown(e, item.id)}
-                        />
-                      )}
-                    </Card>
-                  )}
-                </motion.div>
-              ))}
-            </div>
+                        {/* Comments Section */}
+                        {expandedComments.has(item.id) && (
+                          <CommentsSection
+                            postId={item.id}
+                            commentInput={commentInputs[item.id] || ''}
+                            onCommentInputChange={(value) => setCommentInputs(prev => ({ ...prev, [item.id]: value }))}
+                            onAddComment={() => handleAddComment(item.id)}
+                            onKeyDown={(e) => handleCommentKeyDown(e, item.id)}
+                          />
+                        )}
+                      </Card>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Intersection Observer Sentinel */}
+              {hasNextPage && <div ref={loadMoreRef} className="h-20" />}
+
+              {/* Load More Button */}
+              {hasNextPage && (
+                <div className="flex justify-center py-8">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    variant="outline"
+                    className="rounded-xl px-8"
+                  >
+                    {isFetchingNextPage ? 'Loading...' : 'Load More'}
+                  </Button>
+                </div>
+              )}
+
+              {/* End of Feed Message */}
+              {!hasNextPage && posts && posts.length > 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  You've reached the end of the feed
+                </div>
+              )}
+            </>
           )}
         </motion.div>
       </main>

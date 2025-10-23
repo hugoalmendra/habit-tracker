@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Trophy, Sparkles, Target, Flame, Star, ThumbsUp, MessageCircle, Send } from 'lucide-react'
+import { Trophy, Sparkles, Target, Flame, Star, ThumbsUp, MessageCircle, Send, Award } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { FeedActivity } from '@/hooks/usePosts'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,13 +15,16 @@ interface ActivityCardProps {
     comments_count?: number
     user_liked?: boolean
   }
+  showAsYou?: boolean
 }
 
-export default function ActivityCard({ activity }: ActivityCardProps) {
+export default function ActivityCard({ activity, showAsYou = false }: ActivityCardProps) {
   const { user } = useAuth()
   const [showComments, setShowComments] = useState(false)
   const [commentInput, setCommentInput] = useState('')
   const { comments, toggleLike, addComment } = useActivityInteractions(activity.id)
+
+  const displayName = showAsYou && activity.user_id === user?.id ? 'You' : activity.user?.display_name
 
   const getActivityIcon = () => {
     switch (activity.activity_type) {
@@ -33,6 +36,8 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
         return <Trophy className="h-5 w-5 text-yellow-500" />
       case 'streak_milestone':
         return <Flame className="h-5 w-5 text-orange-500" />
+      case 'badge_earned':
+        return <Award className="h-5 w-5 text-amber-500" />
       case 'achievement_unlocked':
         return <Star className="h-5 w-5 text-green-500" />
       default:
@@ -114,6 +119,16 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
             </span>
           </span>
         )
+      case 'badge_earned':
+        return (
+          <span>
+            earned the{' '}
+            <span className="font-semibold text-amber-500">
+              {metadata.badge_name || 'badge'}
+            </span>
+            {' '}badge!
+          </span>
+        )
       case 'achievement_unlocked':
         return <span>unlocked an achievement!</span>
       default:
@@ -185,7 +200,7 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
               to={activity.user_id === user?.id ? '/profile' : `/profile/${activity.user_id}`}
               className="hover:underline"
             >
-              <span className="font-semibold">{activity.user?.display_name}</span>
+              <span className="font-semibold">{displayName}</span>
             </Link>
             <span className="text-muted-foreground">{getActivityText()}</span>
           </div>
@@ -215,6 +230,32 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
                   {activity.metadata.badge_icon}
                 </div>
                 <span className="text-sm text-muted-foreground">Badge Earned</span>
+              </div>
+            )}
+
+          {/* Badge Earned Display */}
+          {activity.activity_type === 'badge_earned' &&
+            activity.metadata.badge_icon &&
+            activity.metadata.badge_color && (
+              <div className="mt-3 p-4 rounded-xl border border-border/50 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex items-center justify-center h-16 w-16 rounded-full text-3xl shadow-lg"
+                    style={{ backgroundColor: activity.metadata.badge_color }}
+                  >
+                    {activity.metadata.badge_icon}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground">
+                      {activity.metadata.badge_name}
+                    </h4>
+                    {activity.metadata.badge_description && (
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {activity.metadata.badge_description}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 

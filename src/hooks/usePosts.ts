@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -24,7 +24,7 @@ export interface Post {
 export interface FeedActivity {
   id: string
   user_id: string
-  activity_type: 'achievement_unlocked' | 'habit_created' | 'challenge_joined' | 'challenge_completed' | 'streak_milestone'
+  activity_type: 'achievement_unlocked' | 'habit_created' | 'challenge_joined' | 'challenge_completed' | 'streak_milestone' | 'badge_earned'
   related_id: string | null
   metadata: {
     habit_name?: string
@@ -35,6 +35,9 @@ export interface FeedActivity {
     challenge_category?: string
     badge_icon?: string
     badge_color?: string
+    badge_id?: string
+    badge_name?: string
+    badge_description?: string
     streak_count?: number
     habit_id?: string
     final_progress?: number
@@ -73,7 +76,7 @@ export interface Reaction {
   created_at: string
 }
 
-type FeedFilter = 'for_you' | 'following'
+type FeedFilter = 'for_you' | 'following' | 'my_activity'
 
 // Activity importance weights for ranking
 const ACTIVITY_IMPORTANCE: Record<string, number> = {
@@ -142,17 +145,27 @@ function calculateEngagementScore(item: FeedItem): number {
   const commentsCount = item.comments_count || 0
 
   // Comments are worth more than likes (deeper engagement)
-  return (likesCount * 2) + (commentsCount * 3)
+  const baseScore = (likesCount * 3) + (commentsCount * 5)
+
+  // Viral bonus: Extra points for highly engaged content
+  const totalInteractions = likesCount + commentsCount
+  const viralBonus = totalInteractions >= 10 ? 20 :
+                     totalInteractions >= 5 ? 10 : 0
+
+  return baseScore + viralBonus
 }
 
-// Calculate recency bonus (boost recent content)
+// Calculate recency bonus (favor trending over brand new)
 function calculateRecencyBonus(createdAt: string): number {
   const now = new Date().getTime()
   const itemTime = new Date(createdAt).getTime()
   const hoursAgo = (now - itemTime) / (1000 * 60 * 60)
 
-  if (hoursAgo < 24) return 10  // Last 24 hours
-  if (hoursAgo < 168) return 5  // Last week
+  // Favor "trending" content (1-3 days with engagement) over brand new
+  if (hoursAgo < 6) return 8       // Last 6 hours - very fresh
+  if (hoursAgo < 24) return 12     // Last day - trending sweet spot
+  if (hoursAgo < 72) return 10     // Last 3 days - still trending
+  if (hoursAgo < 168) return 5     // Last week - recent
   return 0
 }
 
@@ -193,13 +206,22 @@ function diversifyFeed(items: FeedItem[], maxPerUser: number = 3): FeedItem[] {
   return diversified
 }
 
+const ITEMS_PER_PAGE = 20
+const FETCH_SIZE = 100 // Fetch more items to account for filtering
+
 export function usePosts(filter: FeedFilter = 'for_you') {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
-  const { data: feedItems, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
     queryKey: ['posts', filter],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 0 }) => {
       let followingIds: string[] = []
 
       if (filter === 'following') {
@@ -213,22 +235,200 @@ export function usePosts(filter: FeedFilter = 'for_you') {
         followingIds = following?.map(f => f.following_id) || []
 
         if (followingIds.length === 0) {
-          return []
+          return { items: [], nextPage: undefined }
         }
       }
 
-      // Fetch posts
+      const from = pageParam * FETCH_SIZE
+      const to = from + FETCH_SIZE - 1
+
+      // For "My Activity" tab, fetch both posts and activities from current user
+      if (filter === 'my_activity') {
+        // Fetch user's posts
+        const { data: postsData, error: postsError } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('user_id', user!.id)
+          .order('created_at', { ascending: false })
+          .range(from, to)
+
+        if (postsError) throw postsError
+
+        // Fetch user's activities
+        const { data: activitiesData, error: activitiesError } = await supabase
+          .from('feed_activities')
+          .select('*')
+          .eq('user_id', user!.id)
+          .order('created_at', { ascending: false })
+          .range(from, to)
+
+        if (activitiesError && activitiesError.code !== 'PGRST116') throw activitiesError
+
+        // Enrich posts with user data
+        const postsWithDetails = await Promise.all(
+          (postsData || []).map(async (post) => {
+            const [userData, commentsData, reactionsData, userReactionData] = await Promise.all([
+              supabase
+                .from('profiles')
+                .select('id, display_name, photo_url')
+                .eq('id', post.user_id)
+                .maybeSingle(),
+              supabase
+                .from('post_comments')
+                .select('id', { count: 'exact', head: true })
+                .eq('post_id', post.id),
+              supabase
+                .from('post_reactions')
+                .select('id', { count: 'exact', head: true })
+                .eq('post_id', post.id),
+              supabase
+                .from('post_reactions')
+                .select('reaction')
+                .eq('post_id', post.id)
+                .eq('user_id', user!.id)
+                .maybeSingle()
+            ])
+
+            return {
+              ...post,
+              item_type: 'post' as const,
+              user: userData.data,
+              comments_count: commentsData.count || 0,
+              reactions_count: reactionsData.count || 0,
+              user_reaction: userReactionData.data?.reaction || null
+            }
+          })
+        )
+
+        // Enrich activities with user data
+        const activitiesWithDetails = await Promise.all(
+          (activitiesData || []).map(async (activity) => {
+            const [userData, likesData, commentsData, userLikeData] = await Promise.all([
+              supabase
+                .from('profiles')
+                .select('id, display_name, photo_url')
+                .eq('id', activity.user_id)
+                .maybeSingle(),
+              supabase
+                .from('activity_likes')
+                .select('id', { count: 'exact', head: true })
+                .eq('activity_id', activity.id),
+              supabase
+                .from('activity_comments')
+                .select('id', { count: 'exact', head: true })
+                .eq('activity_id', activity.id),
+              supabase
+                .from('activity_likes')
+                .select('id')
+                .eq('activity_id', activity.id)
+                .eq('user_id', user!.id)
+                .maybeSingle()
+            ])
+
+            // Fetch habit/challenge names as needed
+            if (activity.activity_type === 'habit_created' && activity.related_id) {
+              const { data: habitData } = await supabase
+                .from('habits')
+                .select('name, category')
+                .eq('id', activity.related_id)
+                .maybeSingle()
+
+              if (habitData) {
+                activity.metadata = {
+                  ...activity.metadata,
+                  habit_name: habitData.name,
+                  habit_category: habitData.category
+                }
+              }
+            }
+
+            if ((activity.activity_type === 'challenge_joined' || activity.activity_type === 'challenge_completed') &&
+                activity.metadata.challenge_id) {
+              const { data: challengeData } = await supabase
+                .from('challenges')
+                .select('name, category, badge_icon, badge_color')
+                .eq('id', activity.metadata.challenge_id)
+                .maybeSingle()
+
+              if (challengeData) {
+                activity.metadata = {
+                  ...activity.metadata,
+                  challenge_name: challengeData.name,
+                  challenge_category: challengeData.category,
+                  badge_icon: challengeData.badge_icon,
+                  badge_color: challengeData.badge_color
+                }
+              }
+            }
+
+            if (activity.activity_type === 'streak_milestone' && activity.metadata.habit_id) {
+              const { data: habitData } = await supabase
+                .from('habits')
+                .select('name')
+                .eq('id', activity.metadata.habit_id)
+                .maybeSingle()
+
+              if (habitData) {
+                activity.metadata = {
+                  ...activity.metadata,
+                  habit_name: habitData.name
+                }
+              }
+            }
+
+            if (activity.activity_type === 'badge_earned' && activity.metadata.badge_id) {
+              const { data: badgeData } = await supabase
+                .from('badge_definitions')
+                .select('name, description, icon, color')
+                .eq('id', activity.metadata.badge_id)
+                .maybeSingle()
+
+              if (badgeData) {
+                activity.metadata = {
+                  ...activity.metadata,
+                  badge_name: badgeData.name,
+                  badge_description: badgeData.description,
+                  badge_icon: badgeData.icon,
+                  badge_color: badgeData.color
+                }
+              }
+            }
+
+            return {
+              ...activity,
+              item_type: 'activity' as const,
+              user: userData.data,
+              likes_count: likesData.count || 0,
+              comments_count: commentsData.count || 0,
+              user_liked: !!userLikeData.data
+            }
+          })
+        )
+
+        // Merge posts and activities, then sort by created_at
+        const allItems = [...postsWithDetails, ...activitiesWithDetails]
+        const sortedItems = allItems.sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+
+        return {
+          items: sortedItems as FeedItem[],
+          nextPage: (postsData?.length || 0) + (activitiesData?.length || 0) >= FETCH_SIZE ? pageParam + 1 : undefined
+        }
+      }
+
+      // Fetch posts with pagination
       const postsQuery = filter === 'following'
-        ? supabase.from('posts').select('*').in('user_id', followingIds).order('created_at', { ascending: false })
-        : supabase.from('posts').select('*').eq('privacy', 'public').order('created_at', { ascending: false }).limit(50)
+        ? supabase.from('posts').select('*').in('user_id', followingIds).order('created_at', { ascending: false }).range(from, to)
+        : supabase.from('posts').select('*').eq('privacy', 'public').order('created_at', { ascending: false }).range(from, to)
 
       const { data: postsData, error: postsError } = await postsQuery
       if (postsError) throw postsError
 
-      // Fetch activities
+      // Fetch activities with pagination
       const activitiesQuery = filter === 'following'
-        ? supabase.from('feed_activities').select('*').in('user_id', followingIds).order('created_at', { ascending: false })
-        : supabase.from('feed_activities').select('*').order('created_at', { ascending: false }).limit(50)
+        ? supabase.from('feed_activities').select('*').in('user_id', followingIds).order('created_at', { ascending: false }).range(from, to)
+        : supabase.from('feed_activities').select('*').order('created_at', { ascending: false }).range(from, to)
 
       const { data: activitiesData, error: activitiesError } = await activitiesQuery
       if (activitiesError && activitiesError.code !== 'PGRST116') throw activitiesError
@@ -347,6 +547,25 @@ export function usePosts(filter: FeedFilter = 'for_you') {
             }
           }
 
+          // Fetch badge details for badge_earned activities
+          if (activity.activity_type === 'badge_earned' && activity.metadata.badge_id) {
+            const { data: badgeData } = await supabase
+              .from('badge_definitions')
+              .select('name, description, icon, color')
+              .eq('id', activity.metadata.badge_id)
+              .maybeSingle()
+
+            if (badgeData) {
+              activity.metadata = {
+                ...activity.metadata,
+                badge_name: badgeData.name,
+                badge_description: badgeData.description,
+                badge_icon: badgeData.icon,
+                badge_color: badgeData.color
+              }
+            }
+          }
+
           return {
             ...activity,
             item_type: 'activity' as const,
@@ -378,10 +597,21 @@ export function usePosts(filter: FeedFilter = 'for_you') {
       // 5. Remove temporary score field
       const finalFeed = diversified.map(({ _score, ...item }) => item)
 
-      return finalFeed as FeedItem[]
+      // Check if we got a full batch from the database (meaning there might be more data)
+      const fetchedFullBatch = (postsData?.length || 0) + (activitiesData?.length || 0) >= FETCH_SIZE
+
+      return {
+        items: finalFeed as FeedItem[],
+        nextPage: fetchedFullBatch ? pageParam + 1 : undefined
+      }
     },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
     enabled: !!user,
+    initialPageParam: 0,
   })
+
+  // Flatten all pages into single array
+  const feedItems = data?.pages.flatMap(page => page.items) ?? []
 
   const createPostMutation = useMutation({
     mutationFn: async (input: { content: string; privacy: 'public' | 'friends' | 'private'; image_url?: string }) => {
@@ -516,6 +746,9 @@ export function usePosts(filter: FeedFilter = 'for_you') {
   return {
     posts: feedItems,
     isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
     createPost: createPostMutation.mutateAsync,
     deletePost: deletePostMutation.mutateAsync,
     toggleReaction: toggleReactionMutation.mutateAsync,
