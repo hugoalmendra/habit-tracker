@@ -134,6 +134,8 @@ export default function PublicProfile() {
         .eq('following_id', userId)
         .eq('status', 'accepted')
 
+      console.log('[PublicProfile] Followers count for userId', userId, ':', followersCount, 'Error:', followersCountError)
+
       if (!followersCountError) {
         setFollowersCount(followersCount || 0)
       }
