@@ -49,14 +49,18 @@ export default function InviteMembersModal({
 
     setIsSearching(true)
     try {
-      // Search for users by username or display name
+      // Search for users by display name
       const { data: users, error } = await supabase
         .from('profiles')
-        .select('id, display_name, username, photo_url')
-        .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
+        .select('id, display_name, photo_url')
+        .ilike('display_name', `%${searchQuery}%`)
         .limit(10)
 
-      if (error) throw error
+      if (error) {
+        console.error('Search error:', error)
+        alert(`Search failed: ${error.message}`)
+        return
+      }
 
       // Filter out users who are already members
       const { data: members } = await supabase
@@ -70,6 +74,7 @@ export default function InviteMembersModal({
       setSearchResults(filteredUsers)
     } catch (error) {
       console.error('Error searching users:', error)
+      alert(`Error: ${error}`)
     } finally {
       setIsSearching(false)
     }
@@ -105,14 +110,14 @@ export default function InviteMembersModal({
         <div className="space-y-4">
           {/* Search Input */}
           <div className="space-y-2">
-            <Label htmlFor="search">Search by username or name</Label>
+            <Label htmlFor="search">Search by name</Label>
             <div className="flex gap-2">
               <Input
                 id="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Enter username or name..."
+                placeholder="Enter name..."
               />
               <Button
                 onClick={handleSearch}
@@ -145,11 +150,6 @@ export default function InviteMembersModal({
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{user.display_name}</p>
-                      {user.username && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          @{user.username}
-                        </p>
-                      )}
                     </div>
                     <Button
                       size="sm"

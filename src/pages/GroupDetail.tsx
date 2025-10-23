@@ -373,11 +373,6 @@ export default function GroupDetail() {
                           {member.profile?.display_name || 'Unknown'}
                           {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
                         </p>
-                        {member.profile?.username && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            @{member.profile.username}
-                          </p>
-                        )}
                       </div>
                       {isMemberAdmin && (
                         <Badge variant="secondary" className="text-xs">

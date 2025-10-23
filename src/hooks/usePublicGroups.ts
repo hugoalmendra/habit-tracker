@@ -236,7 +236,7 @@ export function usePublicGroups() {
           ((membersData as any) || []).map(async (member: any) => {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('id, display_name, photo_url, username')
+              .select('id, display_name, photo_url')
               .eq('id', member.user_id)
               .maybeSingle()
 
