@@ -194,7 +194,7 @@ function App() {
         defaultOptions: {
           queries: {
             staleTime: 1000 * 60 * 2, // 2 minutes - more aggressive caching
-            cacheTime: 1000 * 60 * 5, // 5 minutes in cache
+            gcTime: 1000 * 60 * 5, // 5 minutes in cache (renamed from cacheTime)
             refetchOnWindowFocus: false,
             refetchOnReconnect: false, // Prevent refetch on reconnect
             retry: 1,

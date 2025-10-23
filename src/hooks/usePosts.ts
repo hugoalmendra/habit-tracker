@@ -229,7 +229,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
   } = useInfiniteQuery({
     queryKey: ['posts', filter],
     staleTime: 1000 * 60 * 1, // 1 minute for feed
-    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (renamed from cacheTime)
     queryFn: async ({ pageParam = 0 }) => {
       let followingIds: string[] = []
 
