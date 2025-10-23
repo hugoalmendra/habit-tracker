@@ -38,7 +38,10 @@
       "Bash(npx vercel --prod --yes)",
       "Bash(git init:*)",
       "Bash(npx vercel --version)",
-      "Bash(npx vercel login)"
+      "Bash(npx vercel login)",
+      "Bash(git pull:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git filter-repo:*)"
     ],
     "deny": [],
     "ask": []
