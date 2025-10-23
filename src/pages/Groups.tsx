@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { supabase } from '@/lib/supabase'
@@ -57,12 +56,12 @@ export default function Groups() {
     if (group && group.is_admin) {
       // Fetch members to check member count and admin count
       const { data: members } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .select('role')
         .eq('group_id', groupId)
 
-      const totalMembers = members?.length || 0
-      const adminCount = members?.filter(m => m.role === 'admin').length || 0
+      const totalMembers = (members as any)?.length || 0
+      const adminCount = (members as any)?.filter((m: any) => m.role === 'admin').length || 0
 
       // If user is the only member, warn them the group will be deleted
       if (totalMembers === 1) {

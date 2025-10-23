@@ -69,7 +69,7 @@ export function usePublicGroups() {
 
       // Get member counts and check if current user is a member
       const groupsWithDetails = await Promise.all(
-        (groupsData || []).map(async (group) => {
+        ((groupsData as any) || []).map(async (group: any) => {
           const { count } = await supabase
             .from('user_group_memberships' as any)
             .select('*', { count: 'exact', head: true })
@@ -87,7 +87,7 @@ export function usePublicGroups() {
               .maybeSingle()
 
             isMember = !!membership
-            isAdmin = membership?.role === 'admin'
+            isAdmin = (membership as any)?.role === 'admin'
           }
 
           // Get creator profile
@@ -125,7 +125,7 @@ export function usePublicGroups() {
 
       if (error) throw error
 
-      const groupIds = memberships?.map(m => m.group_id) || []
+      const groupIds = (memberships as any)?.map((m: any) => m.group_id) || []
       if (groupIds.length === 0) return []
 
       const { data: groupsData, error: groupsError } = await supabase
@@ -138,8 +138,8 @@ export function usePublicGroups() {
 
       // Add membership details and member count
       const groupsWithDetails = await Promise.all(
-        (groupsData || []).map(async (group) => {
-          const membership = memberships?.find(m => m.group_id === group.id)
+        ((groupsData as any) || []).map(async (group: any) => {
+          const membership = (memberships as any)?.find((m: any) => m.group_id === group.id)
 
           // Get member count for each group
           const { count } = await supabase
@@ -178,7 +178,7 @@ export function usePublicGroups() {
 
         // Get member count
         const { count } = await supabase
-          .from('user_group_memberships')
+          .from('user_group_memberships' as any)
           .select('*', { count: 'exact', head: true })
           .eq('group_id', groupId)
 
@@ -187,25 +187,25 @@ export function usePublicGroups() {
         let isAdmin = false
         if (user) {
           const { data: membership } = await supabase
-            .from('user_group_memberships')
+            .from('user_group_memberships' as any)
             .select('role')
             .eq('group_id', groupId)
             .eq('user_id', user.id)
             .maybeSingle()
 
           isMember = !!membership
-          isAdmin = membership?.role === 'admin'
+          isAdmin = (membership as any)?.role === 'admin'
         }
 
         // Get creator profile
         const { data: creatorProfile } = await supabase
           .from('profiles')
           .select('id, display_name, photo_url')
-          .eq('id', group.created_by)
+          .eq('id', (group as any).created_by)
           .maybeSingle()
 
         return {
-          ...group,
+          ...(group as any),
           member_count: count || 0,
           is_member: isMember,
           is_admin: isAdmin,
@@ -233,7 +233,7 @@ export function usePublicGroups() {
 
         // Fetch profile data for each member
         const membersWithProfiles = await Promise.all(
-          (membersData || []).map(async (member) => {
+          ((membersData as any) || []).map(async (member: any) => {
             const { data: profile } = await supabase
               .from('profiles')
               .select('id, display_name, photo_url, username')
@@ -270,7 +270,7 @@ export function usePublicGroups() {
 
       // Fetch group and inviter details for each invitation
       const invitationsWithDetails = await Promise.all(
-        (invitationsData || []).map(async (invitation) => {
+        ((invitationsData as any) || []).map(async (invitation: any) => {
           const { data: group } = await supabase
             .from('public_groups' as any)
             .select('*')
@@ -443,10 +443,10 @@ export function usePublicGroups() {
 
       // Join the group
       const { error: joinError } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .insert({
           user_id: user!.id,
-          group_id: invitation.group_id,
+          group_id: (invitation as any).group_id,
           role: 'member',
         })
 
