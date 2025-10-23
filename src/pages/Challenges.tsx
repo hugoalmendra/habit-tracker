@@ -12,6 +12,7 @@ import { differenceInDays } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
+import Spinner from '@/components/ui/Spinner'
 import CreateChallengeModal from '@/components/challenges/CreateChallengeModal'
 import { getIconComponent } from '@/components/ui/IconPicker'
 import {
@@ -226,7 +227,7 @@ export default function Challenges() {
           {/* Challenges Grid */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <p className="text-muted-foreground">Loading challenges...</p>
+              <Spinner size="lg" text="Loading challenges..." />
             </div>
           ) : filteredChallenges?.length === 0 ? (
             <Card className="p-16 text-center">

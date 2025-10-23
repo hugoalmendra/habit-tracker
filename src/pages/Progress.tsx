@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Header from '@/components/layout/Header'
+import Spinner from '@/components/ui/Spinner'
 import { useMonthlyStats } from '@/hooks/useMonthlyStats'
 import { motion } from 'framer-motion'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns'
@@ -191,7 +192,7 @@ export default function Progress() {
             <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="text-muted-foreground">Loading...</div>
+                  <Spinner size="md" />
                 </div>
               ) : (
                 <div className="grid grid-cols-7 gap-1 sm:gap-2">

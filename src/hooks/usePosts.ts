@@ -213,8 +213,8 @@ function diversifyFeed(items: FeedItem[], maxPerUser: number = 3): FeedItem[] {
   return diversified
 }
 
-const ITEMS_PER_PAGE = 20
-const FETCH_SIZE = 100 // Fetch more items to account for filtering
+const ITEMS_PER_PAGE = 15 // Reduced for faster initial load
+const FETCH_SIZE = 30 // Reduced to minimize over-fetching
 
 export function usePosts(filter: FeedFilter = 'for_you') {
   const queryClient = useQueryClient()
@@ -228,6 +228,8 @@ export function usePosts(filter: FeedFilter = 'for_you') {
     isFetchingNextPage
   } = useInfiniteQuery({
     queryKey: ['posts', filter],
+    staleTime: 1000 * 60 * 1, // 1 minute for feed
+    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
     queryFn: async ({ pageParam = 0 }) => {
       let followingIds: string[] = []
 

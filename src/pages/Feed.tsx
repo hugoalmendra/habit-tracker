@@ -17,6 +17,7 @@ import CreatePostModal from '@/components/feed/CreatePostModal'
 import ActivityCard from '@/components/feed/ActivityCard'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import ReactionUsersModal from '@/components/feed/ReactionUsersModal'
+import Spinner from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -38,7 +39,9 @@ function CommentsSection({ postId, commentInput, onCommentInputChange, onAddComm
     <div className="mt-4 pt-4 border-t border-border space-y-4">
       {/* Comments List */}
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading comments...</p>
+        <div className="flex justify-center py-4">
+          <Spinner size="sm" />
+        </div>
       ) : comments && comments.length > 0 ? (
         <div className="space-y-3">
           {comments.map((comment) => (
@@ -323,7 +326,7 @@ export default function Feed() {
           {/* Posts and Activities */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <p className="text-muted-foreground">Loading feed...</p>
+              <Spinner size="lg" text="Loading feed..." />
             </div>
           ) : posts?.length === 0 ? (
             <Card className="p-16 text-center">
@@ -449,9 +452,16 @@ export default function Feed() {
                     onClick={() => fetchNextPage()}
                     disabled={isFetchingNextPage}
                     variant="outline"
-                    className="rounded-xl px-8"
+                    className="rounded-xl px-8 flex items-center gap-2"
                   >
-                    {isFetchingNextPage ? 'Loading...' : 'Load More'}
+                    {isFetchingNextPage ? (
+                      <>
+                        <Spinner size="sm" />
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      'Load More'
+                    )}
                   </Button>
                 </div>
               )}

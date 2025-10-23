@@ -15,6 +15,7 @@ import AchievementPopup from '@/components/celebrations/AchievementPopup'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
+import Spinner from '@/components/ui/Spinner'
 import { useAchievements } from '@/hooks/useAchievements'
 import { useBadgeAchievements } from '@/hooks/useBadgeAchievements'
 import { format, addDays, subDays, isToday, isFuture } from 'date-fns'
@@ -320,7 +321,7 @@ export default function Dashboard() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="text-lg font-medium text-muted-foreground">Loading habits...</div>
+            <Spinner size="lg" text="Loading habits..." />
           </div>
         ) : (habits || []).length === 0 ? (
           <motion.div

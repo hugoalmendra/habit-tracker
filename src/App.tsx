@@ -6,6 +6,7 @@ import { CelebrationProvider } from '@/contexts/CelebrationContext'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
+import Spinner from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
 
 // Pages
@@ -59,7 +60,7 @@ function AuthenticatedRedirect() {
   if (checkingOnboarding) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Spinner size="xl" text="Loading..." />
       </div>
     )
   }
@@ -105,7 +106,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (checkingOnboarding) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Spinner size="xl" text="Loading..." />
       </div>
     )
   }
@@ -123,7 +124,7 @@ function AppRoutes() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Spinner size="xl" text="Loading..." />
       </div>
     )
   }
@@ -192,9 +193,12 @@ function App() {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes
+            staleTime: 1000 * 60 * 2, // 2 minutes - more aggressive caching
+            cacheTime: 1000 * 60 * 5, // 5 minutes in cache
             refetchOnWindowFocus: false,
+            refetchOnReconnect: false, // Prevent refetch on reconnect
             retry: 1,
+            networkMode: 'online', // Only query when online
           },
         },
       })
