@@ -36,7 +36,9 @@
       "Bash(vercel:*)",
       "Bash(npx vercel --prod)",
       "Bash(npx vercel --prod --yes)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(npx vercel --version)",
+      "Bash(npx vercel login)"
     ],
     "deny": [],
     "ask": []
