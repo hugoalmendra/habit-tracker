@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { usePublicGroups } from '@/hooks/usePublicGroups'
@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export default function Groups() {
-  const { user } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
@@ -41,7 +40,6 @@ export default function Groups() {
     loadingInvitations,
     joinGroup,
     leaveGroup,
-    deleteGroup,
     acceptInvitation,
     declineInvitation,
     isJoining,

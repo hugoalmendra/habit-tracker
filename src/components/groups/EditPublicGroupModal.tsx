@@ -131,7 +131,7 @@ export default function EditPublicGroupModal({ isOpen, onClose, group }: EditPub
         groupId: group.id,
         name,
         description,
-        avatar_url: avatarUrl,
+        avatar_url: avatarUrl || undefined,
         is_private: isPrivate,
       })
 
