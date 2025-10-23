@@ -60,8 +60,8 @@ export function CelebrationProvider({ children }: { children: ReactNode }) {
                 description: `You've completed the "${challengeData.name}" challenge and earned a badge!`,
                 color: '#FFA500',
                 icon: 'trophy',
-                customIcon: challengeData.badge_icon,
-                customColor: challengeData.badge_color,
+                customIcon: challengeData.badge_icon || undefined,
+                customColor: challengeData.badge_color || undefined,
               }
             }
           } else if (activity.activity_type === 'streak_milestone') {
@@ -93,8 +93,8 @@ export function CelebrationProvider({ children }: { children: ReactNode }) {
                 description: badgeData.description || `You've earned the ${badgeData.name} badge!`,
                 color: '#FFD700',
                 icon: 'award',
-                customIcon: badgeData.icon,
-                customColor: badgeData.color,
+                customIcon: badgeData.icon || undefined,
+                customColor: badgeData.color || undefined,
               }
             }
           }

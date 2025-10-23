@@ -42,6 +42,13 @@ export interface FeedActivity {
     habit_id?: string
     final_progress?: number
     final_streak?: number
+    is_grouped?: boolean
+    grouped_count?: number
+    grouped_items?: Array<{
+      id: string
+      name?: string
+      category?: string
+    }>
   }
   created_at: string
   user?: {
