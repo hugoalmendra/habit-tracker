@@ -26,6 +26,8 @@ import JoinChallenge from '@/pages/JoinChallenge'
 import PublicProfile from '@/pages/PublicProfile'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
+import Groups from '@/pages/Groups'
+import GroupDetail from '@/pages/GroupDetail'
 
 // Redirect authenticated users to the correct page based on onboarding status
 function AuthenticatedRedirect() {
@@ -181,6 +183,14 @@ function AppRoutes() {
         <Route path="/profile/:userId" element={<PublicProfile />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route
+          path="/groups"
+          element={<ProtectedRoute><Groups /></ProtectedRoute>}
+        />
+        <Route
+          path="/groups/:id"
+          element={<ProtectedRoute><GroupDetail /></ProtectedRoute>}
+        />
       </Routes>
       {user && <MobileBottomNav />}
     </>

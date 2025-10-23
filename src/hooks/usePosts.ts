@@ -355,7 +355,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
                 activity.metadata.challenge_id) {
               const { data: challengeData } = await supabase
                 .from('challenges')
-                .select('name, category, badge_icon, badge_color')
+                .select('name, badge_icon, badge_color')
                 .eq('id', activity.metadata.challenge_id)
                 .maybeSingle()
 
@@ -525,7 +525,7 @@ export function usePosts(filter: FeedFilter = 'for_you') {
               activity.metadata.challenge_id) {
             const { data: challengeData } = await supabase
               .from('challenges')
-              .select('name, category, badge_icon, badge_color')
+              .select('name, badge_icon, badge_color')
               .eq('id', activity.metadata.challenge_id)
               .maybeSingle()
 
@@ -698,22 +698,50 @@ export function usePosts(filter: FeedFilter = 'for_you') {
       const previousData = queryClient.getQueriesData({ queryKey: ['posts'] })
 
       // Optimistically update all post queries
-      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: FeedItem[] | undefined) => {
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) => {
         if (!old) return old
 
-        return old.map(item => {
-          if (item.item_type === 'post' && item.id === postId) {
-            const isCurrentlyLiked = item.user_reaction === reaction
-            return {
-              ...item,
-              user_reaction: isCurrentlyLiked ? null : reaction,
-              reactions_count: isCurrentlyLiked
-                ? Math.max(0, (item.reactions_count || 0) - 1)
-                : (item.reactions_count || 0) + 1
-            }
+        // Handle infinite query structure
+        if (old.pages) {
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: page.items?.map((item: FeedItem) => {
+                if (item.item_type === 'post' && item.id === postId) {
+                  const isCurrentlyLiked = item.user_reaction === reaction
+                  return {
+                    ...item,
+                    user_reaction: isCurrentlyLiked ? null : reaction,
+                    reactions_count: isCurrentlyLiked
+                      ? Math.max(0, (item.reactions_count || 0) - 1)
+                      : (item.reactions_count || 0) + 1
+                  }
+                }
+                return item
+              }) || []
+            }))
           }
-          return item
-        })
+        }
+
+        // Handle regular query structure (fallback)
+        if (Array.isArray(old)) {
+          return old.map(item => {
+            if (item.item_type === 'post' && item.id === postId) {
+              const isCurrentlyLiked = item.user_reaction === reaction
+              return {
+                ...item,
+                user_reaction: isCurrentlyLiked ? null : reaction,
+                reactions_count: isCurrentlyLiked
+                  ? Math.max(0, (item.reactions_count || 0) - 1)
+                  : (item.reactions_count || 0) + 1
+              }
+            }
+            return item
+          })
+        }
+
+        return old
       })
 
       return { previousData }

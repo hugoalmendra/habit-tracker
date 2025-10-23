@@ -1,0 +1,464 @@
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
+import { usePublicGroups } from '@/hooks/usePublicGroups'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Plus, Moon, Sun, Users, Lock, Globe, ChevronDown, Search, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import NotificationsDropdown from '@/components/social/NotificationsDropdown'
+import AvatarDropdown from '@/components/layout/AvatarDropdown'
+import GlobalSearch from '@/components/layout/GlobalSearch'
+import Spinner from '@/components/ui/Spinner'
+import CreatePublicGroupModal from '@/components/groups/CreatePublicGroupModal'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+export default function Groups() {
+  const { user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
+  const [tab, setTab] = useState<'discover' | 'my-groups' | 'invitations'>('discover')
+  const [sortFilter, setSortFilter] = useState<'recent' | 'popular' | 'oldest'>('recent')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const {
+    publicGroups,
+    myGroups,
+    invitations,
+    loadingPublicGroups,
+    loadingMyGroups,
+    loadingInvitations,
+    joinGroup,
+    leaveGroup,
+    deleteGroup,
+    acceptInvitation,
+    declineInvitation,
+    isJoining,
+    isLeaving,
+  } = usePublicGroups()
+
+  const handleJoinGroup = async (groupId: string) => {
+    await joinGroup(groupId)
+  }
+
+  const handleLeaveGroup = async (groupId: string) => {
+    // Find the group to check if user is admin/creator
+    const group = [...(publicGroups || []), ...(myGroups || [])].find(g => g.id === groupId)
+
+    if (group && group.is_admin) {
+      // Fetch members to check member count and admin count
+      const { data: members } = await supabase
+        .from('user_group_memberships')
+        .select('role')
+        .eq('group_id', groupId)
+
+      const totalMembers = members?.length || 0
+      const adminCount = members?.filter(m => m.role === 'admin').length || 0
+
+      // If user is the only member, warn them the group will be deleted
+      if (totalMembers === 1) {
+        if (!confirm('You are the only member of this group. If you leave, the group will be automatically deleted. Are you sure you want to continue?')) {
+          return
+        }
+      }
+      // If user is the only admin but not the only member, warn them
+      else if (adminCount === 1) {
+        if (!confirm('You are the only admin of this group. If you leave, the group will have no admins to manage it. Are you sure you want to continue?')) {
+          return
+        }
+      }
+      // Regular leave confirmation
+      else if (!confirm('Are you sure you want to leave this group?')) {
+        return
+      }
+    } else if (!confirm('Are you sure you want to leave this group?')) {
+      return
+    }
+
+    await leaveGroup(groupId)
+  }
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    await acceptInvitation(invitationId)
+  }
+
+  const handleDeclineInvitation = async (invitationId: string) => {
+    await declineInvitation(invitationId)
+  }
+
+  // Filter and sort groups
+  const filterAndSortGroups = (groups: any[]) => {
+    // Filter by search query
+    const filtered = groups?.filter(group =>
+      group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      group.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || []
+
+    // Sort the filtered results
+    return filtered.sort((a, b) => {
+      if (sortFilter === 'recent') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+      if (sortFilter === 'oldest') {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }
+      if (sortFilter === 'popular') {
+        return (b.member_count || 0) - (a.member_count || 0)
+      }
+      return 0
+    })
+  }
+
+  const sortedPublicGroups = filterAndSortGroups(publicGroups || [])
+  const sortedMyGroups = filterAndSortGroups(myGroups || [])
+
+  const isLoading = tab === 'discover' ? loadingPublicGroups : tab === 'my-groups' ? loadingMyGroups : loadingInvitations
+
+  return (
+    <div className="min-h-screen bg-background pb-20 md:pb-8">
+      {/* Header */}
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <h1 className="text-2xl font-bold">Groups</h1>
+            <div className="flex items-center gap-2">
+              <GlobalSearch />
+              <NotificationsDropdown />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="rounded-full"
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <AvatarDropdown />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="Search groups..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                onClick={() => setSearchQuery('')}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Tabs and Actions */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2">
+            <Button
+              variant={tab === 'discover' ? 'default' : 'outline'}
+              onClick={() => setTab('discover')}
+            >
+              <Globe className="mr-2 h-4 w-4" />
+              Discover
+            </Button>
+            <Button
+              variant={tab === 'my-groups' ? 'default' : 'outline'}
+              onClick={() => setTab('my-groups')}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              My Groups
+            </Button>
+            <Button
+              variant={tab === 'invitations' ? 'default' : 'outline'}
+              onClick={() => setTab('invitations')}
+              className="relative"
+            >
+              Invitations
+              {invitations && invitations.length > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  {invitations.length}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Sort by: {sortFilter === 'recent' ? 'Recent' : sortFilter === 'popular' ? 'Popular' : 'Oldest'}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setSortFilter('recent')}>
+                  Recent
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortFilter('popular')}>
+                  Popular
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortFilter('oldest')}>
+                  Oldest
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button onClick={() => setIsCreateGroupOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Group
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Spinner size="lg" text="Loading groups..." />
+          </div>
+        ) : (
+          <>
+            {/* Discover Tab */}
+            {tab === 'discover' && (
+              <>
+                {sortedPublicGroups.length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <Globe className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No public groups yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Be the first to create a group and build a community!
+                    </p>
+                    <Button onClick={() => setIsCreateGroupOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create First Group
+                    </Button>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {sortedPublicGroups.map((group) => (
+                      <motion.div
+                        key={group.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <Card
+                          className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                          onClick={() => navigate(`/groups/${group.id}`)}
+                        >
+                          <div className="flex items-start gap-4">
+                            <Avatar className="h-16 w-16">
+                              <AvatarImage src={group.avatar_url || undefined} />
+                              <AvatarFallback className="text-lg">
+                                {group.name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-semibold truncate">{group.name}</h3>
+                                {group.is_private && (
+                                  <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {group.description || 'No description'}
+                              </p>
+                              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                            {group.is_member ? (
+                              <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => handleLeaveGroup(group.id)}
+                                disabled={isLeaving}
+                              >
+                                {group.is_admin ? 'Admin' : 'Leave Group'}
+                              </Button>
+                            ) : (
+                              <Button
+                                className="w-full"
+                                onClick={() => handleJoinGroup(group.id)}
+                                disabled={isJoining || group.is_private}
+                              >
+                                {group.is_private ? 'Private Group' : 'Join Group'}
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* My Groups Tab */}
+            {tab === 'my-groups' && (
+              <>
+                {sortedMyGroups.length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No groups yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Join a group or create your own to get started!
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      <Button variant="outline" onClick={() => setTab('discover')}>
+                        Discover Groups
+                      </Button>
+                      <Button onClick={() => setIsCreateGroupOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Group
+                      </Button>
+                    </div>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {sortedMyGroups.map((group) => (
+                      <motion.div
+                        key={group.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <Card
+                          className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                          onClick={() => navigate(`/groups/${group.id}`)}
+                        >
+                          <div className="flex items-start gap-4">
+                            <Avatar className="h-16 w-16">
+                              <AvatarImage src={group.avatar_url || undefined} />
+                              <AvatarFallback className="text-lg">
+                                {group.name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-semibold truncate">{group.name}</h3>
+                                <div className="flex gap-1">
+                                  {group.is_admin && (
+                                    <Badge variant="secondary" className="text-xs">Admin</Badge>
+                                  )}
+                                  {group.is_private && (
+                                    <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {group.description || 'No description'}
+                              </p>
+                              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Invitations Tab */}
+            {tab === 'invitations' && (
+              <>
+                {!invitations || invitations.length === 0 ? (
+                  <Card className="p-12 text-center">
+                    <h3 className="text-lg font-semibold mb-2">No pending invitations</h3>
+                    <p className="text-muted-foreground">
+                      You don't have any group invitations at the moment.
+                    </p>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {invitations.map((invitation) => (
+                      <motion.div
+                        key={invitation.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <Card className="p-6">
+                          <div className="flex items-start gap-4">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={invitation.group?.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {invitation.group?.name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold">{invitation.group?.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Invited by{' '}
+                                <span className="font-medium">
+                                  {invitation.inviter_profile?.display_name || 'Someone'}
+                                </span>
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {invitation.group?.description}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-4 flex gap-2">
+                            <Button
+                              onClick={() => handleAcceptInvitation(invitation.id)}
+                              className="flex-1"
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDeclineInvitation(invitation.id)}
+                              className="flex-1"
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Create Group Modal */}
+      <CreatePublicGroupModal
+        isOpen={isCreateGroupOpen}
+        onClose={() => setIsCreateGroupOpen(false)}
+      />
+    </div>
+  )
+}

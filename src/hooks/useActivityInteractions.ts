@@ -92,22 +92,50 @@ export function useActivityInteractions(activityId: string) {
       const previousData = queryClient.getQueriesData({ queryKey: ['posts'] })
 
       // Optimistically update all post queries
-      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any[] | undefined) => {
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) => {
         if (!old) return old
 
-        return old.map(item => {
-          if (item.item_type === 'activity' && item.id === activityId) {
-            const isCurrentlyLiked = item.user_liked
-            return {
-              ...item,
-              user_liked: !isCurrentlyLiked,
-              likes_count: isCurrentlyLiked
-                ? Math.max(0, (item.likes_count || 0) - 1)
-                : (item.likes_count || 0) + 1
-            }
+        // Handle infinite query structure
+        if (old.pages) {
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: page.items?.map((item: any) => {
+                if (item.item_type === 'activity' && item.id === activityId) {
+                  const isCurrentlyLiked = item.user_liked
+                  return {
+                    ...item,
+                    user_liked: !isCurrentlyLiked,
+                    likes_count: isCurrentlyLiked
+                      ? Math.max(0, (item.likes_count || 0) - 1)
+                      : (item.likes_count || 0) + 1
+                  }
+                }
+                return item
+              }) || []
+            }))
           }
-          return item
-        })
+        }
+
+        // Handle regular query structure (fallback)
+        if (Array.isArray(old)) {
+          return old.map(item => {
+            if (item.item_type === 'activity' && item.id === activityId) {
+              const isCurrentlyLiked = item.user_liked
+              return {
+                ...item,
+                user_liked: !isCurrentlyLiked,
+                likes_count: isCurrentlyLiked
+                  ? Math.max(0, (item.likes_count || 0) - 1)
+                  : (item.likes_count || 0) + 1
+              }
+            }
+            return item
+          })
+        }
+
+        return old
       })
 
       return { previousData }
