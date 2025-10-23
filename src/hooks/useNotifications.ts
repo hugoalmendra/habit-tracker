@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export interface Notification {
   id: string
   user_id: string
-  type: 'follow' | 'recognition' | 'shared_habit_invite' | 'shared_habit_completion' | 'achievement' | 'challenge_invite'
+  type: 'follow' | 'recognition' | 'shared_habit_invite' | 'shared_habit_completion' | 'achievement' | 'challenge_invite' | 'post_reaction' | 'post_comment'
   from_user_id: string | null
   content: string
   metadata: Record<string, any> | null
