@@ -60,7 +60,7 @@ export function usePublicGroups() {
     queryKey: ['public-groups'],
     queryFn: async () => {
       const { data: groupsData, error } = await supabase
-        .from('public_groups')
+        .from('public_groups' as any)
         .select('*')
         .eq('is_private', false)
         .order('created_at', { ascending: false })
@@ -71,7 +71,7 @@ export function usePublicGroups() {
       const groupsWithDetails = await Promise.all(
         (groupsData || []).map(async (group) => {
           const { count } = await supabase
-            .from('user_group_memberships')
+            .from('user_group_memberships' as any)
             .select('*', { count: 'exact', head: true })
             .eq('group_id', group.id)
 
@@ -80,7 +80,7 @@ export function usePublicGroups() {
           let isAdmin = false
           if (user) {
             const { data: membership } = await supabase
-              .from('user_group_memberships')
+              .from('user_group_memberships' as any)
               .select('role')
               .eq('group_id', group.id)
               .eq('user_id', user.id)
@@ -119,7 +119,7 @@ export function usePublicGroups() {
       if (!user) return []
 
       const { data: memberships, error } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .select('group_id, role')
         .eq('user_id', user.id)
 
@@ -129,7 +129,7 @@ export function usePublicGroups() {
       if (groupIds.length === 0) return []
 
       const { data: groupsData, error: groupsError } = await supabase
-        .from('public_groups')
+        .from('public_groups' as any)
         .select('*')
         .in('id', groupIds)
         .order('created_at', { ascending: false })
@@ -143,7 +143,7 @@ export function usePublicGroups() {
 
           // Get member count for each group
           const { count } = await supabase
-            .from('user_group_memberships')
+            .from('user_group_memberships' as any)
             .select('*', { count: 'exact', head: true })
             .eq('group_id', group.id)
 
@@ -169,7 +169,7 @@ export function usePublicGroups() {
         if (!groupId) return null
 
         const { data: group, error } = await supabase
-          .from('public_groups')
+          .from('public_groups' as any)
           .select('*')
           .eq('id', groupId)
           .single()
@@ -224,7 +224,7 @@ export function usePublicGroups() {
         if (!groupId) return []
 
         const { data: membersData, error } = await supabase
-          .from('user_group_memberships')
+          .from('user_group_memberships' as any)
           .select('*')
           .eq('group_id', groupId)
           .order('joined_at', { ascending: true })
@@ -260,7 +260,7 @@ export function usePublicGroups() {
       if (!user) return []
 
       const { data: invitationsData, error } = await supabase
-        .from('group_invitations')
+        .from('group_invitations' as any)
         .select('*')
         .eq('invited_user_id', user.id)
         .eq('status', 'pending')
@@ -272,7 +272,7 @@ export function usePublicGroups() {
       const invitationsWithDetails = await Promise.all(
         (invitationsData || []).map(async (invitation) => {
           const { data: group } = await supabase
-            .from('public_groups')
+            .from('public_groups' as any)
             .select('*')
             .eq('id', invitation.group_id)
             .maybeSingle()
@@ -300,7 +300,7 @@ export function usePublicGroups() {
   const createGroupMutation = useMutation({
     mutationFn: async (input: { name: string; description?: string; avatar_url?: string; is_private: boolean }) => {
       const { data: group, error } = await supabase
-        .from('public_groups')
+        .from('public_groups' as any)
         .insert({
           name: input.name,
           description: input.description || null,
@@ -330,7 +330,7 @@ export function usePublicGroups() {
       if (input.is_private !== undefined) updates.is_private = input.is_private
 
       const { data, error } = await supabase
-        .from('public_groups')
+        .from('public_groups' as any)
         .update(updates)
         .eq('id', input.groupId)
         .select()
@@ -350,7 +350,7 @@ export function usePublicGroups() {
   const deleteGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
       const { error } = await supabase
-        .from('public_groups')
+        .from('public_groups' as any)
         .delete()
         .eq('id', groupId)
 
@@ -366,7 +366,7 @@ export function usePublicGroups() {
   const joinGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
       const { error } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .insert({
           user_id: user!.id,
           group_id: groupId,
@@ -387,7 +387,7 @@ export function usePublicGroups() {
   const leaveGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
       const { error } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .delete()
         .eq('group_id', groupId)
         .eq('user_id', user!.id)
@@ -406,7 +406,7 @@ export function usePublicGroups() {
   const inviteUserMutation = useMutation({
     mutationFn: async (input: { groupId: string; userId: string }) => {
       const { error } = await supabase
-        .from('group_invitations')
+        .from('group_invitations' as any)
         .insert({
           group_id: input.groupId,
           invited_by: user!.id,
@@ -426,7 +426,7 @@ export function usePublicGroups() {
     mutationFn: async (invitationId: string) => {
       // Update invitation status
       const { error: updateError } = await supabase
-        .from('group_invitations')
+        .from('group_invitations' as any)
         .update({ status: 'accepted' })
         .eq('id', invitationId)
 
@@ -434,7 +434,7 @@ export function usePublicGroups() {
 
       // Get the invitation to find the group_id
       const { data: invitation, error: invError } = await supabase
-        .from('group_invitations')
+        .from('group_invitations' as any)
         .select('group_id')
         .eq('id', invitationId)
         .single()
@@ -463,7 +463,7 @@ export function usePublicGroups() {
   const declineInvitationMutation = useMutation({
     mutationFn: async (invitationId: string) => {
       const { error } = await supabase
-        .from('group_invitations')
+        .from('group_invitations' as any)
         .update({ status: 'declined' })
         .eq('id', invitationId)
 
@@ -478,7 +478,7 @@ export function usePublicGroups() {
   const removeMemberMutation = useMutation({
     mutationFn: async (input: { groupId: string; userId: string }) => {
       const { error } = await supabase
-        .from('user_group_memberships')
+        .from('user_group_memberships' as any)
         .delete()
         .eq('group_id', input.groupId)
         .eq('user_id', input.userId)
