@@ -43,6 +43,31 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
   const getActivityText = () => {
     const { metadata, activity_type } = activity
 
+    // Handle grouped activities
+    if (metadata.is_grouped && metadata.grouped_count) {
+      const count = metadata.grouped_count
+
+      switch (activity_type) {
+        case 'habit_created':
+          return (
+            <span>
+              created{' '}
+              <span className="font-semibold">{count} new habits</span>
+            </span>
+          )
+        case 'challenge_joined':
+          return (
+            <span>
+              joined{' '}
+              <span className="font-semibold">{count} challenges</span>
+            </span>
+          )
+        default:
+          return <span>completed {count} activities</span>
+      }
+    }
+
+    // Handle individual activities
     switch (activity_type) {
       case 'habit_created':
         return (

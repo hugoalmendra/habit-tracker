@@ -75,6 +75,124 @@ export interface Reaction {
 
 type FeedFilter = 'for_you' | 'following'
 
+// Activity importance weights for ranking
+const ACTIVITY_IMPORTANCE: Record<string, number> = {
+  'challenge_completed': 10,
+  'achievement_unlocked': 9,
+  'streak_milestone': 8,
+  'badge_earned': 8,
+  'challenge_joined': 4,
+  'habit_created': 3,
+}
+
+// Group similar activities from the same user on the same day
+function groupActivities(activities: FeedActivity[]): FeedActivity[] {
+  const groupableTypes = ['habit_created', 'challenge_joined']
+  const grouped: FeedActivity[] = []
+  const groupMap = new Map<string, FeedActivity[]>()
+
+  activities.forEach(activity => {
+    if (!groupableTypes.includes(activity.activity_type)) {
+      // Don't group important activities
+      grouped.push(activity)
+      return
+    }
+
+    // Create grouping key: user_id + activity_type + same_day
+    const activityDate = new Date(activity.created_at).toDateString()
+    const groupKey = `${activity.user_id}-${activity.activity_type}-${activityDate}`
+
+    if (!groupMap.has(groupKey)) {
+      groupMap.set(groupKey, [])
+    }
+    groupMap.get(groupKey)!.push(activity)
+  })
+
+  // Process grouped activities
+  groupMap.forEach(group => {
+    if (group.length === 1) {
+      // Single activity, don't group
+      grouped.push(group[0])
+    } else {
+      // Multiple activities, create grouped item
+      const firstActivity = group[0]
+      const groupedActivity: FeedActivity = {
+        ...firstActivity,
+        metadata: {
+          ...firstActivity.metadata,
+          is_grouped: true,
+          grouped_count: group.length,
+          grouped_items: group.map(a => ({
+            id: a.id,
+            name: a.activity_type === 'habit_created' ? a.metadata.habit_name : a.metadata.challenge_name,
+            category: a.activity_type === 'habit_created' ? a.metadata.habit_category : a.metadata.challenge_category,
+          }))
+        }
+      }
+      grouped.push(groupedActivity)
+    }
+  })
+
+  return grouped
+}
+
+// Calculate engagement score based on likes and comments
+function calculateEngagementScore(item: FeedItem): number {
+  const likesCount = item.item_type === 'post' ? (item.reactions_count || 0) : (item.likes_count || 0)
+  const commentsCount = item.comments_count || 0
+
+  // Comments are worth more than likes (deeper engagement)
+  return (likesCount * 2) + (commentsCount * 3)
+}
+
+// Calculate recency bonus (boost recent content)
+function calculateRecencyBonus(createdAt: string): number {
+  const now = new Date().getTime()
+  const itemTime = new Date(createdAt).getTime()
+  const hoursAgo = (now - itemTime) / (1000 * 60 * 60)
+
+  if (hoursAgo < 24) return 10  // Last 24 hours
+  if (hoursAgo < 168) return 5  // Last week
+  return 0
+}
+
+// Get importance score for activity type
+function getImportanceScore(item: FeedItem): number {
+  if (item.item_type === 'post') {
+    // Posts with images are more engaging
+    return 7 + ((item as Post).image_url ? 5 : 0)
+  }
+
+  return ACTIVITY_IMPORTANCE[item.activity_type] || 0
+}
+
+// Calculate combined score for ranking
+function calculateCombinedScore(item: FeedItem): number {
+  const engagementScore = calculateEngagementScore(item)
+  const importanceScore = getImportanceScore(item)
+  const recencyBonus = calculateRecencyBonus(item.created_at)
+
+  return engagementScore + importanceScore + recencyBonus
+}
+
+// Apply diversity filter to limit same user domination
+function diversifyFeed(items: FeedItem[], maxPerUser: number = 3): FeedItem[] {
+  const userItemCount = new Map<string, number>()
+  const diversified: FeedItem[] = []
+
+  items.forEach(item => {
+    const userId = item.user_id
+    const currentCount = userItemCount.get(userId) || 0
+
+    if (currentCount < maxPerUser) {
+      diversified.push(item)
+      userItemCount.set(userId, currentCount + 1)
+    }
+  })
+
+  return diversified
+}
+
 export function usePosts(filter: FeedFilter = 'for_you') {
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -240,12 +358,27 @@ export function usePosts(filter: FeedFilter = 'for_you') {
         })
       )
 
-      // Merge and sort posts and activities by created_at
-      const allItems = [...postsWithDetails, ...activitiesWithDetails].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
+      // 1. Group similar activities
+      const groupedActivities = groupActivities(activitiesWithDetails)
 
-      return allItems as FeedItem[]
+      // 2. Merge posts and grouped activities
+      const allItems = [...postsWithDetails, ...groupedActivities]
+
+      // 3. Calculate combined score for each item and sort
+      const scoredAndSorted = allItems
+        .map(item => ({
+          ...item,
+          _score: calculateCombinedScore(item) // Add temporary score field
+        }))
+        .sort((a, b) => b._score - a._score) // Sort by score (highest first)
+
+      // 4. Apply diversity filter to prevent user domination
+      const diversified = diversifyFeed(scoredAndSorted, 3)
+
+      // 5. Remove temporary score field
+      const finalFeed = diversified.map(({ _score, ...item }) => item)
+
+      return finalFeed as FeedItem[]
     },
     enabled: !!user,
   })
