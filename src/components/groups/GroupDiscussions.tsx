@@ -100,19 +100,20 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
+      if (!user?.id) throw new Error('User not authenticated')
+
       const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
-      const filePath = `group-discussions/${fileName}`
+      const fileName = `group-discussions/${user.id}_${Date.now()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file)
+        .from('post-images')
+        .upload(fileName, file)
 
       if (uploadError) throw uploadError
 
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
+        .from('post-images')
+        .getPublicUrl(fileName)
 
       return publicUrl
     } catch (error) {
