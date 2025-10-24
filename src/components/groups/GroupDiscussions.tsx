@@ -409,7 +409,7 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
                               src={discussion.image_url}
                               alt="Discussion attachment"
                               className="max-w-full max-h-96 rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                              onClick={() => window.open(discussion.image_url, '_blank')}
+                              onClick={() => discussion.image_url && window.open(discussion.image_url, '_blank')}
                             />
                           </div>
                         )}
