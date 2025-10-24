@@ -24,8 +24,7 @@ interface InviteMembersModalProps {
 
 interface UserProfile {
   id: string
-  display_name: string
-  username: string | null
+  display_name: string | null
   photo_url: string | null
 }
 

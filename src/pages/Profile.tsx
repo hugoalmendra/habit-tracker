@@ -202,7 +202,7 @@ export default function Profile() {
       setCompletions(completionsData || [])
 
       // Load followers count
-      const { count: followersCount, error: followersCountError } = await supabase
+      const { count: followersCount } = await supabase
         .from('followers')
         .select('*', { count: 'exact', head: true })
         .eq('following_id', user.id)

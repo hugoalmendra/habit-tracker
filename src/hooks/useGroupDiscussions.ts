@@ -123,6 +123,7 @@ export function useGroupDiscussions(groupId: string | null) {
     }: {
       discussionId: string
       content: string
+      groupId: string
     }) => {
       const { data, error } = await supabase
         .from('group_discussions' as any)
@@ -135,13 +136,13 @@ export function useGroupDiscussions(groupId: string | null) {
       return data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['group-discussions'] })
+      queryClient.invalidateQueries({ queryKey: ['group-discussions', variables.groupId] })
     },
   })
 
   // Delete a discussion
   const deleteDiscussion = useMutation({
-    mutationFn: async ({ discussionId, groupId }: { discussionId: string; groupId: string }) => {
+    mutationFn: async ({ discussionId }: { discussionId: string; groupId: string }) => {
       const { error } = await supabase
         .from('group_discussions' as any)
         .delete()
@@ -159,7 +160,6 @@ export function useGroupDiscussions(groupId: string | null) {
     mutationFn: async ({
       discussionId,
       isPinned,
-      groupId,
     }: {
       discussionId: string
       isPinned: boolean
@@ -184,7 +184,6 @@ export function useGroupDiscussions(groupId: string | null) {
   const addReaction = useMutation({
     mutationFn: async ({
       discussionId,
-      groupId,
     }: {
       discussionId: string
       groupId: string
@@ -214,7 +213,6 @@ export function useGroupDiscussions(groupId: string | null) {
   const removeReaction = useMutation({
     mutationFn: async ({
       discussionId,
-      groupId,
     }: {
       discussionId: string
       groupId: string

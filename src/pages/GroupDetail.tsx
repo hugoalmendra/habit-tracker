@@ -412,7 +412,7 @@ export default function GroupDetail() {
               <MessageCircle className="h-5 w-5" />
               Discussion
             </h2>
-            <GroupDiscussions groupId={id} isAdmin={isAdmin} />
+            <GroupDiscussions groupId={id} isAdmin={isAdmin || false} />
           </motion.div>
         )}
       </div>

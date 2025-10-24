@@ -47,7 +47,6 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
     removeReaction,
     isCreating,
     isUpdating,
-    isDeleting,
   } = useGroupDiscussions(groupId)
 
   const handleSendMessage = () => {
@@ -63,7 +62,7 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
 
   const handleSaveEdit = () => {
     if (!editingId || !editContent.trim()) return
-    updateDiscussion({ discussionId: editingId, content: editContent.trim() })
+    updateDiscussion({ discussionId: editingId, content: editContent.trim(), groupId })
     setEditingId(null)
     setEditContent('')
   }
