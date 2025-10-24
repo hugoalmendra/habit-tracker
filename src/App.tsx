@@ -28,8 +28,6 @@ import Groups from '@/pages/Groups'
 import GroupDetail from '@/pages/GroupDetail'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
-import Groups from '@/pages/Groups'
-import GroupDetail from '@/pages/GroupDetail'
 
 // Redirect authenticated users to the correct page based on onboarding status
 function AuthenticatedRedirect() {
