@@ -12,6 +12,8 @@ import {
   Edit2,
   Trash2,
   Send,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react'
 import { useGroupDiscussions, useDiscussionComments } from '@/hooks/useGroupDiscussions'
 import { useAuth } from '@/contexts/AuthContext'
@@ -43,6 +45,9 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
   const [editContent, setEditContent] = useState('')
   const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null)
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   const {
     discussions,
@@ -76,10 +81,71 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
     loadUserProfile()
   }, [user?.id])
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return
-    createDiscussion({ groupId, content: newMessage.trim() })
-    setNewMessage('')
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null)
+    setImagePreview(null)
+  }
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`
+      const filePath = `group-discussions/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      return null
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() && !selectedImage) return
+
+    setUploadingImage(true)
+
+    try {
+      let imageUrl: string | null = null
+
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage)
+      }
+
+      createDiscussion({
+        groupId,
+        content: newMessage.trim() || ' ',
+        imageUrl
+      })
+
+      setNewMessage('')
+      handleRemoveImage()
+    } catch (error) {
+      console.error('Error sending message:', error)
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
   const handleStartEdit = (discussionId: string, content: string) => {
@@ -162,14 +228,62 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
                 }
               }}
             />
-            <div className="flex justify-end mt-2">
+
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="relative mt-2 inline-block">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="max-h-40 rounded-lg border"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-6 w-6"
+                  onClick={handleRemoveImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center mt-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={uploadingImage}
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Photo
+                </Button>
+              </div>
               <Button
                 onClick={handleSendMessage}
-                disabled={!newMessage.trim() || isCreating}
+                disabled={(!newMessage.trim() && !selectedImage) || isCreating || uploadingImage}
                 size="sm"
               >
-                <Send className="h-4 w-4 mr-2" />
-                Post
+                {uploadingImage ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Post
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -287,6 +401,18 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
                         <p className="whitespace-pre-wrap break-words">
                           {discussion.content}
                         </p>
+
+                        {/* Discussion Image */}
+                        {discussion.image_url && (
+                          <div className="mt-3">
+                            <img
+                              src={discussion.image_url}
+                              alt="Discussion attachment"
+                              className="max-w-full max-h-96 rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(discussion.image_url, '_blank')}
+                            />
+                          </div>
+                        )}
 
                         {/* Reactions and Comments */}
                         <div className="flex items-center gap-4 mt-3">

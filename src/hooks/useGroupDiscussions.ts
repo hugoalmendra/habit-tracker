@@ -6,6 +6,7 @@ export interface GroupDiscussion {
   group_id: string
   user_id: string
   content: string
+  image_url?: string | null
   is_pinned: boolean
   created_at: string
   updated_at: string
@@ -118,17 +119,23 @@ export function useGroupDiscussions(groupId: string | null) {
 
   // Create a new discussion
   const createDiscussion = useMutation({
-    mutationFn: async ({ groupId, content }: { groupId: string; content: string }) => {
+    mutationFn: async ({ groupId, content, imageUrl }: { groupId: string; content: string; imageUrl?: string | null }) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const insertData: any = {
+        group_id: groupId,
+        user_id: user.id,
+        content,
+      }
+
+      if (imageUrl) {
+        insertData.image_url = imageUrl
+      }
+
       const { data, error } = await supabase
         .from('group_discussions' as any)
-        .insert({
-          group_id: groupId,
-          user_id: user.id,
-          content,
-        })
+        .insert(insertData)
         .select()
         .single()
 
