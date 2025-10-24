@@ -27,6 +27,7 @@ export default function GroupDetail() {
   const { user } = useAuth()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'discussion' | 'stats' | 'members'>('discussion')
 
   const {
     useGroupDetails,
@@ -199,220 +200,261 @@ export default function GroupDetail() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
         {/* Group Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="p-8">
-            <div className="flex flex-col sm:flex-row gap-6 items-start">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={group.avatar_url || undefined} />
-                <AvatarFallback className="text-2xl">
-                  {group.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <h1 className="text-3xl font-bold">{group.name}</h1>
-                  {group.is_private ? (
-                    <Lock className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
-
-                {group.description && (
-                  <p className="text-muted-foreground mb-4">{group.description}</p>
-                )}
-
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+          <Card className="overflow-hidden">
+            {/* Cover Photo */}
+            <div className="relative h-48 sm:h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
+              {group.avatar_url ? (
+                <img
+                  src={group.avatar_url}
+                  alt={group.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-8xl sm:text-9xl font-bold text-primary/10">
+                    {group.name.substring(0, 2).toUpperCase()}
                   </div>
-                  {group.creator_profile && (
-                    <div>
-                      Created by{' '}
-                      <span className="font-medium">
-                        {group.creator_profile.display_name || 'Unknown'}
-                      </span>
-                    </div>
-                  )}
                 </div>
+              )}
+            </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  {isMember ? (
-                    <>
-                      {isAdmin && (
-                        <Badge variant="secondary">
-                          {isCreator ? 'Creator' : 'Admin'}
-                        </Badge>
-                      )}
-                      {!isCreator && (
-                        <Button
-                          variant="outline"
-                          onClick={handleLeaveGroup}
-                          disabled={isLeaving}
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Leave Group
-                        </Button>
-                      )}
-                    </>
-                  ) : (
-                    <Button
-                      onClick={handleJoinGroup}
-                      disabled={isJoining || group.is_private}
-                    >
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      {group.is_private ? 'Private Group' : 'Join Group'}
-                    </Button>
+            {/* Group Info Content */}
+            <div className="p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h1 className="text-3xl font-bold truncate">{group.name}</h1>
+                    {group.is_private ? (
+                      <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    ) : (
+                      <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    )}
+                  </div>
+
+                  {group.description && (
+                    <p className="text-muted-foreground mb-4">{group.description}</p>
                   )}
+
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                    </div>
+                    {group.creator_profile && (
+                      <div>
+                        Created by{' '}
+                        <span className="font-medium">
+                          {group.creator_profile.display_name || 'Unknown'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {isMember ? (
+                      <>
+                        {isAdmin && (
+                          <Badge variant="secondary" className="h-9 px-3">
+                            {isCreator ? 'Creator' : 'Admin'}
+                          </Badge>
+                        )}
+                        {!isCreator && (
+                          <Button
+                            variant="outline"
+                            onClick={handleLeaveGroup}
+                            disabled={isLeaving}
+                          >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Leave Group
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <Button
+                        onClick={handleJoinGroup}
+                        disabled={isJoining || group.is_private}
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        {group.is_private ? 'Private Group' : 'Join Group'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Members Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mt-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">
-              Members ({members?.length || 0})
-            </h2>
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsInviteModalOpen(true)}
+        {/* Tabs Section */}
+        {isMember && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-6 px-4 sm:px-6 lg:px-8 pb-8"
+          >
+            {/* Tab Navigation */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex gap-2">
+                <Button
+                  variant={activeTab === 'discussion' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('discussion')}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Discussion
+                </Button>
+                <Button
+                  variant={activeTab === 'stats' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('stats')}
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Stats
+                </Button>
+                <Button
+                  variant={activeTab === 'members' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('members')}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Members ({members?.length || 0})
+                </Button>
+              </div>
+
+              {/* Invite button for admins on members tab */}
+              {activeTab === 'members' && isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsInviteModalOpen(true)}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Invite
+                </Button>
+              )}
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'discussion' && id && (
+              <motion.div
+                key="discussion"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
               >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Invite Members
-              </Button>
+                <GroupDiscussions groupId={id} isAdmin={isAdmin || false} />
+              </motion.div>
             )}
-          </div>
 
-          {loadingMembers ? (
-            <div className="flex justify-center py-8">
-              <Spinner size="md" />
-            </div>
-          ) : members && members.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {members.map((member) => {
-                const isCurrentUser = member.user_id === user?.id
-                const isMemberAdmin = member.role === 'admin'
-                const canManageMember = isAdmin && !isCurrentUser && member.user_id !== group?.created_by
+            {activeTab === 'stats' && id && (
+              <motion.div
+                key="stats"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <GroupStatsCard groupId={id} memberIds={memberIds} />
+              </motion.div>
+            )}
 
-                return (
-                  <Card key={member.id} className="p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={member.profile?.photo_url || undefined} />
-                        <AvatarFallback>
-                          {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">
-                          {member.profile?.display_name || 'Unknown'}
-                          {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
-                        </p>
-                      </div>
-                      {isMemberAdmin && (
-                        <Badge variant="secondary" className="text-xs">
-                          Admin
-                        </Badge>
-                      )}
-                      {canManageMember && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              disabled={isRemoving || isPromoting}
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {!isMemberAdmin && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() => handlePromoteToAdmin(
-                                    member.user_id,
-                                    member.profile?.display_name || 'this member'
-                                  )}
-                                >
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Promote to Admin
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                              </>
+            {activeTab === 'members' && (
+              <motion.div
+                key="members"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {loadingMembers ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner size="md" />
+                  </div>
+                ) : members && members.length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {members.map((member) => {
+                      const isCurrentUser = member.user_id === user?.id
+                      const isMemberAdmin = member.role === 'admin'
+                      const canManageMember = isAdmin && !isCurrentUser && member.user_id !== group?.created_by
+
+                      return (
+                        <Card key={member.id} className="p-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={member.profile?.photo_url || undefined} />
+                              <AvatarFallback>
+                                {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">
+                                {member.profile?.display_name || 'Unknown'}
+                                {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
+                              </p>
+                            </div>
+                            {isMemberAdmin && (
+                              <Badge variant="secondary" className="text-xs">
+                                Admin
+                              </Badge>
                             )}
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleRemoveMember(
-                                member.user_id,
-                                member.profile?.display_name || 'this member'
-                              )}
-                            >
-                              <UserMinus className="mr-2 h-4 w-4" />
-                              Remove from Group
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
+                            {canManageMember && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    disabled={isRemoving || isPromoting}
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {!isMemberAdmin && (
+                                    <>
+                                      <DropdownMenuItem
+                                        onClick={() => handlePromoteToAdmin(
+                                          member.user_id,
+                                          member.profile?.display_name || 'this member'
+                                        )}
+                                      >
+                                        <Shield className="mr-2 h-4 w-4" />
+                                        Promote to Admin
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                    </>
+                                  )}
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => handleRemoveMember(
+                                      member.user_id,
+                                      member.profile?.display_name || 'this member'
+                                    )}
+                                  >
+                                    <UserMinus className="mr-2 h-4 w-4" />
+                                    Remove from Group
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No members yet</p>
                   </Card>
-                )
-              })}
-            </div>
-          ) : (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground">No members yet</p>
-            </Card>
-          )}
-        </motion.div>
-
-        {/* Group Stats Section */}
-        {isMember && id && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6"
-          >
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Group Stats
-            </h2>
-            <GroupStatsCard groupId={id} memberIds={memberIds} />
-          </motion.div>
-        )}
-
-        {/* Discussion Section */}
-        {isMember && id && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6"
-          >
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              Discussion
-            </h2>
-            <GroupDiscussions groupId={id} isAdmin={isAdmin || false} />
+                )}
+              </motion.div>
+            )}
           </motion.div>
         )}
       </div>

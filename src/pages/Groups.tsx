@@ -95,12 +95,17 @@ export default function Groups() {
   }
 
   // Filter and sort groups
-  const filterAndSortGroups = (groups: any[]) => {
+  const filterAndSortGroups = (groups: any[], excludeMyGroups: boolean = false) => {
     // Filter by search query
-    const filtered = groups?.filter(group =>
+    let filtered = groups?.filter(group =>
       group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       group.description?.toLowerCase().includes(searchQuery.toLowerCase())
     ) || []
+
+    // For discover tab, exclude groups user is already a member of
+    if (excludeMyGroups) {
+      filtered = filtered.filter(group => !group.is_member)
+    }
 
     // Sort the filtered results
     return filtered.sort((a, b) => {
@@ -117,7 +122,7 @@ export default function Groups() {
     })
   }
 
-  const sortedPublicGroups = filterAndSortGroups(publicGroups || [])
+  const sortedPublicGroups = filterAndSortGroups(publicGroups || [], true)
   const sortedMyGroups = filterAndSortGroups(myGroups || [])
 
   const isLoading = tab === 'discover' ? loadingPublicGroups : tab === 'my-groups' ? loadingMyGroups : loadingInvitations
@@ -258,37 +263,48 @@ export default function Groups() {
                         key={group.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        className="flex"
                       >
-                        <Card
-                          className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                          onClick={() => navigate(`/groups/${group.id}`)}
-                        >
-                          <div className="flex items-start gap-4">
-                            <Avatar className="h-16 w-16">
-                              <AvatarImage src={group.avatar_url || undefined} />
-                              <AvatarFallback className="text-lg">
-                                {group.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="font-semibold truncate">{group.name}</h3>
-                                {group.is_private && (
-                                  <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                {group.description || 'No description'}
-                              </p>
-                              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer flex flex-col w-full">
+                          {/* Cover Photo */}
+                          <div
+                            className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden"
+                            onClick={() => navigate(`/groups/${group.id}`)}
+                          >
+                            {group.avatar_url ? (
+                              <img
+                                src={group.avatar_url}
+                                alt={group.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-5xl font-bold text-primary/10">
+                                  {group.name.substring(0, 2).toUpperCase()}
                                 </div>
                               </div>
+                            )}
+                            {group.is_private && (
+                              <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1.5">
+                                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Card Content */}
+                          <div className="p-4 flex-1 flex flex-col" onClick={() => navigate(`/groups/${group.id}`)}>
+                            <h3 className="font-semibold truncate mb-1">{group.name}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">
+                              {group.description || 'No description'}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Users className="h-3.5 w-3.5" />
+                              {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
                             </div>
                           </div>
-                          <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+
+                          {/* Action Button */}
+                          <div className="px-4 pb-4 mt-auto" onClick={(e) => e.stopPropagation()}>
                             {group.is_member ? (
                               <Button
                                 variant="outline"
@@ -296,7 +312,7 @@ export default function Groups() {
                                 onClick={() => handleLeaveGroup(group.id)}
                                 disabled={isLeaving}
                               >
-                                {group.is_admin ? 'Admin' : 'Leave Group'}
+                                {group.is_admin ? 'Manage Group' : 'Leave Group'}
                               </Button>
                             ) : (
                               <Button
@@ -343,39 +359,50 @@ export default function Groups() {
                         key={group.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        className="flex"
                       >
                         <Card
-                          className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                          className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer flex flex-col w-full"
                           onClick={() => navigate(`/groups/${group.id}`)}
                         >
-                          <div className="flex items-start gap-4">
-                            <Avatar className="h-16 w-16">
-                              <AvatarImage src={group.avatar_url || undefined} />
-                              <AvatarFallback className="text-lg">
-                                {group.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <h3 className="font-semibold truncate">{group.name}</h3>
-                                <div className="flex gap-1">
-                                  {group.is_admin && (
-                                    <Badge variant="secondary" className="text-xs">Admin</Badge>
-                                  )}
-                                  {group.is_private && (
-                                    <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                  )}
+                          {/* Cover Photo */}
+                          <div className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
+                            {group.avatar_url ? (
+                              <img
+                                src={group.avatar_url}
+                                alt={group.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-5xl font-bold text-primary/10">
+                                  {group.name.substring(0, 2).toUpperCase()}
                                 </div>
                               </div>
-                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                                {group.description || 'No description'}
-                              </p>
-                              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                            )}
+                            <div className="absolute top-2 right-2 flex gap-1">
+                              {group.is_admin && (
+                                <Badge variant="secondary" className="text-xs shadow-sm">
+                                  Admin
+                                </Badge>
+                              )}
+                              {group.is_private && (
+                                <div className="bg-background/80 backdrop-blur-sm rounded-full p-1.5">
+                                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                                 </div>
-                              </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Card Content */}
+                          <div className="p-4 flex-1 flex flex-col">
+                            <h3 className="font-semibold truncate mb-1">{group.name}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">
+                              {group.description || 'No description'}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Users className="h-3.5 w-3.5" />
+                              {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
                             </div>
                           </div>
                         </Card>
@@ -397,48 +424,63 @@ export default function Groups() {
                     </p>
                   </Card>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {invitations.map((invitation) => (
                       <motion.div
                         key={invitation.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        className="flex"
                       >
-                        <Card className="p-6">
-                          <div className="flex items-start gap-4">
-                            <Avatar className="h-12 w-12">
-                              <AvatarImage src={invitation.group?.avatar_url || undefined} />
-                              <AvatarFallback>
-                                {invitation.group?.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold">{invitation.group?.name}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Invited by{' '}
-                                <span className="font-medium">
-                                  {invitation.inviter_profile?.display_name || 'Someone'}
-                                </span>
-                              </p>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {invitation.group?.description}
-                              </p>
-                            </div>
+                        <Card className="overflow-hidden flex flex-col w-full">
+                          {/* Cover Photo */}
+                          <div className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
+                            {invitation.group?.avatar_url ? (
+                              <img
+                                src={invitation.group.avatar_url}
+                                alt={invitation.group?.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-5xl font-bold text-primary/10">
+                                  {invitation.group?.name.substring(0, 2).toUpperCase()}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <div className="mt-4 flex gap-2">
-                            <Button
-                              onClick={() => handleAcceptInvitation(invitation.id)}
-                              className="flex-1"
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => handleDeclineInvitation(invitation.id)}
-                              className="flex-1"
-                            >
-                              Decline
-                            </Button>
+
+                          {/* Card Content */}
+                          <div className="p-4 flex-1 flex flex-col">
+                            <h3 className="font-semibold truncate mb-1">{invitation.group?.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Invited by{' '}
+                              <span className="font-medium">
+                                {invitation.inviter_profile?.display_name || 'Someone'}
+                              </span>
+                            </p>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                              {invitation.group?.description || 'No description'}
+                            </p>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 mt-auto">
+                              <Button
+                                onClick={() => handleAcceptInvitation(invitation.id)}
+                                className="flex-1"
+                                size="sm"
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => handleDeclineInvitation(invitation.id)}
+                                className="flex-1"
+                                size="sm"
+                              >
+                                Decline
+                              </Button>
+                            </div>
                           </div>
                         </Card>
                       </motion.div>

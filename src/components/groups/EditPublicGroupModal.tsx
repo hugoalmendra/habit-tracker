@@ -154,7 +154,7 @@ export default function EditPublicGroupModal({ isOpen, onClose, group }: EditPub
         <DialogHeader>
           <DialogTitle>Edit Group</DialogTitle>
           <DialogDescription>
-            Update your group's name, description, avatar, and privacy settings.
+            Update your group's name, description, cover photo, and privacy settings.
           </DialogDescription>
         </DialogHeader>
 
@@ -186,22 +186,22 @@ export default function EditPublicGroupModal({ isOpen, onClose, group }: EditPub
           </div>
 
           <div className="space-y-2">
-            <Label>Group Avatar</Label>
+            <Label>Cover Photo</Label>
             {imagePreview ? (
               <div className="relative">
                 <img
                   src={imagePreview}
-                  alt="Group avatar preview"
-                  className="w-32 h-32 object-cover rounded-lg border"
+                  alt="Group cover photo preview"
+                  className="w-full h-40 object-cover rounded-lg border"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                  className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
                   onClick={removeImage}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
@@ -216,13 +216,13 @@ export default function EditPublicGroupModal({ isOpen, onClose, group }: EditPub
                 <Label htmlFor="edit-avatar">
                   <div className="flex items-center gap-2 px-4 py-2 border border-input rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
                     <ImageIcon className="h-4 w-4" />
-                    <span>Upload Image</span>
+                    <span>Upload Cover Photo</span>
                   </div>
                 </Label>
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              Recommended: Square image, max 5MB
+              Recommended: Landscape image (16:9 ratio), max 5MB
             </p>
           </div>
 

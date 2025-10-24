@@ -673,51 +673,6 @@ export default function Profile() {
             </CardContent>
           </Card>
 
-          {/* Public Groups */}
-          {myGroups && myGroups.length > 0 && (
-            <Card className="border-border/40 shadow-apple-lg rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Groups</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/groups')}
-                    className="text-sm"
-                  >
-                    View All
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {myGroups.slice(0, 6).map((group) => (
-                    <button
-                      key={group.id}
-                      onClick={() => navigate(`/groups/${group.id}`)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/60 hover:border-primary hover:bg-primary/5 transition-all group"
-                    >
-                      <div className="h-8 w-8 rounded-full overflow-hidden bg-secondary flex items-center justify-center shrink-0">
-                        {group.avatar_url ? (
-                          <img
-                            src={group.avatar_url}
-                            alt={group.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-xs font-medium">
-                            {group.name.substring(0, 2).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                        {group.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Stats */}
           <div className="grid gap-5 md:grid-cols-3">
             <Card className="border-border/40 shadow-apple rounded-2xl">
@@ -929,6 +884,56 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Public Groups */}
+          {myGroups && myGroups.length > 0 && (
+            <Card className="border-border/40 shadow-apple-lg rounded-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Groups</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/groups')}
+                    className="text-sm"
+                  >
+                    View All
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {myGroups.slice(0, 6).map((group) => (
+                    <div key={group.id} className="flex">
+                      <Card
+                        onClick={() => navigate(`/groups/${group.id}`)}
+                        className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col w-full"
+                      >
+                        {/* Cover Photo */}
+                        <div className="relative h-20 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
+                          {group.avatar_url ? (
+                            <img
+                              src={group.avatar_url}
+                              alt={group.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="text-3xl font-bold text-primary/10">
+                                {group.name.substring(0, 2).toUpperCase()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {/* Group Name */}
+                        <div className="p-3 flex-1">
+                          <p className="text-sm font-medium truncate">{group.name}</p>
+                        </div>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </motion.div>
       </main>
 
