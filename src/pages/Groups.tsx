@@ -193,7 +193,7 @@ export default function Groups() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
         {/* Search Bar */}
         <div className="mb-4">
           <div className="relative">
