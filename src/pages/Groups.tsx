@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { usePublicGroups } from '@/hooks/usePublicGroups'
 import { markGroupsAsVisited } from '@/hooks/useGroupNotifications'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -135,26 +136,62 @@ export default function Groups() {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <h1 className="text-2xl font-bold">Groups</h1>
-            <div className="flex items-center gap-2">
-              <GlobalSearch />
-              <NotificationsDropdown />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="rounded-full"
-              >
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-              <AvatarDropdown />
-            </div>
+      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl shadow-apple-sm">
+        <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
+          <Link to="/dashboard">
+            <img
+              src={theme === 'light' ? '/logo-light.png' : '/logo-dark.png'}
+              alt="The Way of Kaizen"
+              className="h-7 sm:h-8 w-auto cursor-pointer"
+            />
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav className="hidden md:flex items-center gap-1">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link to="/progress">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Progress
+                </Button>
+              </Link>
+              <Link to="/challenges">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
+                </Button>
+              </Link>
+              <Link to="/feed">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
+                  Feed
+                </Button>
+              </Link>
+            </nav>
+            <GlobalSearch />
+            <NotificationsDropdown />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="h-9 w-9 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
+            <AvatarDropdown />
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Search Bar */}
