@@ -250,6 +250,9 @@ export function usePublicGroups() {
         return membersWithProfiles as GroupMember[]
       },
       enabled: !!groupId,
+      staleTime: 0, // Always refetch when component mounts
+      refetchOnMount: true, // Refetch on mount
+      refetchOnWindowFocus: true, // Refetch when window regains focus
     })
   }
 
