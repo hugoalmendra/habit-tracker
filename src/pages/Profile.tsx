@@ -526,7 +526,7 @@ export default function Profile() {
           {/* Profile Header */}
           <Card className="border-border/40 shadow-apple-lg rounded-2xl">
             <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row items-start md:justify-between gap-6 md:gap-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-6 md:gap-8">
                 {/* Profile Photo */}
                 <div className="flex items-center gap-6 w-full md:w-auto">
                   <div className="relative">
@@ -648,23 +648,21 @@ export default function Profile() {
                 </div>
 
                 {/* Stats and Actions */}
-                <div className="flex flex-col items-start md:items-end gap-4 w-full md:w-auto">
-                  <div className="flex flex-col gap-4 text-sm w-full md:w-auto items-start md:items-end">
-                    <button
-                      onClick={loadFollowersList}
-                      className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span className="font-bold text-2xl text-foreground">{followersCount}</span>
-                      <span>followers</span>
-                    </button>
-                    <button
-                      onClick={loadFollowingList}
-                      className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span className="font-bold text-2xl text-foreground">{followingCount}</span>
-                      <span>following</span>
-                    </button>
-                  </div>
+                <div className="flex items-center gap-8 text-sm w-full md:w-auto justify-start md:justify-end">
+                  <button
+                    onClick={loadFollowersList}
+                    className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span className="font-bold text-2xl text-foreground">{followersCount}</span>
+                    <span>followers</span>
+                  </button>
+                  <button
+                    onClick={loadFollowingList}
+                    className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span className="font-bold text-2xl text-foreground">{followingCount}</span>
+                    <span>following</span>
+                  </button>
                 </div>
               </div>
             </CardContent>
