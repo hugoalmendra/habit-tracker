@@ -649,7 +649,7 @@ export default function Profile() {
 
                 {/* Stats and Actions */}
                 <div className="flex flex-col items-start md:items-end gap-4 w-full md:w-auto">
-                  <div className="flex items-center gap-8 text-sm w-full md:w-auto justify-start md:justify-end">
+                  <div className="flex flex-col gap-4 text-sm w-full md:w-auto items-start md:items-end">
                     <button
                       onClick={loadFollowersList}
                       className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
