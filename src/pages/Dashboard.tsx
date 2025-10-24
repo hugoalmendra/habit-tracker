@@ -15,6 +15,7 @@ import AchievementPopup from '@/components/celebrations/AchievementPopup'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 import Spinner from '@/components/ui/Spinner'
 import { useAchievements } from '@/hooks/useAchievements'
 import { useBadgeAchievements } from '@/hooks/useBadgeAchievements'
@@ -201,6 +202,12 @@ export default function Dashboard() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">

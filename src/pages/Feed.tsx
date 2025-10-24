@@ -20,6 +20,7 @@ import ReactionUsersModal from '@/components/feed/ReactionUsersModal'
 import Spinner from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 
 type FeedFilter = 'for_you' | 'following'
 
@@ -230,6 +231,12 @@ export default function Feed() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">

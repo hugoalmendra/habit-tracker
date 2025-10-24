@@ -11,6 +11,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 
 interface UserProfile {
   id: string
@@ -118,6 +119,12 @@ export default function Social() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">

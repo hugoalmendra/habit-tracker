@@ -15,6 +15,7 @@ import GlobalSearch from '@/components/layout/GlobalSearch'
 import Spinner from '@/components/ui/Spinner'
 import CreateChallengeModal from '@/components/challenges/CreateChallengeModal'
 import { getIconComponent } from '@/components/ui/IconPicker'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +107,12 @@ export default function Challenges() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">

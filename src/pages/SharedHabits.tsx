@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import { format, startOfWeek, addDays, isSameDay, endOfWeek } from 'date-fns'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 
 export default function SharedHabits() {
   const { user } = useAuth()
@@ -63,6 +64,12 @@ export default function SharedHabits() {
                 <Link to="/challenges">
                   <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                     Challenges
+                  </Button>
+                </Link>
+                <Link to="/groups">
+                  <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                    Groups
+                    <GroupsNotificationBadge />
                   </Button>
                 </Link>
                 <Link to="/feed">
@@ -124,6 +131,12 @@ export default function SharedHabits() {
                 <Link to="/challenges">
                   <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                     Challenges
+                  </Button>
+                </Link>
+                <Link to="/groups">
+                  <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                    Groups
+                    <GroupsNotificationBadge />
                   </Button>
                 </Link>
                 <Link to="/feed">
@@ -204,6 +217,12 @@ export default function SharedHabits() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">

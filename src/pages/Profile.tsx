@@ -18,6 +18,7 @@ import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
 import GlobalSearch from '@/components/layout/GlobalSearch'
 import ManageGroupsModal from '@/components/groups/ManageGroupsModal'
+import GroupsNotificationBadge from '@/components/groups/GroupsNotificationBadge'
 
 interface Profile {
   display_name: string | null
@@ -487,6 +488,12 @@ export default function Profile() {
               <Link to="/challenges">
                 <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium">
                   Challenges
+                </Button>
+              </Link>
+              <Link to="/groups">
+                <Button variant="ghost" size="sm" className="h-9 px-3 text-sm font-medium relative">
+                  Groups
+                  <GroupsNotificationBadge />
                 </Button>
               </Link>
               <Link to="/feed">
