@@ -4,7 +4,8 @@ import { X, UserPlus, Search, Mail, Link2, Check, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChallenges } from '@/hooks/useChallenges'
 import { useFollowers } from '@/hooks/useFollowers'
-import { useFollowerGroups } from '@/hooks/useFollowerGroups'
+import { usePublicGroups } from '@/hooks/usePublicGroups'
+import { supabase } from '@/lib/supabase'
 
 interface InviteParticipantsModalProps {
   open: boolean
@@ -31,7 +32,7 @@ export default function InviteParticipantsModal({
   const [linkCopied, setLinkCopied] = useState(false)
 
   const { following } = useFollowers()
-  const { groups } = useFollowerGroups()
+  const { myGroups } = usePublicGroups()
   const { inviteParticipants, inviteByEmail } = useChallenges()
 
   // Map following to friends format
@@ -62,15 +63,17 @@ export default function InviteParticipantsModal({
   }
 
   // Get all unique member IDs from selected groups
-  const getGroupMemberIds = () => {
-    const memberIds = new Set<string>()
-    selectedGroups.forEach(groupId => {
-      const group = groups?.find(g => g.id === groupId)
-      if (group?.members) {
-        group.members.forEach(member => memberIds.add(member.follower_id))
-      }
-    })
-    return Array.from(memberIds)
+  const getGroupMemberIds = async () => {
+    if (selectedGroups.length === 0) return []
+
+    const { data: membersData } = await supabase
+      .from('user_group_memberships' as any)
+      .select('user_id')
+      .in('group_id', selectedGroups)
+
+    // Return unique user IDs
+    const uniqueIds = [...new Set((membersData as any)?.map((m: any) => m.user_id) || [])]
+    return uniqueIds
   }
 
   const validateEmail = (email: string) => {
@@ -126,10 +129,26 @@ export default function InviteParticipantsModal({
           userIds: selectedFriends
         })
       } else if (activeTab === 'groups') {
-        const memberIds = getGroupMemberIds()
+        const memberIds = await getGroupMemberIds()
+
+        // Get current challenge participants to skip already joined users
+        const { data: currentParticipants } = await supabase
+          .from('challenge_participants')
+          .select('user_id')
+          .eq('challenge_id', challengeId)
+
+        const existingUserIds = new Set((currentParticipants as any)?.map((p: any) => p.user_id as string) || [])
+        const newMemberIds = memberIds.filter(id => !existingUserIds.has(id)) as string[]
+
+        if (newMemberIds.length === 0) {
+          alert('All members of the selected groups are already participating in this challenge.')
+          setIsSubmitting(false)
+          return
+        }
+
         await inviteParticipants({
           challengeId,
-          userIds: memberIds
+          userIds: newMemberIds
         })
       } else {
         await inviteByEmail({
@@ -321,42 +340,71 @@ export default function InviteParticipantsModal({
                     <div className="space-y-3">
                       <label className="text-sm font-medium">Select Groups</label>
                       <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2">
-                        {groups && groups.length > 0 ? (
-                          groups.map((group) => (
+                        {myGroups && myGroups.length > 0 ? (
+                          myGroups.map((group) => (
                             <button
                               key={group.id}
                               type="button"
                               onClick={() => handleToggleGroup(group.id)}
-                              className={`w-full flex items-center gap-3 rounded-xl p-4 transition-all hover:bg-secondary border-2 ${
+                              className={`w-full overflow-hidden rounded-xl transition-all hover:shadow-md border-2 ${
                                 selectedGroups.includes(group.id)
-                                  ? 'bg-primary/10 border-primary'
-                                  : 'bg-secondary/50 border-transparent'
+                                  ? 'border-primary'
+                                  : 'border-transparent'
                               }`}
                             >
-                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                                <Users className="h-6 w-6 text-primary" />
-                              </div>
-                              <div className="flex-1 text-left">
-                                <p className="font-medium text-sm">{group.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {group.member_count || 0} member{group.member_count !== 1 ? 's' : ''}
-                                </p>
-                              </div>
-                              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                                selectedGroups.includes(group.id)
-                                  ? 'border-primary bg-primary'
-                                  : 'border-border'
-                              }`}>
-                                {selectedGroups.includes(group.id) && (
-                                  <Check className="h-3 w-3 text-primary-foreground" />
+                              {/* Cover Photo */}
+                              <div className="relative h-20 bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
+                                {group.avatar_url ? (
+                                  <img
+                                    src={group.avatar_url}
+                                    alt={group.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-3xl font-bold text-primary/10">
+                                      {group.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                  </div>
                                 )}
+                                {/* Selection indicator */}
+                                <div className="absolute top-2 right-2">
+                                  <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center shadow-sm ${
+                                    selectedGroups.includes(group.id)
+                                      ? 'border-primary bg-primary'
+                                      : 'border-white bg-white/80'
+                                  }`}>
+                                    {selectedGroups.includes(group.id) && (
+                                      <Check className="h-4 w-4 text-primary-foreground" />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Group Info */}
+                              <div className={`p-3 text-left ${
+                                selectedGroups.includes(group.id) ? 'bg-primary/5' : 'bg-secondary/30'
+                              }`}>
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm truncate">{group.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {group.member_count || 0} member{group.member_count !== 1 ? 's' : ''}
+                                    </p>
+                                  </div>
+                                  {group.is_admin && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                      Admin
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </button>
                           ))
                         ) : (
                           <div className="text-center py-8 text-muted-foreground text-sm">
                             <p className="mb-2">No groups yet</p>
-                            <p className="text-xs">Create groups in your Profile to invite multiple people at once</p>
+                            <p className="text-xs">Join or create groups to invite multiple people at once</p>
                           </div>
                         )}
                       </div>
@@ -366,8 +414,9 @@ export default function InviteParticipantsModal({
                         <div className="rounded-xl bg-primary/5 p-3 text-sm">
                           <p className="text-muted-foreground text-center">
                             {selectedGroups.length} group{selectedGroups.length !== 1 ? 's' : ''} selected
-                            <span className="mx-2">•</span>
-                            {getGroupMemberIds().length} unique member{getGroupMemberIds().length !== 1 ? 's' : ''} will be invited
+                          </p>
+                          <p className="text-xs text-muted-foreground text-center mt-1">
+                            Members from selected groups will be invited
                           </p>
                         </div>
                       )}
