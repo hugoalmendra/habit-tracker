@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { usePublicGroups } from '@/hooks/usePublicGroups'
+import { markGroupsAsVisited } from '@/hooks/useGroupNotifications'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -43,6 +44,11 @@ export default function Groups() {
     isJoining,
     isLeaving,
   } = usePublicGroups()
+
+  // Mark groups as visited to clear notification badge
+  useEffect(() => {
+    markGroupsAsVisited()
+  }, [])
 
   const handleJoinGroup = async (groupId: string) => {
     await joinGroup(groupId)
