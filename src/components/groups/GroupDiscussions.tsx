@@ -266,7 +266,7 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
                   disabled={uploadingImage}
                 >
                   <ImageIcon className="h-4 w-4 mr-2" />
-                  Photo
+                  Upload Image
                 </Button>
               </div>
               <Button
