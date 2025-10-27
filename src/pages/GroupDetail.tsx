@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Users, UserPlus, Lock, Globe, MoreVertical, LogOut, Edit2, Trash2, Shield, UserMinus, MessageCircle, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Spinner from '@/components/ui/Spinner'
 import EditPublicGroupModal from '@/components/groups/EditPublicGroupModal'
 import InviteMembersModal from '@/components/groups/InviteMembersModal'
+import PromoteMemberModal from '@/components/groups/PromoteMemberModal'
 import GroupStatsCard from '@/components/groups/GroupStatsCard'
 import GroupDiscussions from '@/components/groups/GroupDiscussions'
 import {
@@ -27,6 +28,8 @@ export default function GroupDetail() {
   const { user } = useAuth()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<{ userId: string; name: string; photo?: string | null } | null>(null)
   const [activeTab, setActiveTab] = useState<'discussion' | 'stats' | 'members'>('discussion')
 
   const {
@@ -123,15 +126,18 @@ export default function GroupDetail() {
     }
   }
 
-  const handlePromoteToAdmin = async (userId: string, memberName: string) => {
-    if (!id) return
-    if (confirm(`Are you sure you want to promote ${memberName} to admin?`)) {
-      try {
-        await promoteToAdmin({ groupId: id, userId })
-      } catch (error) {
-        console.error('Error promoting member:', error)
-        alert('Failed to promote member. Please try again.')
-      }
+  const handlePromoteToAdmin = async (userId: string, memberName: string, memberPhoto?: string | null) => {
+    setSelectedMember({ userId, name: memberName, photo: memberPhoto })
+    setIsPromoteModalOpen(true)
+  }
+
+  const confirmPromoteToAdmin = async () => {
+    if (!id || !selectedMember) return
+    try {
+      await promoteToAdmin({ groupId: id, userId: selectedMember.userId })
+    } catch (error) {
+      console.error('Error promoting member:', error)
+      alert('Failed to promote member. Please try again.')
     }
   }
 
@@ -386,18 +392,23 @@ export default function GroupDetail() {
                       return (
                         <Card key={member.id} className="p-4">
                           <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={member.profile?.photo_url || undefined} />
-                              <AvatarFallback>
-                                {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">
-                                {member.profile?.display_name || 'Unknown'}
-                                {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
-                              </p>
-                            </div>
+                            <Link
+                              to={`/profile/${member.user_id}`}
+                              className="flex items-center gap-3 flex-1 min-w-0 group"
+                            >
+                              <Avatar className="transition-opacity group-hover:opacity-80">
+                                <AvatarImage src={member.profile?.photo_url || undefined} />
+                                <AvatarFallback>
+                                  {member.profile?.display_name?.substring(0, 2).toUpperCase() || '??'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate group-hover:text-primary transition-colors">
+                                  {member.profile?.display_name || 'Unknown'}
+                                  {isCurrentUser && <span className="text-muted-foreground"> (You)</span>}
+                                </p>
+                              </div>
+                            </Link>
                             {isMemberAdmin && (
                               <Badge variant="secondary" className="text-xs">
                                 Admin
@@ -421,7 +432,8 @@ export default function GroupDetail() {
                                       <DropdownMenuItem
                                         onClick={() => handlePromoteToAdmin(
                                           member.user_id,
-                                          member.profile?.display_name || 'this member'
+                                          member.profile?.display_name || 'this member',
+                                          member.profile?.photo_url
                                         )}
                                       >
                                         <Shield className="mr-2 h-4 w-4" />
@@ -475,6 +487,18 @@ export default function GroupDetail() {
           onClose={() => setIsInviteModalOpen(false)}
           groupId={id}
           groupName={group.name}
+        />
+      )}
+
+      {/* Promote Member Modal */}
+      {selectedMember && (
+        <PromoteMemberModal
+          open={isPromoteModalOpen}
+          onOpenChange={setIsPromoteModalOpen}
+          memberName={selectedMember.name}
+          memberPhoto={selectedMember.photo}
+          onConfirm={confirmPromoteToAdmin}
+          isPromoting={isPromoting}
         />
       )}
     </div>

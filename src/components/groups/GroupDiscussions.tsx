@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle,
-  Heart,
+  ThumbsUp,
   MoreVertical,
   Pin,
   Edit2,
@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import Spinner from '@/components/ui/Spinner'
 import { formatDistanceToNow } from 'date-fns'
+import DiscussionReactionUsersModal from '@/components/groups/DiscussionReactionUsersModal'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,8 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [showReactionsModal, setShowReactionsModal] = useState(false)
+  const [selectedDiscussionId, setSelectedDiscussionId] = useState<string | null>(null)
 
   const {
     discussions,
@@ -417,26 +420,40 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
 
                         {/* Reactions and Comments */}
                         <div className="flex items-center gap-4 mt-3">
-                          <button
-                            onClick={() =>
-                              handleToggleReaction(
-                                discussion.id,
-                                discussion.user_has_reacted || false
-                              )
-                            }
-                            className={`flex items-center gap-1 text-sm transition-colors ${
-                              discussion.user_has_reacted
-                                ? 'text-red-500'
-                                : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                          >
-                            <Heart
-                              className={`h-4 w-4 ${
-                                discussion.user_has_reacted ? 'fill-current' : ''
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() =>
+                                handleToggleReaction(
+                                  discussion.id,
+                                  discussion.user_has_reacted || false
+                                )
+                              }
+                              className={`flex items-center gap-1 text-sm transition-colors ${
+                                discussion.user_has_reacted
+                                  ? 'text-primary'
+                                  : 'text-muted-foreground hover:text-foreground'
                               }`}
-                            />
-                            {discussion.reaction_count || 0}
-                          </button>
+                            >
+                              <ThumbsUp
+                                className={`h-4 w-4 ${
+                                  discussion.user_has_reacted ? 'fill-current' : ''
+                                }`}
+                              />
+                            </button>
+                            {discussion.reaction_count && discussion.reaction_count > 0 ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedDiscussionId(discussion.id)
+                                  setShowReactionsModal(true)
+                                }}
+                                className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                              >
+                                {discussion.reaction_count}
+                              </button>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">0</span>
+                            )}
+                          </div>
 
                           <button
                             onClick={() => toggleComments(discussion.id)}
@@ -472,6 +489,13 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
           </p>
         </Card>
       )}
+
+      {/* Reactions Modal */}
+      <DiscussionReactionUsersModal
+        discussionId={selectedDiscussionId}
+        open={showReactionsModal}
+        onOpenChange={setShowReactionsModal}
+      />
     </div>
   )
 }
