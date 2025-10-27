@@ -39,7 +39,7 @@ export default function DiscussionReactionUsersModal({ discussionId, open, onOpe
       if (error) throw error
 
       // Fetch user profiles
-      const userIds = [...new Set((reactionsData as any)?.map((r: any) => r.user_id) || [])]
+      const userIds = [...new Set((reactionsData as any)?.map((r: any) => r.user_id as string) || [])] as string[]
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, display_name, photo_url')
