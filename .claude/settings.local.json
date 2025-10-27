@@ -45,7 +45,16 @@
       "Bash(npx tsc:*)",
       "Bash(python3:*)",
       "Bash(git reset:*)",
-      "Read(//dev/**)"
+      "Read(//dev/**)",
+      "Bash(node scripts/list_nexgent_users.js:*)",
+      "Bash(node scripts/add_users_to_ngt_academy.js:*)",
+      "Bash(node scripts/check_ngt_academy_members.js:*)",
+      "Bash(node scripts/debug_group_members.js:*)",
+      "Bash(node --no-warnings --loader ./scripts/loader.mjs:*)",
+      "Bash(node scripts/check_rls_policies.js:*)",
+      "Bash(node scripts/fix_member_visibility.js:*)",
+      "Bash(node /Users/hugoalmendra/development/cursorplayground/habit-tracker/scripts/fix_member_visibility.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
