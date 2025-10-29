@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase'
 import Spinner from '@/components/ui/Spinner'
 import { formatDistanceToNow } from 'date-fns'
 import DiscussionReactionUsersModal from '@/components/groups/DiscussionReactionUsersModal'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +52,8 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
   const [uploadingImage, setUploadingImage] = useState(false)
   const [showReactionsModal, setShowReactionsModal] = useState(false)
   const [selectedDiscussionId, setSelectedDiscussionId] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [discussionToDelete, setDiscussionToDelete] = useState<string | null>(null)
 
   const {
     discussions,
@@ -169,9 +172,15 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
     setEditContent('')
   }
 
-  const handleDelete = (discussionId: string) => {
-    if (confirm('Are you sure you want to delete this message?')) {
-      deleteDiscussion({ discussionId, groupId })
+  const handleDeleteClick = (discussionId: string) => {
+    setDiscussionToDelete(discussionId)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (discussionToDelete) {
+      deleteDiscussion({ discussionId: discussionToDelete, groupId })
+      setDiscussionToDelete(null)
     }
   }
 
@@ -366,7 +375,7 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
                             )}
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => handleDelete(discussion.id)}
+                              onClick={() => handleDeleteClick(discussion.id)}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -496,6 +505,18 @@ export default function GroupDiscussions({ groupId, isAdmin }: GroupDiscussionsP
         open={showReactionsModal}
         onOpenChange={setShowReactionsModal}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Discussion"
+        description="Are you sure you want to delete this discussion? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }
@@ -516,6 +537,8 @@ function DiscussionCommentsSection({
 }: DiscussionCommentsSectionProps) {
   const { user } = useAuth()
   const [commentText, setCommentText] = useState('')
+  const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(false)
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null)
 
   const {
     comments,
@@ -531,9 +554,15 @@ function DiscussionCommentsSection({
     setCommentText('')
   }
 
-  const handleDeleteComment = (commentId: string) => {
-    if (confirm('Are you sure you want to delete this comment?')) {
-      deleteComment({ commentId, discussionId })
+  const handleDeleteCommentClick = (commentId: string) => {
+    setCommentToDelete(commentId)
+    setShowDeleteCommentDialog(true)
+  }
+
+  const handleConfirmDeleteComment = () => {
+    if (commentToDelete) {
+      deleteComment({ commentId: commentToDelete, discussionId })
+      setCommentToDelete(null)
     }
   }
 
@@ -607,7 +636,7 @@ function DiscussionCommentsSection({
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6"
-                        onClick={() => handleDeleteComment(comment.id)}
+                        onClick={() => handleDeleteCommentClick(comment.id)}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -627,6 +656,18 @@ function DiscussionCommentsSection({
           No comments yet. Be the first to comment!
         </p>
       )}
+
+      {/* Delete Comment Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteCommentDialog}
+        onOpenChange={setShowDeleteCommentDialog}
+        onConfirm={handleConfirmDeleteComment}
+        title="Delete Comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }

@@ -61,7 +61,27 @@ export interface FeedActivity {
   user_liked?: boolean
 }
 
-export type FeedItem = (Post & { item_type: 'post' }) | (FeedActivity & { item_type: 'activity' })
+export interface GroupDiscussion {
+  id: string
+  group_id: string
+  user_id: string
+  content: string
+  image_url?: string | null
+  is_pinned: boolean
+  created_at: string
+  updated_at: string
+  user?: {
+    id: string
+    display_name: string
+    photo_url: string
+  }
+  group_name?: string
+  reactions_count?: number
+  comments_count?: number
+  user_reaction?: string | null
+}
+
+export type FeedItem = (Post & { item_type: 'post' }) | (FeedActivity & { item_type: 'activity' }) | (GroupDiscussion & { item_type: 'group_discussion' })
 
 export interface Comment {
   id: string
@@ -148,7 +168,11 @@ function groupActivities(activities: FeedActivity[]): FeedActivity[] {
 
 // Calculate engagement score based on likes and comments
 function calculateEngagementScore(item: FeedItem): number {
-  const likesCount = item.item_type === 'post' ? (item.reactions_count || 0) : (item.likes_count || 0)
+  const likesCount = item.item_type === 'post'
+    ? (item.reactions_count || 0)
+    : item.item_type === 'group_discussion'
+    ? (item.reactions_count || 0)
+    : (item.likes_count || 0)
   const commentsCount = item.comments_count || 0
 
   // Comments are worth more than likes (deeper engagement)
@@ -162,17 +186,21 @@ function calculateEngagementScore(item: FeedItem): number {
   return baseScore + viralBonus
 }
 
-// Calculate recency bonus (favor trending over brand new)
+// Calculate recency bonus (favor very fresh content)
 function calculateRecencyBonus(createdAt: string): number {
   const now = new Date().getTime()
   const itemTime = new Date(createdAt).getTime()
   const hoursAgo = (now - itemTime) / (1000 * 60 * 60)
+  const minutesAgo = (now - itemTime) / (1000 * 60)
 
-  // Favor "trending" content (1-3 days with engagement) over brand new
-  if (hoursAgo < 6) return 8       // Last 6 hours - very fresh
-  if (hoursAgo < 24) return 12     // Last day - trending sweet spot
-  if (hoursAgo < 72) return 10     // Last 3 days - still trending
-  if (hoursAgo < 168) return 5     // Last week - recent
+  // Heavily favor brand new content to ensure fresh posts appear at top
+  if (minutesAgo < 5) return 50     // Last 5 minutes - super fresh
+  if (minutesAgo < 30) return 35    // Last 30 minutes - very fresh
+  if (hoursAgo < 1) return 25       // Last hour - fresh
+  if (hoursAgo < 6) return 15       // Last 6 hours - recent
+  if (hoursAgo < 24) return 12      // Last day - trending
+  if (hoursAgo < 72) return 8       // Last 3 days - still relevant
+  if (hoursAgo < 168) return 4      // Last week - older
   return 0
 }
 
@@ -181,6 +209,11 @@ function getImportanceScore(item: FeedItem): number {
   if (item.item_type === 'post') {
     // Posts with images are more engaging
     return 7 + ((item as Post).image_url ? 5 : 0)
+  }
+
+  if (item.item_type === 'group_discussion') {
+    // Group discussions with images are more engaging
+    return 8 + ((item as GroupDiscussion).image_url ? 5 : 0)
   }
 
   return ACTIVITY_IMPORTANCE[item.activity_type] || 0
@@ -442,6 +475,30 @@ export function usePosts(filter: FeedFilter = 'for_you') {
       const { data: activitiesData, error: activitiesError } = await activitiesQuery
       if (activitiesError && activitiesError.code !== 'PGRST116') throw activitiesError
 
+      // Fetch group discussions from groups the user is a member of (only for 'for_you' filter)
+      let groupDiscussionsData: any[] = []
+      if (filter === 'for_you') {
+        // Get groups the user is a member of
+        const { data: memberGroups } = await supabase
+          .from('user_group_memberships')
+          .select('group_id')
+          .eq('user_id', user!.id)
+
+        const groupIds = memberGroups?.map(m => m.group_id) || []
+
+        if (groupIds.length > 0) {
+          const { data: discussions, error: discussionsError } = await supabase
+            .from('group_discussions')
+            .select('*')
+            .in('group_id', groupIds)
+            .order('created_at', { ascending: false })
+            .range(from, to)
+
+          if (discussionsError && discussionsError.code !== 'PGRST116') throw discussionsError
+          groupDiscussionsData = discussions || []
+        }
+      }
+
       // Fetch user details, comments count, and reactions for each post
       const postsWithDetails = await Promise.all(
         (postsData || []).map(async (post) => {
@@ -586,11 +643,53 @@ export function usePosts(filter: FeedFilter = 'for_you') {
         })
       )
 
+      // Enrich group discussions with user details and engagement data
+      const discussionsWithDetails = await Promise.all(
+        groupDiscussionsData.map(async (discussion) => {
+          const [userData, reactionsData, commentsData, userReactionData, groupData] = await Promise.all([
+            supabase
+              .from('profiles')
+              .select('id, display_name, photo_url')
+              .eq('id', discussion.user_id)
+              .maybeSingle(),
+            supabase
+              .from('discussion_reactions')
+              .select('id', { count: 'exact', head: true })
+              .eq('discussion_id', discussion.id),
+            supabase
+              .from('discussion_comments')
+              .select('id', { count: 'exact', head: true })
+              .eq('discussion_id', discussion.id),
+            supabase
+              .from('discussion_reactions')
+              .select('reaction_type')
+              .eq('discussion_id', discussion.id)
+              .eq('user_id', user!.id)
+              .maybeSingle(),
+            supabase
+              .from('public_groups')
+              .select('name')
+              .eq('id', discussion.group_id)
+              .maybeSingle()
+          ])
+
+          return {
+            ...discussion,
+            item_type: 'group_discussion' as const,
+            user: userData.data,
+            reactions_count: reactionsData.count || 0,
+            comments_count: commentsData.count || 0,
+            user_reaction: userReactionData.data?.reaction_type || null,
+            group_name: groupData.data?.name || 'Unknown Group'
+          }
+        })
+      )
+
       // 1. Group similar activities
       const groupedActivities = groupActivities(activitiesWithDetails)
 
-      // 2. Merge posts and grouped activities
-      const allItems = [...postsWithDetails, ...groupedActivities]
+      // 2. Merge posts, grouped activities, and group discussions
+      const allItems = [...postsWithDetails, ...groupedActivities, ...discussionsWithDetails]
 
       // 3. Calculate combined score for each item and sort
       const scoredAndSorted = allItems

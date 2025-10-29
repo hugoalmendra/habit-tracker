@@ -350,6 +350,84 @@ export default function Feed() {
                   >
                     {item.item_type === 'activity' ? (
                       <ActivityCard activity={item} showAsYou={filter === 'my_activity'} />
+                    ) : item.item_type === 'group_discussion' ? (
+                      <Card className="p-6">
+                        {/* Group Discussion Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="shrink-0">
+                              <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                                <AvatarImage src={item.user?.photo_url || undefined} />
+                                <AvatarFallback>
+                                  {item.user?.display_name?.[0]?.toUpperCase() || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                            </Link>
+                            <div>
+                              <Link to={item.user_id === user?.id ? '/profile' : `/profile/${item.user_id}`} className="hover:underline">
+                                <p className="font-semibold">
+                                  {filter === 'my_activity' && item.user_id === user?.id ? 'You' : item.user?.display_name}
+                                </p>
+                              </Link>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>Posted in</span>
+                                <Link to={`/groups/${item.group_id}`} className="hover:underline font-medium text-primary">
+                                  {item.group_name}
+                                </Link>
+                                <span>•</span>
+                                <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {item.user_id === user?.id && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteClick(item.id)}
+                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Discussion Content */}
+                        <p className="mb-4 whitespace-pre-wrap">{item.content}</p>
+
+                        {/* Discussion Image */}
+                        {item.image_url && (
+                          <div className="mb-4 rounded-xl overflow-hidden border border-border/60">
+                            <img
+                              src={item.image_url}
+                              alt="Discussion image"
+                              className="w-full h-auto object-contain"
+                            />
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-4 pt-4 border-t border-border">
+                          <div className="flex items-center gap-1">
+                            <ThumbsUp className={`h-4 w-4 ${item.user_reaction ? 'text-primary' : 'text-muted-foreground'}`} />
+                            {item.reactions_count > 0 && (
+                              <span className="text-sm text-muted-foreground px-1">
+                                {item.reactions_count}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">
+                              {item.comments_count || 0}
+                            </span>
+                          </div>
+                          <Link to={`/groups/${item.group_id}`} className="ml-auto">
+                            <Button variant="outline" size="sm">
+                              View in Group
+                            </Button>
+                          </Link>
+                        </div>
+                      </Card>
                     ) : (
                       <Card className="p-6">
                         {/* Post Header */}
