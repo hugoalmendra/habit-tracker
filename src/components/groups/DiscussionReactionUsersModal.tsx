@@ -10,6 +10,7 @@ interface DiscussionReactionUsersModalProps {
   discussionId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  type?: 'group' | 'challenge' // Add type to support both
 }
 
 interface ReactionUser {
@@ -24,14 +25,16 @@ interface ReactionUser {
   }
 }
 
-export default function DiscussionReactionUsersModal({ discussionId, open, onOpenChange }: DiscussionReactionUsersModalProps) {
+export default function DiscussionReactionUsersModal({ discussionId, open, onOpenChange, type = 'group' }: DiscussionReactionUsersModalProps) {
+  const tableName = type === 'challenge' ? 'challenge_discussion_reactions' : 'discussion_reactions'
+
   const { data: reactions, isLoading } = useQuery({
-    queryKey: ['discussion-reactions', discussionId],
+    queryKey: [type === 'challenge' ? 'challenge-discussion-reactions' : 'discussion-reactions', discussionId],
     queryFn: async () => {
       if (!discussionId) return []
 
       const { data: reactionsData, error } = await supabase
-        .from('discussion_reactions' as any)
+        .from(tableName as any)
         .select('*')
         .eq('discussion_id', discussionId)
         .order('created_at', { ascending: false })

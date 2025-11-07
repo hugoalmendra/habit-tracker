@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import InviteParticipantsModal from '@/components/challenges/InviteParticipantsModal'
 import EditChallengeModal from '@/components/challenges/EditChallengeModal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import ChallengeDiscussions from '@/components/challenges/ChallengeDiscussions'
 import { getIconComponent } from '@/components/ui/IconPicker'
 import { format } from 'date-fns'
 import {
@@ -124,7 +125,7 @@ export default function ChallengeDetail() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         {/* Challenge Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -292,73 +293,89 @@ export default function ChallengeDetail() {
           </div>
         </motion.div>
 
-        {/* Leaderboard */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card rounded-2xl p-6 shadow-apple border border-border/60"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Trophy className="h-5 w-5 text-yellow-500" />
-            <h2 className="text-lg font-semibold">Leaderboard</h2>
-          </div>
+        {/* Split-screen Layout: Discussions + Leaderboard */}
+        {(isParticipant || isCreator) && (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+            {/* Left: Discussions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <ChallengeDiscussions challengeId={id!} isCreator={isCreator} />
+            </motion.div>
 
-          {participants && participants.length > 0 ? (
-            <div className="space-y-2">
-              {participants.map((participant, index) => (
-                <div
-                  key={participant.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                    participant.user_id === user?.id
-                      ? 'bg-primary/10 ring-2 ring-primary/20'
-                      : 'bg-secondary/50'
-                  }`}
-                >
-                  <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-sm ${
-                    index === 0 ? 'bg-yellow-500 text-white' :
-                    index === 1 ? 'bg-gray-400 text-white' :
-                    index === 2 ? 'bg-orange-700 text-white' :
-                    'bg-secondary text-muted-foreground'
-                  }`}>
-                    {index + 1}
-                  </div>
-                  <Link
-                    to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
-                    className="shrink-0"
-                  >
-                    <img
-                      src={participant.user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`}
-                      alt={participant.user?.display_name || 'User'}
-                      className="h-10 w-10 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-                    />
-                  </Link>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
-                      className="hover:underline"
-                    >
-                      <p className="font-medium text-sm truncate">
-                        {participant.user?.display_name || 'Unknown User'}
-                        {participant.user_id === user?.id && ' (You)'}
-                      </p>
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {participant.current_progress || 0} / {participant.total_habits || totalHabits} habits completed today
-                    </p>
-                  </div>
-                  {participant.badge_earned && (
-                    <Award className="h-5 w-5 text-yellow-500 flex-shrink-0" />
-                  )}
+            {/* Right: Leaderboard (sticky on desktop) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:sticky lg:top-24 lg:h-fit"
+            >
+              <div className="bg-card rounded-2xl p-6 shadow-apple border border-border/60">
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <h2 className="text-lg font-semibold">Leaderboard</h2>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              No participants yet
-            </div>
-          )}
-        </motion.div>
+
+                {participants && participants.length > 0 ? (
+                  <div className="space-y-2">
+                    {participants.map((participant, index) => (
+                      <div
+                        key={participant.id}
+                        className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                          participant.user_id === user?.id
+                            ? 'bg-primary/10 ring-2 ring-primary/20'
+                            : 'bg-secondary/50'
+                        }`}
+                      >
+                        <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-sm ${
+                          index === 0 ? 'bg-yellow-500 text-white' :
+                          index === 1 ? 'bg-gray-400 text-white' :
+                          index === 2 ? 'bg-orange-700 text-white' :
+                          'bg-secondary text-muted-foreground'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <Link
+                          to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
+                          className="shrink-0"
+                        >
+                          <img
+                            src={participant.user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`}
+                            alt={participant.user?.display_name || 'User'}
+                            className="h-10 w-10 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                          />
+                        </Link>
+                        <div className="flex-1 min-w-0">
+                          <Link
+                            to={participant.user_id === user?.id ? '/profile' : `/profile/${participant.user_id}`}
+                            className="hover:underline"
+                          >
+                            <p className="font-medium text-sm truncate">
+                              {participant.user?.display_name || 'Unknown User'}
+                              {participant.user_id === user?.id && ' (You)'}
+                            </p>
+                          </Link>
+                          <p className="text-xs text-muted-foreground">
+                            {participant.current_progress || 0} / {participant.total_habits || totalHabits} habits completed today
+                          </p>
+                        </div>
+                        {participant.badge_earned && (
+                          <Award className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No participants yet
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
 
       {/* Invite Modal */}
