@@ -54,7 +54,8 @@
       "Bash(node scripts/check_rls_policies.js:*)",
       "Bash(node scripts/fix_member_visibility.js:*)",
       "Bash(node /Users/hugoalmendra/development/cursorplayground/habit-tracker/scripts/fix_member_visibility.js:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
