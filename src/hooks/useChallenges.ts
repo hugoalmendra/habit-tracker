@@ -509,6 +509,15 @@ export function useChallengeParticipants(challengeId: string) {
   const { data: participants, isLoading } = useQuery({
     queryKey: ['challenge-participants', challengeId],
     queryFn: async () => {
+      // Get challenge details first to know the start date
+      const { data: challenge } = await supabase
+        .from('challenges')
+        .select('start_date')
+        .eq('id', challengeId)
+        .maybeSingle()
+
+      const challengeStartDate = challenge?.start_date
+
       const { data, error } = await supabase
         .from('challenge_participants')
         .select('*')
@@ -546,23 +555,40 @@ export function useChallengeParticipants(challengeId: string) {
           const challengeHabitIds = userChallengeHabitsData?.map(ch => ch.habit_id) || []
 
           // Count completions today for this user's challenge habits
-          const { count } = await supabase
+          const { count: todayCount } = await supabase
             .from('habit_completions')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', participant.user_id)
             .in('habit_id', challengeHabitIds)
             .eq('completed_date', new Date().toISOString().split('T')[0])
 
+          // Count total completions since challenge start
+          const { count: totalCount } = await supabase
+            .from('habit_completions')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', participant.user_id)
+            .in('habit_id', challengeHabitIds)
+            .gte('completed_date', challengeStartDate || new Date().toISOString().split('T')[0])
+
           return {
             ...participant,
             user: userData,
-            current_progress: count || 0,
+            current_progress: todayCount || 0,
+            total_progress: totalCount || 0,
             total_habits: challengeHabitIds.length
           }
         })
       )
 
-      return participantsWithUsers as (ChallengeParticipant & { current_progress: number; total_habits: number })[]
+      // Sort by total progress (descending), then by today's progress
+      participantsWithUsers.sort((a, b) => {
+        if (b.total_progress !== a.total_progress) {
+          return b.total_progress - a.total_progress
+        }
+        return b.current_progress - a.current_progress
+      })
+
+      return participantsWithUsers as (ChallengeParticipant & { current_progress: number; total_progress: number; total_habits: number })[]
     },
     enabled: !!challengeId,
   })

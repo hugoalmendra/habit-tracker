@@ -358,7 +358,10 @@ export default function ChallengeDetail() {
                             </p>
                           </Link>
                           <p className="text-xs text-muted-foreground">
-                            {participant.current_progress || 0} / {participant.total_habits || totalHabits} habits completed today
+                            {participant.total_progress || 0} total completions
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {participant.current_progress || 0} / {participant.total_habits || totalHabits} today
                           </p>
                         </div>
                         {participant.badge_earned && (
