@@ -14,7 +14,7 @@ export default function Navigation() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/logo-light.png"
+              src="/logo-white.png"
               alt="The Way of Kaizen"
               className="h-7 w-auto"
             />
