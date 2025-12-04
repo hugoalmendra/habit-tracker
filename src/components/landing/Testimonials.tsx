@@ -33,7 +33,7 @@ const stats = [
 
 export default function Testimonials() {
   return (
-    <section className="py-32 bg-stone-50 relative">
+    <section className="py-32 bg-zinc-900 relative">
       {/* Zen paper texture */}
       <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
@@ -56,7 +56,7 @@ export default function Testimonials() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-stone-800"
+                className="text-zinc-200"
                 strokeLinecap="round"
                 strokeDasharray="188"
                 strokeDashoffset="12"
@@ -69,7 +69,7 @@ export default function Testimonials() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-light text-stone-900 mb-6 tracking-wide"
+            className="text-3xl md:text-4xl font-light text-zinc-100 mb-6 tracking-wide"
           >
             Voices from the Path
           </motion.h2>
@@ -78,7 +78,7 @@ export default function Testimonials() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-lg text-stone-600 font-light leading-relaxed"
+            className="text-lg text-zinc-400 font-light leading-relaxed"
           >
             Stories from those walking the way
           </motion.p>
@@ -101,10 +101,10 @@ export default function Testimonials() {
               transition={{ duration: 1, delay: index * 0.15 }}
               className="text-center"
             >
-              <div className="text-4xl md:text-5xl font-light text-stone-900 mb-3">
+              <div className="text-4xl md:text-5xl font-light text-zinc-100 mb-3">
                 {stat.number}
               </div>
-              <div className="text-stone-500 text-sm tracking-wider uppercase font-light">{stat.label}</div>
+              <div className="text-zinc-500 text-sm tracking-wider uppercase font-light">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
@@ -119,26 +119,26 @@ export default function Testimonials() {
               viewport={{ once: true }}
               transition={{ duration: 1, delay: index * 0.15 }}
             >
-              <Card className="h-full border border-stone-200 hover:border-stone-300 hover:shadow-lg transition-all duration-500 bg-white rounded-none">
+              <Card className="h-full border border-zinc-800 hover:border-zinc-700 hover:shadow-lg transition-all duration-500 bg-zinc-950 rounded-none">
                 <CardContent className="p-10">
                   {/* Quote */}
-                  <p className="text-stone-600 leading-loose mb-8 font-light">
+                  <p className="text-zinc-400 leading-loose mb-8 font-light">
                     "{testimonial.quote}"
                   </p>
 
                   {/* Divider */}
-                  <div className="w-12 h-px bg-stone-300 mb-8" />
+                  <div className="w-12 h-px bg-zinc-700 mb-8" />
 
                   {/* Author */}
                   <div className="flex items-center gap-4">
                     <img
                       src={testimonial.image}
                       alt={testimonial.name}
-                      className="w-12 h-12 object-cover border border-stone-300"
+                      className="w-12 h-12 object-cover border border-zinc-700"
                     />
                     <div>
-                      <div className="font-light text-stone-900">{testimonial.name}</div>
-                      <div className="text-xs text-stone-500 uppercase tracking-wider font-light">{testimonial.role}</div>
+                      <div className="font-light text-zinc-100">{testimonial.name}</div>
+                      <div className="text-xs text-zinc-500 uppercase tracking-wider font-light">{testimonial.role}</div>
                     </div>
                   </div>
                 </CardContent>

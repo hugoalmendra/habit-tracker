@@ -9,7 +9,7 @@ import Footer from '@/components/landing/Footer'
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-kaizen-bg">
+    <div className="min-h-screen bg-zinc-950">
       <Navigation />
       <Hero />
       <Features />

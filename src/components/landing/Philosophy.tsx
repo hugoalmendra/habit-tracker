@@ -2,13 +2,13 @@ import { motion } from 'framer-motion'
 
 export default function Philosophy() {
   return (
-    <section id="philosophy" className="py-32 bg-stone-900 relative overflow-hidden">
+    <section id="philosophy" className="py-32 bg-zinc-100 relative overflow-hidden">
       {/* Zen paper texture */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
       {/* Large background Kanji - very subtle */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[24rem] font-light text-stone-100">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[24rem] font-light text-zinc-900">
           改善
         </div>
       </div>
@@ -23,11 +23,11 @@ export default function Philosophy() {
             transition={{ duration: 1.2 }}
             className="mb-16"
           >
-            <div className="text-7xl md:text-8xl font-light text-stone-100 mb-6">
+            <div className="text-7xl md:text-8xl font-light text-zinc-900 mb-6">
               改善
             </div>
-            <p className="text-stone-400 text-base tracking-[0.5em] uppercase font-light">Kaizen</p>
-            <p className="text-stone-500 text-sm mt-2 font-light">Continuous Improvement</p>
+            <p className="text-zinc-600 text-base tracking-[0.5em] uppercase font-light">Kaizen</p>
+            <p className="text-zinc-500 text-sm mt-2 font-light">Continuous Improvement</p>
           </motion.div>
 
           {/* Quote - Zen style */}
@@ -36,7 +36,7 @@ export default function Philosophy() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-xl md:text-2xl font-light text-stone-300 mb-12 leading-loose max-w-3xl mx-auto"
+            className="text-xl md:text-2xl font-light text-zinc-700 mb-12 leading-loose max-w-3xl mx-auto"
           >
             "When you improve a little each day, eventually big things occur. Not tomorrow, not the next day, but eventually a big gain is made."
           </motion.blockquote>
@@ -47,7 +47,7 @@ export default function Philosophy() {
             whileInView={{ opacity: 1, scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="h-px w-24 bg-stone-700 mx-auto mb-12"
+            className="h-px w-24 bg-zinc-300 mx-auto mb-12"
           />
 
           {/* Explanation - Zen spacing */}
@@ -56,7 +56,7 @@ export default function Philosophy() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="text-stone-400 text-base max-w-2xl mx-auto space-y-8 font-light leading-loose"
+            className="text-zinc-600 text-base max-w-2xl mx-auto space-y-8 font-light leading-loose"
           >
             <p>
               Kaizen is the ancient Japanese philosophy of continuous improvement through small, incremental changes.

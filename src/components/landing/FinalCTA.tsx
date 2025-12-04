@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 
 export default function FinalCTA() {
   return (
-    <section className="py-32 bg-white relative overflow-hidden">
+    <section className="py-32 bg-zinc-950 relative overflow-hidden">
       {/* Zen paper texture */}
       <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
@@ -18,7 +18,7 @@ export default function FinalCTA() {
             fill="none"
             stroke="currentColor"
             strokeWidth="0.5"
-            className="text-stone-900"
+            className="text-zinc-100"
             strokeLinecap="round"
             strokeDasharray="565"
             strokeDashoffset="30"
@@ -44,7 +44,7 @@ export default function FinalCTA() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-stone-800"
+                className="text-zinc-200"
                 strokeLinecap="round"
                 strokeDasharray="188"
                 strokeDashoffset="12"
@@ -58,7 +58,7 @@ export default function FinalCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.1 }}
-            className="text-3xl md:text-5xl font-light text-stone-900 mb-8 tracking-wide leading-tight"
+            className="text-3xl md:text-5xl font-light text-zinc-100 mb-8 tracking-wide leading-tight"
           >
             Begin Your Practice
           </motion.h2>
@@ -69,7 +69,7 @@ export default function FinalCTA() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-5xl font-light text-stone-400/30 mb-12 select-none"
+            className="text-5xl font-light text-zinc-600/30 mb-12 select-none"
           >
             始
           </motion.div>
@@ -80,7 +80,7 @@ export default function FinalCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="text-lg text-stone-600 mb-16 max-w-xl mx-auto font-light leading-loose"
+            className="text-lg text-zinc-400 mb-16 max-w-xl mx-auto font-light leading-loose"
           >
             The best time to plant a tree was twenty years ago.
             <br />
@@ -98,7 +98,7 @@ export default function FinalCTA() {
             <Button
               asChild
               size="lg"
-              className="bg-stone-900 text-stone-50 hover:bg-stone-800 h-12 px-16 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-zinc-100 text-zinc-900 hover:bg-white h-12 px-16 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Link to="/signup">
                 Begin
@@ -109,7 +109,7 @@ export default function FinalCTA() {
               asChild
               size="lg"
               variant="ghost"
-              className="text-stone-600 hover:text-stone-900 h-12 px-8 text-sm font-light tracking-wider uppercase transition-all duration-300"
+              className="text-zinc-400 hover:text-zinc-100 h-12 px-8 text-sm font-light tracking-wider uppercase transition-all duration-300"
             >
               <Link to="/login">Sign In</Link>
             </Button>
@@ -121,7 +121,7 @@ export default function FinalCTA() {
             whileInView={{ opacity: 1, scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="w-16 h-px bg-stone-300 mx-auto mb-12"
+            className="w-16 h-px bg-zinc-700 mx-auto mb-12"
           />
 
           {/* Trust Badge */}

@@ -30,7 +30,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-32 bg-white relative">
+    <section id="how-it-works" className="py-32 bg-zinc-950 relative">
       {/* Zen paper texture */}
       <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
@@ -53,7 +53,7 @@ export default function HowItWorks() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-stone-800"
+                className="text-zinc-200"
                 strokeLinecap="round"
                 strokeDasharray="188"
                 strokeDashoffset="12"
@@ -66,7 +66,7 @@ export default function HowItWorks() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-light text-stone-900 mb-6 tracking-wide"
+            className="text-3xl md:text-4xl font-light text-zinc-100 mb-6 tracking-wide"
           >
             The Four Steps
           </motion.h2>
@@ -75,7 +75,7 @@ export default function HowItWorks() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-lg text-stone-600 font-light leading-relaxed"
+            className="text-lg text-zinc-400 font-light leading-relaxed"
           >
             The path unfolds through patient, deliberate practice
           </motion.p>
@@ -94,14 +94,14 @@ export default function HowItWorks() {
             >
               {/* Connector Line - Zen style */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute left-8 top-20 w-px h-24 bg-stone-200" />
+                <div className="hidden md:block absolute left-8 top-20 w-px h-24 bg-zinc-800" />
               )}
 
               <div className="flex items-start gap-8 mb-16">
                 {/* Step Number - Minimalist */}
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 border border-stone-300 flex items-center justify-center">
-                    <span className="text-2xl font-light text-stone-400">
+                  <div className="w-16 h-16 border border-zinc-700 flex items-center justify-center">
+                    <span className="text-2xl font-light text-zinc-400">
                       {step.number}
                     </span>
                   </div>
@@ -110,12 +110,12 @@ export default function HowItWorks() {
                 {/* Content */}
                 <div className="flex-1 pt-2">
                   <div className="flex items-start gap-4 mb-4">
-                    <step.icon className="h-6 w-6 text-stone-900 flex-shrink-0 mt-1" strokeWidth={1} />
-                    <h3 className="text-2xl font-light text-stone-900 tracking-wide">
+                    <step.icon className="h-6 w-6 text-zinc-100 flex-shrink-0 mt-1" strokeWidth={1} />
+                    <h3 className="text-2xl font-light text-zinc-100 tracking-wide">
                       {step.title}
                     </h3>
                   </div>
-                  <p className="text-stone-600 leading-loose font-light pl-10">
+                  <p className="text-zinc-400 leading-loose font-light pl-10">
                     {step.description}
                   </p>
                 </div>

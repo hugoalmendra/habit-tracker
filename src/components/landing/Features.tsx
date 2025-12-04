@@ -31,7 +31,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-32 bg-stone-50 relative">
+    <section id="features" className="py-32 bg-zinc-900 relative">
       {/* Zen paper texture */}
       <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
@@ -54,7 +54,7 @@ export default function Features() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-stone-800"
+                className="text-zinc-200"
                 strokeLinecap="round"
                 strokeDasharray="188"
                 strokeDashoffset="12"
@@ -67,7 +67,7 @@ export default function Features() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-light text-stone-900 mb-6 tracking-wide"
+            className="text-3xl md:text-4xl font-light text-zinc-100 mb-6 tracking-wide"
           >
             Three Pillars of Practice
           </motion.h2>
@@ -76,7 +76,7 @@ export default function Features() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-lg text-stone-600 font-light leading-relaxed"
+            className="text-lg text-zinc-400 font-light leading-relaxed"
           >
             Like a master perfecting their craft, build your practice with intention and clarity
           </motion.p>
@@ -92,26 +92,26 @@ export default function Features() {
               viewport={{ once: true }}
               transition={{ duration: 1, delay: index * 0.15 }}
             >
-              <Card className="h-full border border-stone-200 hover:border-stone-300 hover:shadow-lg transition-all duration-500 group bg-white rounded-none">
+              <Card className="h-full border border-zinc-800 hover:border-zinc-700 hover:shadow-lg transition-all duration-500 group bg-zinc-950 rounded-none">
                 <CardContent className="p-10">
                   {/* Icon - Minimalist */}
-                  <div className="mb-8 inline-flex p-3 border border-stone-300 text-stone-900 group-hover:border-stone-400 transition-all duration-300">
+                  <div className="mb-8 inline-flex p-3 border border-zinc-700 text-zinc-100 group-hover:border-zinc-600 transition-all duration-300">
                     <feature.icon className="h-6 w-6" strokeWidth={1} />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-light text-stone-900 mb-4 tracking-wide">
+                  <h3 className="text-xl font-light text-zinc-100 mb-4 tracking-wide">
                     {feature.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-stone-600 leading-loose mb-8 font-light text-sm">
+                  <p className="text-zinc-400 leading-loose mb-8 font-light text-sm">
                     {feature.description}
                   </p>
 
                   {/* Visual Placeholder */}
                   {feature.hasImage ? (
-                    <div className="overflow-hidden border border-stone-200">
+                    <div className="overflow-hidden border border-zinc-800">
                       <img
                         src={`/feature${index + 1}-light.jpg`}
                         alt={`${feature.title} preview`}
@@ -119,9 +119,9 @@ export default function Features() {
                       />
                     </div>
                   ) : (
-                    <div className="border border-stone-200 p-8 text-center">
+                    <div className="border border-zinc-800 p-8 text-center">
                       <div className="text-4xl mb-2 opacity-40">{feature.visual}</div>
-                      <p className="text-xs text-stone-500 font-light tracking-wider uppercase">Preview</p>
+                      <p className="text-xs text-zinc-500 font-light tracking-wider uppercase">Preview</p>
                     </div>
                   )}
                 </CardContent>

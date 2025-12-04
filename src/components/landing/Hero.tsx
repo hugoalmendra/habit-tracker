@@ -4,18 +4,18 @@ import { motion } from 'framer-motion'
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-zinc-950">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src="/kaizen-landing/background-hero-light.png"
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-10"
         />
       </div>
 
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-white/40 z-[1]" />
+      <div className="absolute inset-0 bg-zinc-950/60 z-[1]" />
 
       {/* Subtle Enso circles in background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
@@ -34,7 +34,7 @@ export default function Hero() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1"
-              className="text-stone-900"
+              className="text-zinc-100"
               strokeLinecap="round"
               strokeDasharray="502"
               strokeDashoffset="25"
@@ -57,7 +57,7 @@ export default function Hero() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1"
-              className="text-stone-900"
+              className="text-zinc-100"
               strokeLinecap="round"
               strokeDasharray="502"
               strokeDashoffset="30"
@@ -72,9 +72,9 @@ export default function Hero() {
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         >
           <div className="flex gap-3">
-            <div className="w-1 h-32 bg-stone-900 rounded-full" />
-            <div className="w-1 h-24 bg-stone-900 rounded-full" />
-            <div className="w-1 h-28 bg-stone-900 rounded-full" />
+            <div className="w-1 h-32 bg-zinc-100 rounded-full" />
+            <div className="w-1 h-24 bg-zinc-100 rounded-full" />
+            <div className="w-1 h-28 bg-zinc-100 rounded-full" />
           </div>
         </motion.div>
       </div>
@@ -96,7 +96,7 @@ export default function Hero() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-stone-800"
+                className="text-zinc-200"
                 strokeLinecap="round"
                 strokeDasharray="220"
                 strokeDashoffset="15"
@@ -111,10 +111,10 @@ export default function Hero() {
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
             className="text-5xl md:text-7xl lg:text-8xl font-light tracking-wide mb-8 leading-tight"
           >
-            <span className="block text-stone-900 mb-2">
+            <span className="block text-zinc-100 mb-2">
               The Way
             </span>
-            <span className="block text-stone-900">
+            <span className="block text-zinc-100">
               of Kaizen
             </span>
           </motion.h1>
@@ -124,7 +124,7 @@ export default function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="text-6xl font-light text-stone-400/30 mb-8 select-none"
+            className="text-6xl font-light text-zinc-600/30 mb-8 select-none"
           >
             道
           </motion.div>
@@ -134,7 +134,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-            className="text-lg md:text-xl text-stone-600 mb-16 max-w-2xl mx-auto leading-relaxed font-light tracking-wide"
+            className="text-lg md:text-xl text-zinc-400 mb-16 max-w-2xl mx-auto leading-relaxed font-light tracking-wide"
           >
             Transform through small, deliberate steps.
             <br className="hidden md:block" />
@@ -151,7 +151,7 @@ export default function Hero() {
             <Button
               asChild
               size="lg"
-              className="bg-stone-900 text-stone-50 hover:bg-stone-800 h-12 px-12 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-zinc-100 text-zinc-900 hover:bg-white h-12 px-12 text-base font-light tracking-widest uppercase border-none rounded-none transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Link to="/signup">
                 Begin
@@ -167,7 +167,7 @@ export default function Hero() {
             transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
             className="mt-24 relative"
           >
-            <div className="relative overflow-hidden border border-stone-200 shadow-2xl">
+            <div className="relative overflow-hidden border border-zinc-800 shadow-2xl">
               <img
                 src="/light-hero.jpg"
                 alt="The Way of Kaizen Dashboard"
@@ -175,7 +175,7 @@ export default function Hero() {
               />
             </div>
             {/* Subtle shadow effect */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-stone-400/10 to-transparent blur-2xl transform translate-y-12" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-600/10 to-transparent blur-2xl transform translate-y-12" />
           </motion.div>
         </div>
       </div>
