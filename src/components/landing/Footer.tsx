@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="col-span-1 sm:col-span-2 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <img
-                src="/logo-white.png"
+                src="/logo-dark.png"
                 alt="The Way of Kaizen"
                 className="h-7 w-auto"
               />
