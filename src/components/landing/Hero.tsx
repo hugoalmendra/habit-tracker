@@ -169,7 +169,7 @@ export default function Hero() {
           >
             <div className="relative overflow-hidden border border-zinc-800 shadow-2xl">
               <img
-                src="/light-hero.jpg"
+                src="/dark-hero.jpg"
                 alt="The Way of Kaizen Dashboard"
                 className="w-full h-auto opacity-90"
               />

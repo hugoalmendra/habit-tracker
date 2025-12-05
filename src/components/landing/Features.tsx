@@ -113,7 +113,7 @@ export default function Features() {
                   {feature.hasImage ? (
                     <div className="overflow-hidden border border-zinc-800">
                       <img
-                        src={`/feature${index + 1}-light.jpg`}
+                        src={`/feature${index + 1}-dark.jpg`}
                         alt={`${feature.title} preview`}
                         className="w-full h-auto opacity-80 hover:opacity-100 transition-opacity duration-500"
                       />
