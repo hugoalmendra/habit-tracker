@@ -378,6 +378,39 @@ export function useChallenges() {
 
   const leaveChallengeMutation = useMutation({
     mutationFn: async (challengeId: string) => {
+      // First, get the user's habits that are associated with this challenge
+      const { data: userHabits } = await supabase
+        .from('habits')
+        .select('id')
+        .eq('user_id', user!.id)
+
+      const userHabitIds = userHabits?.map(h => h.id) || []
+
+      if (userHabitIds.length > 0) {
+        // Find which of these habits are linked to this challenge
+        const { data: challengeHabitLinks } = await supabase
+          .from('challenge_habits')
+          .select('habit_id')
+          .eq('challenge_id', challengeId)
+          .in('habit_id', userHabitIds)
+
+        const habitIdsToDelete = challengeHabitLinks?.map(ch => ch.habit_id) || []
+
+        // Delete those habits (this will cascade delete the challenge_habits links)
+        if (habitIdsToDelete.length > 0) {
+          const { error: deleteHabitsError } = await supabase
+            .from('habits')
+            .delete()
+            .in('id', habitIdsToDelete)
+
+          if (deleteHabitsError) {
+            console.error('Error deleting challenge habits:', deleteHabitsError)
+            throw deleteHabitsError
+          }
+        }
+      }
+
+      // Then remove the user from challenge participants
       const { error } = await supabase
         .from('challenge_participants')
         .delete()
