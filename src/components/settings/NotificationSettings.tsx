@@ -168,7 +168,7 @@ export default function NotificationSettings() {
               onChange={(v) => handleToggle('push_enabled', v)}
             />
 
-            {preferences?.push_enabled && (
+            {(preferences?.push_enabled ?? true) && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -180,7 +180,7 @@ export default function NotificationSettings() {
                   checked={preferences?.push_habit_reminders ?? true}
                   onChange={(v) => handleToggle('push_habit_reminders', v)}
                 />
-                {preferences?.push_habit_reminders && (
+                {(preferences?.push_habit_reminders ?? true) && (
                   <div className="flex items-center gap-3 pl-4">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <input
