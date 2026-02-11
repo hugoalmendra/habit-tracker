@@ -8,6 +8,7 @@ import { Copy, Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/layout/Header'
+import NotificationSettings from '@/components/settings/NotificationSettings'
 
 export default function Settings() {
   const { user } = useAuth()
@@ -173,6 +174,9 @@ export default function Settings() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Push Notifications */}
+            <NotificationSettings />
 
             {/* Privacy Settings */}
             <Card className="border-border/40 shadow-apple-lg rounded-2xl">
