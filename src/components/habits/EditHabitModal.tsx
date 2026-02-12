@@ -4,7 +4,31 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useHabits } from '@/hooks/useHabits'
+import { format, addDays, addMonths } from 'date-fns'
 import type { Habit, FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
+
+type DurationOption = 'ongoing' | '1_week' | '2_weeks' | '1_month' | '3_months' | 'custom'
+
+const DURATION_OPTIONS: { value: DurationOption; label: string; desc: string }[] = [
+  { value: 'ongoing', label: 'Ongoing', desc: 'No end date' },
+  { value: '1_week', label: '1 Week', desc: 'Ends in 7 days' },
+  { value: '2_weeks', label: '2 Weeks', desc: 'Ends in 14 days' },
+  { value: '1_month', label: '1 Month', desc: 'Ends in ~30 days' },
+  { value: '3_months', label: '3 Months', desc: 'Ends in ~90 days' },
+  { value: 'custom', label: 'Custom', desc: 'Pick an end date' },
+]
+
+function calculateEndDate(duration: DurationOption, customDate: string): string | null {
+  const today = new Date()
+  switch (duration) {
+    case 'ongoing': return null
+    case '1_week': return format(addDays(today, 7), 'yyyy-MM-dd')
+    case '2_weeks': return format(addDays(today, 14), 'yyyy-MM-dd')
+    case '1_month': return format(addMonths(today, 1), 'yyyy-MM-dd')
+    case '3_months': return format(addMonths(today, 3), 'yyyy-MM-dd')
+    case 'custom': return customDate || null
+  }
+}
 
 interface EditHabitModalProps {
   open: boolean
@@ -33,6 +57,8 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
   const [weeklyTarget, setWeeklyTarget] = useState(3)
   const [weekResetDay, setWeekResetDay] = useState(0)
+  const [duration, setDuration] = useState<DurationOption>('ongoing')
+  const [customEndDate, setCustomEndDate] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { updateHabit } = useHabits()
 
@@ -70,6 +96,15 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
         setWeeklyTarget(3)
         setWeekResetDay(0)
       }
+
+      // Initialize duration from habit data
+      if (habit.end_date) {
+        setDuration('custom')
+        setCustomEndDate(habit.end_date)
+      } else {
+        setDuration('ongoing')
+        setCustomEndDate('')
+      }
     }
   }, [open, habit])
 
@@ -94,6 +129,7 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
         color,
         frequency_type: frequencyType,
         frequency_config: frequencyConfig,
+        end_date: calculateEndDate(duration, customEndDate),
       })
       onOpenChange(false)
     } catch (error) {
@@ -277,6 +313,42 @@ export default function EditHabitModal({ open, onOpenChange, habit }: EditHabitM
                     </div>
                   )}
                 </label>
+              </div>
+            </div>
+
+            {/* Duration / Timeline */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Duration</Label>
+              <div className="space-y-2">
+                {DURATION_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-secondary/50 transition-all cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="duration"
+                      checked={duration === opt.value}
+                      onChange={() => setDuration(opt.value)}
+                      className="h-4 w-4 text-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{opt.label}</div>
+                      <div className="text-xs text-muted-foreground">{opt.desc}</div>
+                    </div>
+                  </label>
+                ))}
+                {duration === 'custom' && (
+                  <div className="pl-7">
+                    <input
+                      type="date"
+                      value={customEndDate}
+                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                      className="h-9 px-3 rounded-lg border border-border/50 bg-background text-sm w-full focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

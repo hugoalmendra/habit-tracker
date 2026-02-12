@@ -1,7 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { format } from 'date-fns'
 import type { Habit, FrequencyType, FrequencyConfig, SpecificDaysConfig } from '@/lib/types'
+
+// Helper function to check if a habit is within its active timeline
+export function isHabitActive(habit: Habit, date: Date): boolean {
+  const dateStr = format(date, 'yyyy-MM-dd')
+
+  if (habit.start_date && dateStr < habit.start_date) {
+    return false
+  }
+
+  if (habit.end_date && dateStr > habit.end_date) {
+    return false
+  }
+
+  return true
+}
 
 // Helper function to check if a habit should be displayed on a specific date
 export function shouldDisplayHabit(habit: Habit, date: Date): boolean {
@@ -104,6 +120,8 @@ export function useHabits() {
       color?: string
       frequency_type?: FrequencyType
       frequency_config?: FrequencyConfig
+      start_date?: string
+      end_date?: string | null
     }) => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -118,6 +136,8 @@ export function useHabits() {
           color: input.color || '#3b82f6',
           frequency_type: input.frequency_type || 'daily',
           frequency_config: input.frequency_config as any,
+          start_date: input.start_date || format(new Date(), 'yyyy-MM-dd'),
+          end_date: input.end_date || null,
         })
         .select()
         .maybeSingle()
@@ -139,6 +159,7 @@ export function useHabits() {
       color?: string
       frequency_type?: FrequencyType
       frequency_config?: FrequencyConfig
+      end_date?: string | null
     }) => {
       const { id, ...updates } = input
       const { data, error} = await supabase

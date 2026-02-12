@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Check, GripVertical, Pencil, Trophy, Calendar, Target } from 'lucide-react'
+import { Trash2, Check, GripVertical, Pencil, Trophy, Calendar, Target, Clock } from 'lucide-react'
 import { useHabits, getWeekStart, getWeekEnd } from '@/hooks/useHabits'
+import { format } from 'date-fns'
 import { useCompletions, useWeeklyCompletions } from '@/hooks/useCompletions'
 import type { Habit, FrequencyType, SpecificDaysConfig, WeeklyTargetConfig } from '@/lib/types'
 import { useSortable } from '@dnd-kit/sortable'
@@ -165,6 +166,14 @@ export default function HabitCard({ habit, completed, selectedDate, index }: Hab
                   <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-muted text-muted-foreground flex items-center gap-1">
                     <frequencyBadge.icon className="h-3 w-3" />
                     {frequencyBadge.text}
+                  </span>
+                )}
+                {habit.end_date && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-md shrink-0 bg-muted text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {habit.end_date < format(new Date(), 'yyyy-MM-dd')
+                      ? 'Ended'
+                      : `Ends ${format(new Date(habit.end_date + 'T00:00:00'), 'MMM d')}`}
                   </span>
                 )}
                 {habit.challenge_id && habit.challenge_name && (

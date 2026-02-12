@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { useHabits, shouldDisplayHabit, getWeekStart, getWeekEnd } from '@/hooks/useHabits'
+import { useHabits, shouldDisplayHabit, isHabitActive, getWeekStart, getWeekEnd } from '@/hooks/useHabits'
 import { useCompletions } from '@/hooks/useCompletions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, Moon, Sun, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Moon, Sun, Sparkles, ChevronLeft, ChevronRight, Archive, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import HabitCard from '@/components/habits/HabitCard'
 import AddHabitModal from '@/components/habits/AddHabitModal'
@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedCategory, setSelectedCategory] = useState<typeof CATEGORIES[number]>('All')
+  const [showCompleted, setShowCompleted] = useState(false)
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
 
   const { habits, isLoading, updateHabitOrder } = useHabits()
@@ -77,7 +78,12 @@ export default function Dashboard() {
 
   // Filter by frequency - only show habits that should display on the selected date
   const filteredHabits = categoryFilteredHabits.filter(habit => {
-    // First check if the habit should be displayed based on frequency type and config
+    // Check if the habit is within its active timeline
+    if (!isHabitActive(habit, selectedDate)) {
+      return false
+    }
+
+    // Check if the habit should be displayed based on frequency type and config
     if (!shouldDisplayHabit(habit, selectedDate)) {
       return false
     }
@@ -115,6 +121,10 @@ export default function Dashboard() {
       .filter(c => c.completed_date === selectedDateStr)
       .map(c => c.habit_id)
   )
+
+  // Expired timeline habits (end_date in the past)
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
+  const expiredHabits = (habits || []).filter(h => h.end_date && h.end_date < todayStr)
 
   const { achievement, clearAchievement } = useAchievements()
   const { achievement: badgeAchievement, clearAchievement: clearBadgeAchievement } = useBadgeAchievements()
@@ -376,6 +386,37 @@ export default function Dashboard() {
               </div>
             </SortableContext>
           </DndContext>
+        )}
+
+        {/* Completed Timeline Habits */}
+        {expiredHabits.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8"
+          >
+            <button
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4"
+            >
+              <Archive className="h-4 w-4" />
+              Completed Habits ({expiredHabits.length})
+              <ChevronDown className={`h-4 w-4 transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
+            </button>
+            {showCompleted && (
+              <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 opacity-70">
+                {expiredHabits.map((habit, index) => (
+                  <HabitCard
+                    key={habit.id}
+                    habit={habit}
+                    completed={completedHabitIds.has(habit.id)}
+                    selectedDate={selectedDateStr}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
         )}
 
         {/* Daily Quote at Bottom */}

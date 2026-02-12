@@ -721,10 +721,12 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number | null
+          end_date: string | null
           frequency_config: Json | null
           frequency_type: string | null
           id: string
           name: string
+          start_date: string | null
           updated_at: string | null
           user_id: string
         }
@@ -735,10 +737,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          end_date?: string | null
           frequency_config?: Json | null
           frequency_type?: string | null
           id?: string
           name: string
+          start_date?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -749,10 +753,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          end_date?: string | null
           frequency_config?: Json | null
           frequency_type?: string | null
           id?: string
           name?: string
+          start_date?: string | null
           updated_at?: string | null
           user_id?: string
         }
