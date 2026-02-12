@@ -159,7 +159,7 @@ export default function NotificationsDropdown() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">
-                          {notification.from_user?.display_name || 'Someone'}
+                          {notification.from_user?.display_name || 'The Way of Kaizen'}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {notification.content}

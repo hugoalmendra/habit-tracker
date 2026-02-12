@@ -38,6 +38,7 @@ export function useNotifications() {
         .from('notifications')
         .select('*')
         .eq('user_id', user!.id)
+        .neq('type', 'habit_reminder')
         .order('created_at', { ascending: false })
         .range(offset, offset + NOTIFICATIONS_PER_PAGE - 1)
 
@@ -91,6 +92,7 @@ export function useNotifications() {
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user!.id)
+        .neq('type', 'habit_reminder')
         .eq('read', false)
 
       if (error) throw error
