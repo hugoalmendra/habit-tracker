@@ -114,7 +114,7 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogDrawerContent className="md:max-w-[600px] max-md:pb-safe max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogDrawerContent className="md:max-w-[600px] max-md:pb-safe">
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <DialogHeader className="space-y-2 max-md:space-y-1.5 pb-5 max-md:pb-4 px-6 pt-6 max-md:px-4 max-md:pt-4 flex-shrink-0">
             <DialogTitle className="text-2xl max-md:text-xl font-semibold tracking-tight">
@@ -284,39 +284,33 @@ export default function AddHabitModal({ open, onOpenChange }: AddHabitModalProps
             </div>
 
             {/* Duration / Timeline */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <Label className="text-sm font-medium">Duration</Label>
-              <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
                 {DURATION_OPTIONS.map((opt) => (
-                  <label
+                  <button
                     key={opt.value}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-secondary/50 transition-all cursor-pointer"
+                    type="button"
+                    onClick={() => setDuration(opt.value)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      duration === opt.value
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    }`}
                   >
-                    <input
-                      type="radio"
-                      name="duration"
-                      checked={duration === opt.value}
-                      onChange={() => setDuration(opt.value)}
-                      className="h-4 w-4 text-primary"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{opt.label}</div>
-                      <div className="text-xs text-muted-foreground">{opt.desc}</div>
-                    </div>
-                  </label>
+                    {opt.label}
+                  </button>
                 ))}
-                {duration === 'custom' && (
-                  <div className="pl-7">
-                    <input
-                      type="date"
-                      value={customEndDate}
-                      onChange={(e) => setCustomEndDate(e.target.value)}
-                      min={format(new Date(), 'yyyy-MM-dd')}
-                      className="h-9 px-3 rounded-lg border border-border/50 bg-background text-sm w-full focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
-                    />
-                  </div>
-                )}
               </div>
+              {duration === 'custom' && (
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  min={format(new Date(), 'yyyy-MM-dd')}
+                  className="h-9 px-3 rounded-lg border border-border/50 bg-background text-sm w-full focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                />
+              )}
             </div>
           </div>
           <DialogFooter className="pt-6 pb-6 px-6 gap-3 max-md:px-4 max-md:pb-4 border-t border-border/40 flex-shrink-0">
