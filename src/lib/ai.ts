@@ -176,3 +176,106 @@ Important: Return ONLY the JSON array, no other text or markdown.`
     }))
   }
 }
+
+// --- Daily Insight ---
+
+export interface DailyInsightContext {
+  habits: Array<{
+    name: string
+    category: string
+    description: string | null
+    frequency_type: string
+  }>
+  completedToday: string[]
+  pendingToday: string[]
+  currentStreak: number
+  weeklyProgress: Array<{
+    habitName: string
+    completedThisWeek: number
+    target: number
+  }>
+  monthlyCompletionRate: number
+  totalXP: number
+  rankName: string
+  rankLevel: number
+  categoryBreakdown: Record<string, { completed: number; total: number }>
+}
+
+function getFallbackInsight(context: DailyInsightContext): string {
+  const todayProgress = context.completedToday.length
+  const todayTotal = context.completedToday.length + context.pendingToday.length
+  const pct = todayTotal > 0 ? Math.round((todayProgress / todayTotal) * 100) : 0
+
+  if (pct === 100) {
+    return `All ${todayTotal} habits completed today — a perfect day on your path. Your ${context.currentStreak}-day streak as a ${context.rankName} shows the power of consistent small steps. Rest well tonight; tomorrow brings another opportunity for kaizen.`
+  }
+  if (pct >= 50) {
+    return `You have completed ${todayProgress} of ${todayTotal} habits so far today. With ${context.pendingToday.length} remaining, there is still time to finish strong. Remember: the ${context.rankName} does not seek perfection, only steady progress.`
+  }
+  if (todayProgress > 0) {
+    return `A beginning has been made with ${todayProgress} habit${todayProgress > 1 ? 's' : ''} completed. The remaining ${context.pendingToday.length} await your attention. Even one small step forward keeps the momentum of your ${context.currentStreak}-day journey alive.`
+  }
+  return `Today is a fresh canvas. You have ${todayTotal} habits ready and waiting. A ${context.rankName} knows that the hardest step is always the first — begin with whichever habit feels most natural right now.`
+}
+
+export async function generateDailyInsight(context: DailyInsightContext): Promise<string> {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const useAI = apiKey && apiKey !== 'your-openai-api-key-here'
+
+  if (!useAI) {
+    return getFallbackInsight(context)
+  }
+
+  const todayProgress = context.completedToday.length
+  const todayTotal = context.completedToday.length + context.pendingToday.length
+  const completionPct = todayTotal > 0 ? Math.round((todayProgress / todayTotal) * 100) : 0
+
+  const prompt = `You are a wise Kaizen mentor in a habit tracking app called "The Way of Kaizen."
+Your voice is calm, encouraging, and grounded in Japanese philosophy of continuous improvement (kaizen).
+You speak with the wisdom of a sensei but remain warm and practical.
+
+Here is the user's current progress data:
+
+TODAY'S PROGRESS: ${todayProgress}/${todayTotal} habits completed (${completionPct}%)
+Completed: ${context.completedToday.length > 0 ? context.completedToday.join(', ') : 'None yet'}
+Remaining: ${context.pendingToday.length > 0 ? context.pendingToday.join(', ') : 'All done!'}
+
+STREAK: ${context.currentStreak} consecutive days
+MONTHLY COMPLETION RATE: ${context.monthlyCompletionRate}%
+RANK: ${context.rankName} (Level ${context.rankLevel}) with ${context.totalXP} XP
+
+CATEGORY BREAKDOWN:
+${Object.entries(context.categoryBreakdown)
+  .map(([cat, data]) => `- ${cat}: ${data.completed}/${data.total} completed today`)
+  .join('\n')}
+
+${context.weeklyProgress.length > 0 ? `WEEKLY TARGETS:\n${context.weeklyProgress.map(w => `- ${w.habitName}: ${w.completedThisWeek}/${w.target} this week`).join('\n')}` : ''}
+
+Based on this data, provide a brief daily insight (3-5 sentences max). Include:
+1. A personalized observation about their progress today
+2. One specific, actionable suggestion for improvement
+3. An encouraging closing thought aligned with kaizen philosophy
+
+Keep it concise, warm, and actionable. Do NOT use bullet points or numbered lists - write in flowing prose.
+Do NOT use generic motivational cliches. Be specific to their data.`
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a Kaizen sensei providing daily wisdom. Respond in plain text only, no markdown formatting.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.8,
+      max_tokens: 300,
+    })
+
+    return completion.choices[0]?.message?.content?.trim() || getFallbackInsight(context)
+  } catch (error) {
+    console.error('OpenAI daily insight error, using fallback:', error)
+    return getFallbackInsight(context)
+  }
+}
