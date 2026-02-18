@@ -177,105 +177,220 @@ Important: Return ONLY the JSON array, no other text or markdown.`
   }
 }
 
-// --- Daily Insight ---
+// --- Life Report ---
 
-export interface DailyInsightContext {
-  habits: Array<{
-    name: string
-    category: string
-    description: string | null
-    frequency_type: string
-  }>
-  completedToday: string[]
-  pendingToday: string[]
-  currentStreak: number
-  weeklyProgress: Array<{
-    habitName: string
-    completedThisWeek: number
-    target: number
-  }>
-  monthlyCompletionRate: number
-  totalXP: number
-  rankName: string
-  rankLevel: number
-  categoryBreakdown: Record<string, { completed: number; total: number }>
+type LifeAreaName = 'Health' | 'Career' | 'Spirit' | 'Mindset' | 'Joy'
+
+const LIFE_AREAS: Record<LifeAreaName, { color: string; label: string }> = {
+  Health: { color: '#34C759', label: 'Physical wellbeing' },
+  Career: { color: '#FF9500', label: 'Work, finances, skills' },
+  Spirit: { color: '#FF3B30', label: 'Spirituality, gratitude' },
+  Mindset: { color: '#AF52DE', label: 'Mental wellness, growth' },
+  Joy: { color: '#FFCC00', label: 'Relationships, fun, purpose' },
 }
 
-function getFallbackInsight(context: DailyInsightContext): string {
-  const todayProgress = context.completedToday.length
-  const todayTotal = context.completedToday.length + context.pendingToday.length
-  const pct = todayTotal > 0 ? Math.round((todayProgress / todayTotal) * 100) : 0
-
-  if (pct === 100) {
-    return `All ${todayTotal} habits completed today — a perfect day on your path. Your ${context.currentStreak}-day streak as a ${context.rankName} shows the power of consistent small steps. Rest well tonight; tomorrow brings another opportunity for kaizen.`
-  }
-  if (pct >= 50) {
-    return `You have completed ${todayProgress} of ${todayTotal} habits so far today. With ${context.pendingToday.length} remaining, there is still time to finish strong. Remember: the ${context.rankName} does not seek perfection, only steady progress.`
-  }
-  if (todayProgress > 0) {
-    return `A beginning has been made with ${todayProgress} habit${todayProgress > 1 ? 's' : ''} completed. The remaining ${context.pendingToday.length} await your attention. Even one small step forward keeps the momentum of your ${context.currentStreak}-day journey alive.`
-  }
-  return `Today is a fresh canvas. You have ${todayTotal} habits ready and waiting. A ${context.rankName} knows that the hardest step is always the first — begin with whichever habit feels most natural right now.`
+export interface CategoryScore {
+  category: LifeAreaName
+  color: string
+  label: string
+  completionRate: number
+  totalHabits: number
+  completedCount: number
+  expectedCount: number
+  hasHabits: boolean
 }
 
-export async function generateDailyInsight(context: DailyInsightContext): Promise<string> {
+export interface LifeReportAnalysis {
+  summary: string
+  strongAreas: string[]
+  weakAreas: string[]
+  recommendations: string[]
+}
+
+interface HabitForReport {
+  id: string
+  category: string
+  frequency_type: string | null
+  frequency_config: unknown
+  start_date: string | null
+}
+
+interface CompletionForReport {
+  habit_id: string
+  completed_date: string
+}
+
+export function computeCategoryScores(
+  habits: HabitForReport[],
+  completions: CompletionForReport[],
+  periodDays: number = 30
+): CategoryScore[] {
+  const periodStart = new Date()
+  periodStart.setDate(periodStart.getDate() - periodDays)
+  const periodStartStr = periodStart.toISOString().split('T')[0]
+
+  // Group completions by habit_id for fast lookup
+  const completionsByHabit = new Map<string, number>()
+  for (const c of completions) {
+    if (c.completed_date >= periodStartStr) {
+      completionsByHabit.set(c.habit_id, (completionsByHabit.get(c.habit_id) || 0) + 1)
+    }
+  }
+
+  const scores: CategoryScore[] = []
+
+  for (const [area, meta] of Object.entries(LIFE_AREAS) as [LifeAreaName, { color: string; label: string }][]) {
+    const areaHabits = habits.filter(h => h.category === area)
+
+    if (areaHabits.length === 0) {
+      scores.push({
+        category: area,
+        color: meta.color,
+        label: meta.label,
+        completionRate: 0,
+        totalHabits: 0,
+        completedCount: 0,
+        expectedCount: 0,
+        hasHabits: false,
+      })
+      continue
+    }
+
+    let totalExpected = 0
+    let totalCompleted = 0
+
+    for (const h of areaHabits) {
+      // Account for habits created mid-period
+      const habitStart = h.start_date || periodStartStr
+      const effectiveStart = habitStart > periodStartStr ? habitStart : periodStartStr
+      const startDate = new Date(effectiveStart)
+      const today = new Date()
+      const activeDays = Math.max(1, Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
+      const days = Math.min(activeDays, periodDays)
+
+      let expected = days
+      if (h.frequency_type === 'specific_days' && h.frequency_config) {
+        const config = h.frequency_config as { days?: number[] }
+        const daysPerWeek = config.days?.length || 7
+        expected = Math.round((daysPerWeek / 7) * days)
+      } else if (h.frequency_type === 'weekly_target' && h.frequency_config) {
+        const config = h.frequency_config as { target?: number }
+        expected = Math.round((config.target || 3) * (days / 7))
+      }
+
+      totalExpected += Math.max(1, expected)
+      totalCompleted += completionsByHabit.get(h.id) || 0
+    }
+
+    const rate = totalExpected > 0 ? Math.min(100, (totalCompleted / totalExpected) * 100) : 0
+
+    scores.push({
+      category: area,
+      color: meta.color,
+      label: meta.label,
+      completionRate: Math.round(rate),
+      totalHabits: areaHabits.length,
+      completedCount: totalCompleted,
+      expectedCount: totalExpected,
+      hasHabits: true,
+    })
+  }
+
+  // Sort weakest first
+  return scores.sort((a, b) => {
+    if (!a.hasHabits && b.hasHabits) return -1
+    if (a.hasHabits && !b.hasHabits) return 1
+    return a.completionRate - b.completionRate
+  })
+}
+
+function getFallbackAnalysis(scores: CategoryScore[]): LifeReportAnalysis {
+  const withHabits = scores.filter(s => s.hasHabits)
+  const withoutHabits = scores.filter(s => !s.hasHabits)
+  const strong = withHabits.filter(s => s.completionRate >= 70).map(s => s.category)
+  const weak = withHabits.filter(s => s.completionRate < 50).map(s => s.category)
+
+  const strongest = withHabits.length > 0
+    ? withHabits.reduce((a, b) => a.completionRate > b.completionRate ? a : b)
+    : null
+  const weakest = withHabits.length > 0
+    ? withHabits.reduce((a, b) => a.completionRate < b.completionRate ? a : b)
+    : null
+
+  let summary = ''
+  if (strongest && weakest && strongest.category !== weakest.category) {
+    summary = `Your strongest area is ${strongest.category} at ${strongest.completionRate}%. ${weakest.category} needs the most attention at ${weakest.completionRate}%.`
+  } else if (strongest) {
+    summary = `You're performing consistently across your habits with ${strongest.category} leading at ${strongest.completionRate}%.`
+  } else {
+    summary = 'Start tracking habits to see your life area analysis.'
+  }
+
+  const recommendations: string[] = []
+  for (const s of weak) {
+    recommendations.push(`Focus on improving your ${s} habits — even completing one more per week makes a difference.`)
+  }
+  for (const s of withoutHabits) {
+    recommendations.push(`You have no habits tracking ${s.category}. Consider adding one to cover this life area.`)
+  }
+  if (recommendations.length === 0 && strong.length > 0) {
+    recommendations.push('Great consistency! Consider increasing the challenge in your strongest areas.')
+  }
+
+  return {
+    summary,
+    strongAreas: strong,
+    weakAreas: [...weak, ...withoutHabits.map(s => s.category)],
+    recommendations: recommendations.slice(0, 5),
+  }
+}
+
+export async function generateLifeReport(scores: CategoryScore[]): Promise<LifeReportAnalysis> {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY
   const useAI = apiKey && apiKey !== 'your-openai-api-key-here'
 
   if (!useAI) {
-    return getFallbackInsight(context)
+    return getFallbackAnalysis(scores)
   }
 
-  const todayProgress = context.completedToday.length
-  const todayTotal = context.completedToday.length + context.pendingToday.length
-  const completionPct = todayTotal > 0 ? Math.round((todayProgress / todayTotal) * 100) : 0
+  const scoresSummary = scores.map(s =>
+    s.hasHabits
+      ? `${s.category} (${s.label}): ${s.completionRate}% completion rate (${s.totalHabits} habits, ${s.completedCount}/${s.expectedCount} completions)`
+      : `${s.category} (${s.label}): No habits tracked`
+  ).join('\n')
 
-  const prompt = `You are a wise Kaizen mentor in a habit tracking app called "The Way of Kaizen."
-Your voice is calm, encouraging, and grounded in Japanese philosophy of continuous improvement (kaizen).
-You speak with the wisdom of a sensei but remain warm and practical.
+  const prompt = `You are a life coach analyzing a user's habit tracking data over the last 30 days.
+Here are their completion rates across 5 life areas:
 
-Here is the user's current progress data:
+${scoresSummary}
 
-TODAY'S PROGRESS: ${todayProgress}/${todayTotal} habits completed (${completionPct}%)
-Completed: ${context.completedToday.length > 0 ? context.completedToday.join(', ') : 'None yet'}
-Remaining: ${context.pendingToday.length > 0 ? context.pendingToday.join(', ') : 'All done!'}
+Provide a brief, encouraging analysis in JSON format:
+{
+  "summary": "1-2 sentence overview of their life balance",
+  "strongAreas": ["array of category names performing well (70%+)"],
+  "weakAreas": ["array of category names needing improvement (<50% or no habits)"],
+  "recommendations": ["3-5 specific, actionable recommendations referencing actual numbers"]
+}
 
-STREAK: ${context.currentStreak} consecutive days
-MONTHLY COMPLETION RATE: ${context.monthlyCompletionRate}%
-RANK: ${context.rankName} (Level ${context.rankLevel}) with ${context.totalXP} XP
-
-CATEGORY BREAKDOWN:
-${Object.entries(context.categoryBreakdown)
-  .map(([cat, data]) => `- ${cat}: ${data.completed}/${data.total} completed today`)
-  .join('\n')}
-
-${context.weeklyProgress.length > 0 ? `WEEKLY TARGETS:\n${context.weeklyProgress.map(w => `- ${w.habitName}: ${w.completedThisWeek}/${w.target} this week`).join('\n')}` : ''}
-
-Based on this data, provide a brief daily insight (3-5 sentences max). Include:
-1. A personalized observation about their progress today
-2. One specific, actionable suggestion for improvement
-3. An encouraging closing thought aligned with kaizen philosophy
-
-Keep it concise, warm, and actionable. Do NOT use bullet points or numbered lists - write in flowing prose.
-Do NOT use generic motivational cliches. Be specific to their data.`
+Be specific and reference the actual numbers. Be encouraging but honest about weak areas.
+Return ONLY valid JSON, no other text.`
 
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content: 'You are a Kaizen sensei providing daily wisdom. Respond in plain text only, no markdown formatting.',
-        },
+        { role: 'system', content: 'You are a supportive life coach. Respond only with valid JSON.' },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.8,
-      max_tokens: 300,
+      temperature: 0.7,
+      max_tokens: 500,
     })
 
-    return completion.choices[0]?.message?.content?.trim() || getFallbackInsight(context)
+    const content = completion.choices[0]?.message?.content?.trim() || '{}'
+    const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    return JSON.parse(cleaned) as LifeReportAnalysis
   } catch (error) {
-    console.error('OpenAI daily insight error, using fallback:', error)
-    return getFallbackInsight(context)
+    console.error('OpenAI life report error, using fallback:', error)
+    return getFallbackAnalysis(scores)
   }
 }

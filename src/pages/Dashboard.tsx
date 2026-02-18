@@ -11,7 +11,7 @@ import HabitCard from '@/components/habits/HabitCard'
 import AddHabitModal from '@/components/habits/AddHabitModal'
 import AIGenerateModal from '@/components/habits/AIGenerateModal'
 import KaizenQuote from '@/components/dashboard/KaizenQuote'
-import DailyInsight from '@/components/dashboard/DailyInsight'
+import LifeReport from '@/components/dashboard/LifeReport'
 import AchievementPopup from '@/components/celebrations/AchievementPopup'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
@@ -337,10 +337,10 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* AI Daily Insight - only on today's view */}
+        {/* Life Report - only on today's view */}
         {(habits || []).length > 0 && isToday(selectedDate) && (
           <div className="mb-8">
-            <DailyInsight />
+            <LifeReport />
           </div>
         )}
 
