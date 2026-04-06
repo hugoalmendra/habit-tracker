@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Link } from 'react-router-dom'
-import { ThumbsUp } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { useQuery } from '@tanstack/react-query'
@@ -96,7 +96,7 @@ export default function DiscussionReactionUsersModal({ discussionId, open, onOpe
                         </AvatarFallback>
                       </Avatar>
                       <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 text-blue-500">
-                        <ThumbsUp className="h-3 w-3" />
+                        <Flame className="h-3 w-3" />
                       </div>
                     </div>
 

@@ -8,7 +8,7 @@ import { usePosts, useComments, type FeedItem } from '@/hooks/usePosts'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Moon, Sun, MessageCircle, Trash2, Send, ThumbsUp } from 'lucide-react'
+import { Moon, Sun, MessageCircle, Trash2, Send, Flame } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import NotificationsDropdown from '@/components/social/NotificationsDropdown'
 import AvatarDropdown from '@/components/layout/AvatarDropdown'
@@ -408,7 +408,7 @@ export default function Feed() {
                         {/* Actions */}
                         <div className="flex items-center gap-4 pt-4 border-t border-border">
                           <div className="flex items-center gap-1">
-                            <ThumbsUp className={`h-4 w-4 ${item.user_reaction ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <Flame className={`h-4 w-4 ${item.user_reaction ? 'text-primary' : 'text-muted-foreground'}`} />
                             {item.reactions_count > 0 && (
                               <span className="text-sm text-muted-foreground px-1">
                                 {item.reactions_count}
@@ -487,7 +487,7 @@ export default function Feed() {
                               onClick={() => handleReaction(item.id, 'like')}
                               className={`${item.user_reaction === 'like' ? 'text-primary' : ''} hover:bg-secondary`}
                             >
-                              <ThumbsUp className="h-4 w-4" />
+                              <Flame className="h-4 w-4" />
                             </Button>
                             {item.reactions_count > 0 && (
                               <button

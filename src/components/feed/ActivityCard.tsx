@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Trophy, Sparkles, Target, Flame, Star, ThumbsUp, MessageCircle, Send, Award } from 'lucide-react'
+import { Trophy, Sparkles, Target, Flame, Star, MessageCircle, Send, Award } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { FeedActivity } from '@/hooks/usePosts'
 import { useAuth } from '@/contexts/AuthContext'
@@ -272,7 +272,7 @@ export default function ActivityCard({ activity, showAsYou = false }: ActivityCa
               onClick={handleLike}
               className={activity.user_liked ? 'text-primary' : ''}
             >
-              <ThumbsUp className="h-4 w-4 mr-1" />
+              <Flame className="h-4 w-4 mr-1" />
               {activity.likes_count || 0}
             </Button>
             <Button

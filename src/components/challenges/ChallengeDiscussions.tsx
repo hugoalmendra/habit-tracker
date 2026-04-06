@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle,
-  ThumbsUp,
+  Flame,
   MoreVertical,
   Pin,
   Edit2,
@@ -443,7 +443,7 @@ export default function ChallengeDiscussions({ challengeId, isCreator }: Challen
                                   : 'text-muted-foreground hover:text-foreground'
                               }`}
                             >
-                              <ThumbsUp
+                              <Flame
                                 className={`h-4 w-4 ${
                                   discussion.user_has_reacted ? 'fill-current' : ''
                                 }`}

@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { usePostReactions } from '@/hooks/usePosts'
 import { Link } from 'react-router-dom'
-import { Heart, ThumbsUp, Flame, Sparkles, Users } from 'lucide-react'
+import { Heart, Flame, Sparkles, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface ReactionUsersModalProps {
@@ -12,7 +12,7 @@ interface ReactionUsersModalProps {
 }
 
 const reactionIcons = {
-  like: ThumbsUp,
+  like: Flame,
   love: Heart,
   fire: Flame,
   celebrate: Sparkles,
